@@ -35,7 +35,7 @@ jobs:
         target:
           - name: Build and Push Images (Latest / Release)
             target_step: prod
-            tag: ghcr.io/mai0313/${{ github.event.repository.name }}
+            tag: ghcr.io/mai0313/agentcanvas
 
     steps:
       - name: Disable SSL Verify
