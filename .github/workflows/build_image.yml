@@ -56,9 +56,6 @@ jobs:
       #         UserKnownHostsFile=/dev/null
       #     if_key_exists: replace
 
-      - name: Setup node
-        uses: actions/setup-node@v4
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
