@@ -389,7 +389,7 @@ export default function ChatPage() {
           <h1 className={title()}>Chat</h1>
         </div>
         
-        <div className="app w-full" ref={appContainerRef}>
+        <div className="app w-full h-[calc(100vh-200px)]" ref={appContainerRef}>
           {/* Sidebar with resizer */}
           <div className="sidebar" ref={sidebarRef} style={{ width: `${sidebarWidth}px` }}>
             <div className="thread-controls">
@@ -403,11 +403,11 @@ export default function ChatPage() {
           </div>
 
           {/* Main container with chat and markdown */}
-          <div ref={mainContainerRef} className="main-container">
+          <div ref={mainContainerRef} className="main-container flex flex-row h-full">
             {/* Chat container */}
             <div
               ref={chatContainerRef}
-              className="chat-container"
+              className="chat-container flex-grow overflow-auto"
               style={{
                 width: isMarkdownCanvasOpen ? `${100 - markdownWidth}%` : "100%",
               }}
@@ -458,10 +458,10 @@ export default function ChatPage() {
             {/* Markdown editor with resizer */}
             {isMarkdownCanvasOpen && (
               <>
-                <div ref={markdownResizerRef} className="resizer" />
+                <div ref={markdownResizerRef} className="resizer cursor-col-resize w-1 bg-primary/30 hover:bg-primary/50" />
                 <div
                   ref={markdownContainerRef}
-                  className="markdown-container"
+                  className="markdown-container overflow-auto h-full"
                   style={{ width: `${markdownWidth}%` }}
                 >
                   <MarkdownCanvas

@@ -52,9 +52,9 @@ export const siteConfig = {
     },
   ],
   links: {
-    github: "https://github.com/frontio-ai/heroui",
-    twitter: "https://twitter.com/hero_ui",
-    docs: "https://heroui.com",
-    discord: "https://discord.gg/9b6yyZKmH4",
+    github: "https://www.mediatek.com/",
+    twitter: "https://www.mediatek.com/",
+    docs: "https://www.mediatek.com/",
+    discord: "https://www.mediatek.com/",
   },
 };
