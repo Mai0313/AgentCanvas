@@ -6,7 +6,9 @@ import { ModelSetting, APIType } from "../types";
  * @returns ModelSetting object with all required properties
  * @throws Error if required environment variables are missing
  */
-export function getDefaultModelSettings(model: string = "gpt-4o"): ModelSetting {
+export function getDefaultModelSettings(
+  model: string = "gpt-4o",
+): ModelSetting {
   // Validate that required environment variables exist
   if (!process.env.REACT_APP_API_TYPE)
     throw new Error("Missing REACT_APP_API_TYPE environment variable");

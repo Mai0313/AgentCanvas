@@ -1,6 +1,12 @@
-import React, { ReactNode, useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  ReactNode,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
+
 import { Message } from "../types";
-import SelectionPopup from "./SelectionPopup";
 
 // Import BlockNote components
 import "@blocknote/core/fonts/inter.css";
@@ -17,6 +23,8 @@ import copyCodeIcon from "../assets/icon/copy-code.svg";
 import editCodeIcon from "../assets/icon/edit-code.svg";
 import deleteIcon from "../assets/icon/delete.svg";
 import regenerateIcon from "../assets/icon/regenerate.svg";
+
+import SelectionPopup from "./SelectionPopup";
 
 interface MessageItemProps {
   message: Message;
@@ -58,7 +66,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
-  const [blockNoteEditor, setBlockNoteEditor] = useState<BlockNoteEditor | null>(null);
+  const [blockNoteEditor, setBlockNoteEditor] =
+    useState<BlockNoteEditor | null>(null);
   const [isBlockNoteLoading, setIsBlockNoteLoading] = useState(true);
 
   // Keep track of streaming state to prevent flickering
@@ -105,6 +114,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
         .filter(Boolean)
         .join("\n");
     }
+
     return "";
   }, [message.content]);
 
@@ -143,7 +153,9 @@ const MessageItem: React.FC<MessageItemProps> = ({
       try {
         // Only update the editor if we have content
         if (hasContent) {
-          const blocks = await blockNoteEditor.tryParseMarkdownToBlocks(contentStr);
+          const blocks =
+            await blockNoteEditor.tryParseMarkdownToBlocks(contentStr);
+
           if (blocks && blocks.length > 0) {
             blockNoteEditor.replaceBlocks(blockNoteEditor.document, blocks);
           }
@@ -184,7 +196,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
   // 當模型下拉選單打開時，獲取可用模型
   useEffect(() => {
-    if (showModelDropdown && fetchModels && !availableModels.length && !loadingModels) {
+    if (
+      showModelDropdown &&
+      fetchModels &&
+      !availableModels.length &&
+      !loadingModels
+    ) {
       setLoadingModels(true);
       fetchModels()
         .then((models) => {
@@ -217,12 +234,16 @@ const MessageItem: React.FC<MessageItemProps> = ({
   // 處理點擊外部關閉下拉選單
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowModelDropdown(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -233,13 +254,20 @@ const MessageItem: React.FC<MessageItemProps> = ({
     if (isEditMode) return; // 編輯模式下不啟用文字選擇
 
     const selection = window.getSelection();
+
     // If there's a selection and it's not empty
-    if (selection && !selection.isCollapsed && selection.toString().trim() !== "") {
+    if (
+      selection &&
+      !selection.isCollapsed &&
+      selection.toString().trim() !== ""
+    ) {
       const selectedContent = selection.toString();
+
       setSelectedText(selectedContent);
       // Calculate position for the popup
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
+
       setPopupPosition({
         top: rect.bottom + window.scrollY + 5, // Position below the selection with a small gap
         left: rect.left + window.scrollX + rect.width / 2 - 40, // Center the popup
@@ -253,11 +281,16 @@ const MessageItem: React.FC<MessageItemProps> = ({
   // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (messageRef.current && !messageRef.current.contains(event.target as Node)) {
+      if (
+        messageRef.current &&
+        !messageRef.current.contains(event.target as Node)
+      ) {
         setShowSelectionPopup(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -337,12 +370,17 @@ const MessageItem: React.FC<MessageItemProps> = ({
         .map(
           (item, index) =>
             item.image_url && (
-              <div key={`img-${index}`} className='message-image-container'>
-                <img src={item.image_url.url} alt='Attached' className='message-image' />
+              <div key={`img-${index}`} className="message-image-container">
+                <img
+                  alt="Attached"
+                  className="message-image"
+                  src={item.image_url.url}
+                />
               </div>
             ),
         );
     }
+
     return null;
   };
 
@@ -351,19 +389,19 @@ const MessageItem: React.FC<MessageItemProps> = ({
     // 如果處於編輯模式，渲染文本編輯區
     if (isEditMode) {
       return (
-        <div key='edit-container' className='edit-container'>
+        <div key="edit-container" className="edit-container">
           <textarea
             ref={textareaRef}
+            className="edit-textarea"
+            rows={Math.max(5, editedContent.split("\n").length)}
             value={editedContent}
             onChange={(e) => setEditedContent(e.target.value)}
-            className='edit-textarea'
-            rows={Math.max(5, editedContent.split("\n").length)}
           />
-          <div className='edit-buttons'>
-            <button onClick={handleSave} className='edit-save-button'>
+          <div className="edit-buttons">
+            <button className="edit-save-button" onClick={handleSave}>
               Send
             </button>
-            <button onClick={handleCancel} className='edit-cancel-button'>
+            <button className="edit-cancel-button" onClick={handleCancel}>
               Cancel
             </button>
           </div>
@@ -374,14 +412,16 @@ const MessageItem: React.FC<MessageItemProps> = ({
     // 如果正在生成圖像，顯示動態加載效果
     if (message.isGeneratingImage) {
       return (
-        <div key='generating-image' className='generating-image-container'>
-          <div className='generating-image-animation'>
-            <div className='brush-stroke'></div>
-            <div className='brush-stroke'></div>
-            <div className='brush-stroke'></div>
+        <div key="generating-image" className="generating-image-container">
+          <div className="generating-image-animation">
+            <div className="brush-stroke" />
+            <div className="brush-stroke" />
+            <div className="brush-stroke" />
           </div>
-          <div className='generating-image-text'>
-            {typeof message.content === "string" ? message.content : "Creating your Image..."}
+          <div className="generating-image-text">
+            {typeof message.content === "string"
+              ? message.content
+              : "Creating your Image..."}
           </div>
         </div>
       );
@@ -390,11 +430,15 @@ const MessageItem: React.FC<MessageItemProps> = ({
     // 如果正在生成代碼，顯示靜態占位符，防止內容跳動
     if (message.isGeneratingCode) {
       return (
-        <div key='generating-code' className='generating-code-container'>
-          <div className='generating-code-text'>
-            {typeof message.content === "string" ? message.content : "Generating..."}
+        <div key="generating-code" className="generating-code-container">
+          <div className="generating-code-text">
+            {typeof message.content === "string"
+              ? message.content
+              : "Generating..."}
           </div>
-          <div className='generating-code-hint'>Response will be moved into Canvas</div>
+          <div className="generating-code-hint">
+            Response will be moved into Canvas
+          </div>
         </div>
       );
     }
@@ -403,12 +447,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
     // This prevents flickering during streaming updates
     if (isStreaming && hasInitialContent && blockNoteEditor) {
       return (
-        <div className='blocknote-message-container'>
+        <div className="blocknote-message-container">
           <BlockNoteView
-            editor={blockNoteEditor}
-            theme='dark'
             editable={false}
+            editor={blockNoteEditor}
             formattingToolbar={false}
+            theme="dark"
           />
         </div>
       );
@@ -417,12 +461,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
     // If this is normal (non-streaming) content, use BlockNote for formatting
     if (blockNoteEditor && !isBlockNoteLoading) {
       return (
-        <div className='blocknote-message-container'>
+        <div className="blocknote-message-container">
           <BlockNoteView
-            editor={blockNoteEditor}
-            theme='dark'
             editable={false}
+            editor={blockNoteEditor}
             formattingToolbar={false}
+            theme="dark"
           />
         </div>
       );
@@ -430,13 +474,14 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
     // Only show loading indicator if we're not streaming or we don't have content yet
     if (isBlockNoteLoading && (!isStreaming || !hasInitialContent)) {
-      return <div className='message-loading'>Loading content...</div>;
+      return <div className="message-loading">Loading content...</div>;
     }
 
     // Fallback to original rendering if BlockNote isn't available
     const messageContent = getMessageContentAsString();
+
     return (
-      <div className='message-text-fallback'>
+      <div className="message-text-fallback">
         {messageContent.split("\n").map((line, i) => (
           <div key={i}>{line || <br />}</div>
         ))}
@@ -460,46 +505,58 @@ const MessageItem: React.FC<MessageItemProps> = ({
       } ${isEditMode ? "editing" : ""}`}
       onMouseUp={handleMouseUp}
     >
-      <div className='message-header'>
-        <span className='role'>{message.role === "assistant" ? "AI" : "You"}</span>
-        <span className='timestamp'>
+      <div className="message-header">
+        <span className="role">
+          {message.role === "assistant" ? "AI" : "You"}
+        </span>
+        <span className="timestamp">
           {message.timestamp.toLocaleTimeString()}
           {isStreaming && !message.isGeneratingImage && (
-            <span className='streaming-indicator'> (typing...)</span>
+            <span className="streaming-indicator"> (typing...)</span>
           )}
         </span>
       </div>
 
-      <div className='message-content'>
+      <div className="message-content">
         {processMessageContent()}
         {isStreaming &&
           message.content === "" &&
           !message.isGeneratingImage &&
-          !message.isGeneratingCode && <div className='typing-indicator'>...</div>}
+          !message.isGeneratingCode && (
+            <div className="typing-indicator">...</div>
+          )}
         {/* Render images from message content array */}
         {Array.isArray(message.content) && renderMessageImages()}
         {/* Render legacy image URL if present */}
         {message.imageUrl && (
-          <div className='message-image-container'>
-            <img src={message.imageUrl} alt='Generated' className='message-image' />
+          <div className="message-image-container">
+            <img
+              alt="Generated"
+              className="message-image"
+              src={message.imageUrl}
+            />
           </div>
         )}
       </div>
 
       {/* 消息操作按鈕 - 對於所有非流式傳輸的消息都顯示 */}
       {!isEditMode && !isStreaming && (
-        <div className='message-actions'>
+        <div className="message-actions">
           <button
-            onClick={handleCopy}
             className={`action-button with-icon ${copySuccess ? "copy-success" : ""}`}
-            title='Copy to clipboard'
+            title="Copy to clipboard"
+            onClick={handleCopy}
           >
-            <img src={copyCodeIcon} alt='Copy' className='icon-action' />
+            <img alt="Copy" className="icon-action" src={copyCodeIcon} />
             {copySuccess ? "Copied" : "Copy"}
           </button>
 
-          <button onClick={handleEdit} className='action-button with-icon' title='Edit message'>
-            <img src={editCodeIcon} alt='Edit' className='icon-action' />
+          <button
+            className="action-button with-icon"
+            title="Edit message"
+            onClick={handleEdit}
+          >
+            <img alt="Edit" className="icon-action" src={editCodeIcon} />
             Edit
           </button>
 
@@ -507,36 +564,45 @@ const MessageItem: React.FC<MessageItemProps> = ({
           {message.role === "assistant" && (
             <>
               <button
+                className="action-button with-icon"
+                title="Delete message"
                 onClick={handleDelete}
-                className='action-button with-icon'
-                title='Delete message'
               >
-                <img src={deleteIcon} alt='Delete' className='icon-action' />
+                <img alt="Delete" className="icon-action" src={deleteIcon} />
                 Delete
               </button>
 
-              <div className='regenerate-dropdown-container' ref={dropdownRef}>
+              <div ref={dropdownRef} className="regenerate-dropdown-container">
                 <button
+                  className="action-button with-icon regenerate-button"
+                  title="Regenerate response"
                   onClick={toggleModelDropdown}
-                  className='action-button with-icon regenerate-button'
-                  title='Regenerate response'
                 >
-                  <img src={regenerateIcon} alt='Regenerate' className='icon-action' />
+                  <img
+                    alt="Regenerate"
+                    className="icon-action"
+                    src={regenerateIcon}
+                  />
                   Regenerate {showModelDropdown ? "▲" : "▼"}
                 </button>
 
                 {showModelDropdown && (
-                  <div className='model-dropdown'>
-                    <div className='model-dropdown-header'>Choose model:</div>
+                  <div className="model-dropdown">
+                    <div className="model-dropdown-header">Choose model:</div>
 
                     {/* 當前模型選項 */}
-                    <div className='model-dropdown-item' onClick={() => handleRegenerate()}>
+                    <div
+                      className="model-dropdown-item"
+                      onClick={() => handleRegenerate()}
+                    >
                       Current ({currentModel || "default"})
                     </div>
 
                     {/* 載入提示 */}
                     {(loadingModels || isLoadingModels) && (
-                      <div className='model-dropdown-item loading'>Loading models...</div>
+                      <div className="model-dropdown-item loading">
+                        Loading models...
+                      </div>
                     )}
 
                     {/* 可用模型列表 */}
@@ -548,7 +614,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
                         .map((model) => (
                           <div
                             key={model}
-                            className='model-dropdown-item'
+                            className="model-dropdown-item"
                             onClick={() => handleRegenerate(model)}
                           >
                             {model}
@@ -556,11 +622,13 @@ const MessageItem: React.FC<MessageItemProps> = ({
                         ))}
 
                     {/* 沒有模型時顯示提示 */}
-                    {!loadingModels && !isLoadingModels && availableModels.length === 0 && (
-                      <div className='model-dropdown-item no-models'>
-                        No other models available
-                      </div>
-                    )}
+                    {!loadingModels &&
+                      !isLoadingModels &&
+                      availableModels.length === 0 && (
+                        <div className="model-dropdown-item no-models">
+                          No other models available
+                        </div>
+                      )}
                   </div>
                 )}
               </div>

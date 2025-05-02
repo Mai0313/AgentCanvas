@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+
 import { Message } from "../types";
 import { getDefaultModelSettings } from "../utils/modelUtils";
 import { chatCompletion } from "../services/openai";
-import SelectionPopup from "./SelectionPopup";
 
 // Import BlockNote components and styles
 import "@blocknote/core/fonts/inter.css";
@@ -28,6 +28,8 @@ import { codeBlock } from "@blocknote/code-block";
 import closeIcon from "../assets/icon/close-icon.svg";
 import copyCodeIcon from "../assets/icon/copy-code.svg";
 import editCodeIcon from "../assets/icon/edit-code.svg";
+
+import SelectionPopup from "./SelectionPopup";
 
 interface MarkdownCanvasProps {
   content: string;
@@ -93,13 +95,20 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
 
   // 檢測是否正在流式傳輸內容 (streaming)
-  const isStreaming = useCallback((newContent: string, oldContent: string): boolean => {
-    // 如果內容增量式增加，可能是streaming
-    if (newContent.length > oldContent.length && newContent.startsWith(oldContent)) {
-      return true;
-    }
-    return false;
-  }, []);
+  const isStreaming = useCallback(
+    (newContent: string, oldContent: string): boolean => {
+      // 如果內容增量式增加，可能是streaming
+      if (
+        newContent.length > oldContent.length &&
+        newContent.startsWith(oldContent)
+      ) {
+        return true;
+      }
+
+      return false;
+    },
+    [],
+  );
 
   // 檢測是否存在結束標記（用於檢測完整代碼塊）
   const hasEndingBackticks = useCallback((text: string): boolean => {
@@ -135,6 +144,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   useEffect(() => {
     // 檢查是否正在streaming
     const streaming = isStreaming(content, prevContentRef.current);
+
     prevContentRef.current = content;
 
     // 如果已經有內容且正在streaming，避免重新顯示loading狀態
@@ -149,6 +159,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
     // Try to extract language from code block
     const languageMatch = content.match(/^```([^\s\n]+)/);
+
     if (languageMatch && languageMatch[1]) {
       setCodeLanguage(languageMatch[1]);
     } else {
@@ -157,10 +168,12 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
     // 檢查內容是否有結束的```標記
     const hasClosing = hasEndingBackticks(content);
+
     setHasClosingBackticks(hasClosing);
 
     // Clean the content by removing markdown code fence markers
     let cleanContent = content;
+
     // if cleanContent contains `markdown`, then do this
     if (cleanContent.includes("markdown")) {
       cleanContent = cleanContent.replace(/^```[\w-]*\s*\n/m, "");
@@ -174,7 +187,8 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     setRawMarkdown(cleanContent);
 
     // Track if we should update the hasInitialContent state
-    const shouldSetHasInitialContent = cleanContent.trim() !== "" && !hasInitialContent;
+    const shouldSetHasInitialContent =
+      cleanContent.trim() !== "" && !hasInitialContent;
 
     // Update BlockNote editor content
     const importMarkdown = async () => {
@@ -217,11 +231,13 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   // Reset copy success message after 2 seconds
   useEffect(() => {
     let timeout: NodeJS.Timeout;
+
     if (copySuccess) {
       timeout = setTimeout(() => {
         setCopySuccess(false);
       }, 2000);
     }
+
     return () => clearTimeout(timeout);
   }, [copySuccess]);
 
@@ -246,6 +262,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       const timer = setTimeout(() => {
         window.scrollTo(0, scrollPosition);
       }, 10);
+
       return () => clearTimeout(timer);
     }
   }, [isOpen, editMode, scrollPosition]);
@@ -256,9 +273,15 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       if (isRawView || editMode) return;
 
       const selection = window.getSelection();
+
       // Check if there's a text selection
-      if (selection && !selection.isCollapsed && selection.toString().trim() !== "") {
+      if (
+        selection &&
+        !selection.isCollapsed &&
+        selection.toString().trim() !== ""
+      ) {
         const selectedContent = selection.toString();
+
         setSelectedText(selectedContent);
 
         // Calculate position for the popup
@@ -290,6 +313,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
     // Observe the editor container
     const editorContainer = document.querySelector(".bn-container");
+
     if (editorContainer) {
       selectionObserver.observe(editorContainer, {
         childList: true,
@@ -307,12 +331,16 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (previewRef.current && !previewRef.current.contains(event.target as Node)) {
+      if (
+        previewRef.current &&
+        !previewRef.current.contains(event.target as Node)
+      ) {
         setShowSelectionPopup(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -328,26 +356,33 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       const markdown = await editor.blocksToMarkdownLossy(editor.document);
       // Remove markdown fence if present
       let cleanContent = markdown;
+
       cleanContent = cleanContent.replace(/^```[\w-]*\s*\n/m, "");
       if (cleanContent.includes("\n```")) {
         cleanContent = cleanContent.replace(/\n```\s*$/m, "");
       }
+
       return cleanContent;
     } catch (error) {
       console.error("Error converting blocks to markdown:", error);
+
       return rawMarkdown;
     }
   }, [editor, isRawView, rawMarkdown]);
 
   // Handle raw markdown changes in textarea
-  const handleRawMarkdownChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleRawMarkdownChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
     const newContent = e.target.value;
+
     setRawMarkdown(newContent);
 
     // 檢查原始編輯模式中是否有完整的代碼塊
     // 我們將原始文本包裝在代碼標記中進行檢查
     const wrappedContent = `\`\`\`${codeLanguage}\n${newContent}\n\`\`\``;
     const hasClosing = hasEndingBackticks(wrappedContent);
+
     setHasClosingBackticks(hasClosing);
   };
 
@@ -379,6 +414,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       // Get current content as markdown before switching to raw view
       editor.blocksToMarkdownLossy(editor.document).then((markdown) => {
         let cleanContent = markdown;
+
         setRawMarkdown(cleanContent);
         setIsRawView(true);
       });
@@ -389,10 +425,12 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       const updateFromRaw = async () => {
         try {
           const blocks = await editor.tryParseMarkdownToBlocks(rawMarkdown);
+
           editor.replaceBlocks(editor.document, blocks);
 
           // 檢查轉換後的內容是否有完整代碼塊
           const hasClosing = hasEndingBackticks(rawMarkdown);
+
           setHasClosingBackticks(hasClosing);
         } catch (error) {
           console.error("Error updating from raw markdown:", error);
@@ -409,6 +447,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     if (loadingEditor || !hasClosingBackticks) return;
 
     const cleanContent = await getCleanCodeContent();
+
     if (!cleanContent.trim()) return;
 
     setIsGeneratingTitle(true);
@@ -422,7 +461,8 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
         {
           id: "system-msg",
           role: "system",
-          content: "You are an assistant that helps name code snippets concisely.",
+          content:
+            "You are an assistant that helps name code snippets concisely.",
           timestamp: new Date(),
         },
         {
@@ -434,6 +474,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       ];
 
       let generatedTitle = "";
+
       await chatCompletion(messages, settings, (token) => {
         generatedTitle += token;
       });
@@ -464,6 +505,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       const titleTimer = setTimeout(() => {
         generateTitle();
       }, 100);
+
       return () => clearTimeout(titleTimer);
     }
   }, [
@@ -497,75 +539,114 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   const showLoadingIndicator = loadingEditor && !hasInitialContent;
 
   return (
-    <div className='markdown-canvas' ref={canvasRef}>
-      <div className='markdown-header'>
+    <div ref={canvasRef} className="markdown-canvas">
+      <div className="markdown-header">
         <div style={{ display: "flex", alignItems: "center" }}>
-          <button onClick={handleClose} title='Close editor' className='close-button'>
-            <img src={closeIcon} alt='Close' width='24' height='24' />
+          <button
+            className="close-button"
+            title="Close editor"
+            onClick={handleClose}
+          >
+            <img alt="Close" height="24" src={closeIcon} width="24" />
           </button>
           <h3>{title}</h3>
-          <div className='language-badge'>{codeLanguage !== "plaintext" && codeLanguage}</div>
+          <div className="language-badge">
+            {codeLanguage !== "plaintext" && codeLanguage}
+          </div>
           <button
-            onClick={handleManualGenerateTitle}
+            className="title-button"
             disabled={isGeneratingTitle || !hasClosingBackticks}
-            className='title-button'
-            title={!hasClosingBackticks ? "Waiting for the code block to be done." : ""}
+            title={
+              !hasClosingBackticks
+                ? "Waiting for the code block to be done."
+                : ""
+            }
+            onClick={handleManualGenerateTitle}
           >
             {isGeneratingTitle ? "Generating..." : "AI Title"}
           </button>
-          <button onClick={toggleRawView} className='title-button' style={{ marginLeft: "8px" }}>
-            <img src={editCodeIcon} alt='Edit' width='8' height='8' />
+          <button
+            className="title-button"
+            style={{ marginLeft: "8px" }}
+            onClick={toggleRawView}
+          >
+            <img alt="Edit" height="8" src={editCodeIcon} width="8" />
             {isRawView ? "Save" : "Edit"}
           </button>
         </div>
-        <div className='markdown-controls'>
+        <div className="markdown-controls">
           <button
-            onClick={handleCopyCode}
             className={`icon-button ${copySuccess ? "success" : ""}`}
             title={copySuccess ? "Copied" : "Copy"}
+            onClick={handleCopyCode}
           >
-            <img src={copyCodeIcon} alt='Copy' width='24' height='24' />
+            <img alt="Copy" height="24" src={copyCodeIcon} width="24" />
           </button>
         </div>
       </div>
 
-      <div className='markdown-content'>
+      <div className="markdown-content">
         {showLoadingIndicator ? (
-          <div className='loading-editor'>Loading Canvas...</div>
+          <div className="loading-editor">Loading Canvas...</div>
         ) : isRawView ? (
           <textarea
             ref={rawEditorRef}
+            className="markdown-editor"
             value={rawMarkdown}
+            wrap="off"
             onChange={handleRawMarkdownChange}
-            className='markdown-editor'
-            wrap='off'
           />
         ) : (
-          <div className='blocknote-container' ref={previewRef} style={{ height: "100%" }}>
+          <div
+            ref={previewRef}
+            className="blocknote-container"
+            style={{ height: "100%" }}
+          >
             {/* Switch to BlockNoteView from Mantine with proper formatting toolbar */}
             <BlockNoteView
-              editor={editor}
-              theme='dark'
               editable={editMode}
+              editor={editor}
               formattingToolbar={false}
+              theme="dark"
             >
               <FormattingToolbarController
                 formattingToolbar={() => (
                   <FormattingToolbar>
                     <BlockTypeSelect key={"blockTypeSelect"} />
 
-                    <BasicTextStyleButton basicTextStyle={"bold"} key={"boldStyleButton"} />
-                    <BasicTextStyleButton basicTextStyle={"italic"} key={"italicStyleButton"} />
                     <BasicTextStyleButton
-                      basicTextStyle={"underline"}
-                      key={"underlineStyleButton"}
+                      key={"boldStyleButton"}
+                      basicTextStyle={"bold"}
                     />
-                    <BasicTextStyleButton basicTextStyle={"strike"} key={"strikeStyleButton"} />
-                    <BasicTextStyleButton key={"codeStyleButton"} basicTextStyle={"code"} />
+                    <BasicTextStyleButton
+                      key={"italicStyleButton"}
+                      basicTextStyle={"italic"}
+                    />
+                    <BasicTextStyleButton
+                      key={"underlineStyleButton"}
+                      basicTextStyle={"underline"}
+                    />
+                    <BasicTextStyleButton
+                      key={"strikeStyleButton"}
+                      basicTextStyle={"strike"}
+                    />
+                    <BasicTextStyleButton
+                      key={"codeStyleButton"}
+                      basicTextStyle={"code"}
+                    />
 
-                    <TextAlignButton textAlignment={"left"} key={"textAlignLeftButton"} />
-                    <TextAlignButton textAlignment={"center"} key={"textAlignCenterButton"} />
-                    <TextAlignButton textAlignment={"right"} key={"textAlignRightButton"} />
+                    <TextAlignButton
+                      key={"textAlignLeftButton"}
+                      textAlignment={"left"}
+                    />
+                    <TextAlignButton
+                      key={"textAlignCenterButton"}
+                      textAlignment={"center"}
+                    />
+                    <TextAlignButton
+                      key={"textAlignRightButton"}
+                      textAlignment={"right"}
+                    />
 
                     <ColorStyleButton key={"colorStyleButton"} />
 

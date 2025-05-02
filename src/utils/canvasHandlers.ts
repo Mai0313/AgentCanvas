@@ -1,6 +1,7 @@
+import { v4 as uuidv4 } from "uuid";
+
 import { Message, ModelSetting } from "../types";
 import { chatCompletion } from "../services/openai";
-import { v4 as uuidv4 } from "uuid";
 
 /**
  * 開啟 Markdown 畫布
@@ -59,7 +60,9 @@ export const saveMarkdownContent = (
 ): void => {
   setMessages((prev) => {
     const updatedMessages = [...prev];
-    const messageIndex = updatedMessages.findIndex((m) => m.id === editingMessageId);
+    const messageIndex = updatedMessages.findIndex(
+      (m) => m.id === editingMessageId,
+    );
 
     if (messageIndex !== -1 && codeBlockPosition) {
       const originalContent = updatedMessages[messageIndex].content;
@@ -121,7 +124,10 @@ export const handleCanvasMode = async (
   // 使用靜態的占位文本，並標記為正在生成代碼，這樣ChatBox中就不會顯示"Loading content..."了
   setMessages((prev) => {
     const updatedMessages = [...prev];
-    const messageIndex = updatedMessages.findIndex((m) => m.id === assistantMessageId);
+    const messageIndex = updatedMessages.findIndex(
+      (m) => m.id === assistantMessageId,
+    );
+
     if (messageIndex !== -1) {
       updatedMessages[messageIndex] = {
         ...updatedMessages[messageIndex],
@@ -129,21 +135,26 @@ export const handleCanvasMode = async (
         isGeneratingCode: true, // 標記此消息正在生成代碼到MarkdownCanvas，避免顯示"Loading content..."
       };
     }
+
     return updatedMessages;
   });
 
   // 步驟1：生成代碼
   try {
     // 第一步：生成代碼並在過程中累積結果
-    await chatCompletion([codeSystemMessage, userMessage], settings, (token) => {
-      codeBlock += token;
+    await chatCompletion(
+      [codeSystemMessage, userMessage],
+      settings,
+      (token) => {
+        codeBlock += token;
 
-      // 每收到一個token就更新MarkdownCanvas內容 - 實現真正的流式輸出
-      setMarkdownContent(codeBlock);
-      setCodeBlockPosition({ start: 0, end: codeBlock.length });
+        // 每收到一個token就更新MarkdownCanvas內容 - 實現真正的流式輸出
+        setMarkdownContent(codeBlock);
+        setCodeBlockPosition({ start: 0, end: codeBlock.length });
 
-      // 不更新ChatBox中的消息內容，因為我們已經設置了靜態占位符
-    });
+        // 不更新ChatBox中的消息內容，因為我們已經設置了靜態占位符
+      },
+    );
 
     // 步驟2：準備解釋部分
     const explanationSystemMessage: Message = {
@@ -168,7 +179,10 @@ export const handleCanvasMode = async (
     // 更新消息狀態，清空內容但保留標記，防止在切換時出現"Loading content..."
     setMessages((prev) => {
       const updatedMessages = [...prev];
-      const messageIndex = updatedMessages.findIndex((m) => m.id === assistantMessageId);
+      const messageIndex = updatedMessages.findIndex(
+        (m) => m.id === assistantMessageId,
+      );
+
       if (messageIndex !== -1) {
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
@@ -176,6 +190,7 @@ export const handleCanvasMode = async (
           isGeneratingCode: false, // 代碼生成完成
         };
       }
+
       return updatedMessages;
     });
 
@@ -190,13 +205,17 @@ export const handleCanvasMode = async (
         // 更新ChatBox中顯示的解釋文本
         setMessages((prev) => {
           const updatedMessages = [...prev];
-          const messageIndex = updatedMessages.findIndex((m) => m.id === assistantMessageId);
+          const messageIndex = updatedMessages.findIndex(
+            (m) => m.id === assistantMessageId,
+          );
+
           if (messageIndex !== -1) {
             updatedMessages[messageIndex] = {
               ...updatedMessages[messageIndex],
               content: explanationContent, // 使用累積的完整內容而不是追加，避免頻繁更新造成的閃爍
             };
           }
+
           return updatedMessages;
         });
       },
@@ -207,7 +226,10 @@ export const handleCanvasMode = async (
     // 發生錯誤時，更新消息以顯示錯誤
     setMessages((prev) => {
       const updatedMessages = [...prev];
-      const messageIndex = updatedMessages.findIndex((m) => m.id === assistantMessageId);
+      const messageIndex = updatedMessages.findIndex(
+        (m) => m.id === assistantMessageId,
+      );
+
       if (messageIndex !== -1) {
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
@@ -215,6 +237,7 @@ export const handleCanvasMode = async (
           isGeneratingCode: false,
         };
       }
+
       return updatedMessages;
     });
   }

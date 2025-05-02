@@ -40,6 +40,7 @@ export const extractLongestCodeBlock = (
   const matches: Array<{ text: string; index: number; lineCount: number }> = [];
 
   let match;
+
   while ((match = codeBlockRegex.exec(text)) !== null) {
     // 計算代碼塊中的行數
     const lineCount = (match[0].match(/\n/g) || []).length;

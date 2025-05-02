@@ -1,11 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
+
 import { Message, ModelSetting } from "../types";
 import { chatCompletion, generateImageAndText } from "../services/openai";
 
 /**
  * 處理消息複製功能
  */
-export const copyMessage = (content: string, setError: (error: string | null) => void): void => {
+export const copyMessage = (
+  content: string,
+  setError: (error: string | null) => void,
+): void => {
   navigator.clipboard.writeText(content).catch((err) => {
     console.error("無法複製內容：", err);
     setError("無法複製到剪貼簿。");
@@ -45,10 +49,13 @@ export const deleteMessage = (
 ): void => {
   setMessages((prev) => {
     const messageIndex = prev.findIndex((m) => m.id === messageId);
+
     if (messageIndex === -1) return prev;
 
     const updatedMessages = [...prev];
+
     updatedMessages.splice(messageIndex, 1);
+
     return updatedMessages;
   });
 };
@@ -63,12 +70,18 @@ export const handleImageGeneration = async (
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
 ): Promise<void> => {
   // 處理圖片生成
-  const { imageUrl, textResponse } = await generateImageAndText(messageText, settings);
+  const { imageUrl, textResponse } = await generateImageAndText(
+    messageText,
+    settings,
+  );
 
   // 更新消息，包含圖片和描述
   setMessages((prev) => {
     const updatedMessages = [...prev];
-    const messageIndex = updatedMessages.findIndex((m) => m.id === assistantMessageId);
+    const messageIndex = updatedMessages.findIndex(
+      (m) => m.id === assistantMessageId,
+    );
+
     if (messageIndex !== -1) {
       updatedMessages[messageIndex] = {
         ...updatedMessages[messageIndex],
@@ -77,6 +90,7 @@ export const handleImageGeneration = async (
         isGeneratingImage: false, // 移除生成中狀態
       };
     }
+
     return updatedMessages;
   });
 };
@@ -94,13 +108,17 @@ export const handleStandardChatMode = async (
   await chatCompletion([...messages, userMessage], settings, (token) => {
     setMessages((prev) => {
       const updatedMessages = [...prev];
-      const messageIndex = updatedMessages.findIndex((m) => m.id === assistantMessageId);
+      const messageIndex = updatedMessages.findIndex(
+        (m) => m.id === assistantMessageId,
+      );
+
       if (messageIndex !== -1) {
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
           content: updatedMessages[messageIndex].content + token,
         };
       }
+
       return updatedMessages;
     });
   });
@@ -121,21 +139,25 @@ export const regenerateMessage = async (
 ): Promise<void> => {
   // 找到當前消息及其索引
   const messageIndex = messages.findIndex((m) => m.id === messageId);
+
   if (messageIndex === -1) return;
 
   // 找到該助手消息之前的用戶消息
   let userMessageIndex = messageIndex - 1;
+
   while (userMessageIndex >= 0 && messages[userMessageIndex].role !== "user") {
     userMessageIndex--;
   }
 
   if (userMessageIndex < 0) {
     setError("找不到用戶提問，無法重新生成回應。");
+
     return;
   }
 
   // 刪除當前的助手消息
   const updatedMessages = [...messages];
+
   updatedMessages.splice(messageIndex, 1);
   setMessages(updatedMessages);
 
@@ -159,12 +181,16 @@ export const regenerateMessage = async (
     const contextMessages = messages.slice(0, userMessageIndex + 1);
 
     // 如果指定了模型，則使用該模型
-    const settingsToUse = modelName ? { ...settings, model: modelName } : settings;
+    const settingsToUse = modelName
+      ? { ...settings, model: modelName }
+      : settings;
 
     await chatCompletion(contextMessages, settingsToUse, (token) => {
       setMessages((prev) => {
         const updatedMsgs = [...prev];
-        const msgIndex = updatedMsgs.findIndex((m) => m.id === assistantMessageId);
+        const msgIndex = updatedMsgs.findIndex(
+          (m) => m.id === assistantMessageId,
+        );
 
         if (msgIndex !== -1) {
           updatedMsgs[msgIndex] = {

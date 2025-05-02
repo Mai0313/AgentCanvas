@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
+
 import { Message, ModelSetting, MessageContent } from "../types";
+import sendMessageIcon from "../assets/icon/send-message.svg";
+
 import MessageItem from "./MessageItem";
 // 導入圖標
-import sendMessageIcon from "../assets/icon/send-message.svg";
 
 interface ChatBoxProps {
   messages: Message[];
@@ -46,16 +48,23 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [isComposing, setIsComposing] = useState(false);
   const [prevMessagesLength, setPrevMessagesLength] = useState(0);
-  const [pastedImages, setPastedImages] = useState<{ url: string; file: File }[]>([]);
+  const [pastedImages, setPastedImages] = useState<
+    { url: string; file: File }[]
+  >([]);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   // 檢測用戶是否位於對話底部
   const isNearBottom = () => {
     const container = messagesContainerRef.current;
+
     if (!container) return true;
 
     const threshold = 100; // 像素閾值
-    return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+
+    return (
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      threshold
+    );
   };
 
   // 追踪用戶是否手動滾動的狀態
@@ -67,6 +76,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   // 監聽滾動事件，判斷是否應該自動滾動
   useEffect(() => {
     const container = messagesContainerRef.current;
+
     if (!container) return;
 
     const handleScroll = () => {
@@ -82,6 +92,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     };
 
     container.addEventListener("scroll", handleScroll);
+
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
@@ -113,6 +124,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   // 添加用戶手動滾動的監聽器
   useEffect(() => {
     const container = messagesContainerRef.current;
+
     if (!container) return;
 
     const handleUserScroll = () => {
@@ -140,6 +152,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     };
 
     container.addEventListener("scroll", throttledScroll);
+
     return () => {
       container.removeEventListener("scroll", throttledScroll);
       if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -150,6 +163,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   useEffect(() => {
     const handleSetQuotedText = (event: Event) => {
       const customEvent = event as CustomEvent<{ quotedText: string }>;
+
       if (customEvent.detail && customEvent.detail.quotedText) {
         setQuotedText(customEvent.detail.quotedText);
       }
@@ -158,11 +172,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     //
 
     // 註冊全局事件監聽器
-    document.addEventListener("setQuotedText", handleSetQuotedText as EventListener);
+    document.addEventListener(
+      "setQuotedText",
+      handleSetQuotedText as EventListener,
+    );
 
     // 組件卸載時移除事件監聽器
     return () => {
-      document.removeEventListener("setQuotedText", handleSetQuotedText as EventListener);
+      document.removeEventListener(
+        "setQuotedText",
+        handleSetQuotedText as EventListener,
+      );
     };
   }, []);
 
@@ -177,14 +197,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({
             e.preventDefault(); // Prevent default paste behavior
 
             const file = items[i].getAsFile();
+
             if (!file) continue;
 
             try {
               // Read the file as base64
               const reader = new FileReader();
+
               reader.onload = (event) => {
                 if (event.target && event.target.result) {
                   const imageUrl = event.target.result as string;
+
                   setPastedImages((prev) => [...prev, { url: imageUrl, file }]);
                 }
               };
@@ -198,15 +221,22 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     };
 
     const textarea = textAreaRef.current;
+
     if (textarea) {
       // Using 'as unknown as EventListener' to handle type incompatibility
-      textarea.addEventListener("paste", handlePaste as unknown as EventListener);
+      textarea.addEventListener(
+        "paste",
+        handlePaste as unknown as EventListener,
+      );
     }
 
     return () => {
       if (textarea) {
         // Using 'as unknown as EventListener' to handle type incompatibility
-        textarea.removeEventListener("paste", handlePaste as unknown as EventListener);
+        textarea.removeEventListener(
+          "paste",
+          handlePaste as unknown as EventListener,
+        );
       }
     };
   }, []);
@@ -282,10 +312,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   return (
-    <div className='chat-box'>
-      <div className='messages-container' ref={messagesContainerRef}>
+    <div className="chat-box">
+      <div ref={messagesContainerRef} className="messages-container">
         {messages.length === 0 ? (
-          <div className='empty-state'>
+          <div className="empty-state">
             <h2>Start a conversation with {settings.model}</h2>
             <p>Type your message below to begin</p>
           </div>
@@ -293,42 +323,47 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           messages.map((message) => (
             <MessageItem
               key={message.id}
-              message={message}
-              isStreaming={streamingMessageId === message.id}
+              currentModel={currentModel}
               isEditing={editingMessageId === message.id}
+              isLoadingModels={isLoadingModels}
+              isStreaming={streamingMessageId === message.id}
               longestCodeBlockPosition={
                 message.id === editingMessageId ? longestCodeBlockPosition : null
               }
+              message={message}
               toggleMarkdownCanvas={() => {
                 if (typeof message.content === "string") {
                   toggleMarkdownCanvas(message.id, message.content);
                 }
               }}
+              onDelete={onDelete}
+              onEdit={onEdit}
               onAskGpt={handleAskGpt}
               // 傳遞新的消息操作功能
               onCopy={onCopy}
-              onEdit={onEdit}
-              onDelete={onDelete}
               onRegenerate={onRegenerate}
               // 傳遞模型相關數據
               fetchModels={fetchModels}
-              currentModel={currentModel}
-              isLoadingModels={isLoadingModels}
             />
           ))
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      <form className='chat-input-form' onSubmit={handleSubmit}>
+      <form className="chat-input-form" onSubmit={handleSubmit}>
         {quotedText && (
-          <div className='quoted-text-container'>
-            <div className='quoted-text'>
-              <div className='quote-marker'></div>
-              <div className='quote-content'>
-                {quotedText.length > 100 ? quotedText.substring(0, 100) + "..." : quotedText}
+          <div className="quoted-text-container">
+            <div className="quoted-text">
+              <div className="quote-marker" />
+              <div className="quote-content">
+                {quotedText.length > 100
+                  ? quotedText.substring(0, 100) + "..."
+                  : quotedText}
               </div>
-              <button className='quote-remove-button' onClick={removeQuotedText}>
+              <button
+                className="quote-remove-button"
+                onClick={removeQuotedText}
+              >
                 ✕
               </button>
             </div>
@@ -336,15 +371,18 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         )}
 
         {pastedImages.length > 0 && (
-          <div className='pasted-images-container'>
+          <div className="pasted-images-container">
             {pastedImages.map((image, index) => (
-              <div key={index} className='pasted-image-item'>
+              <div key={index} className="pasted-image-item">
                 <img
-                  src={image.url}
                   alt={`Pasted ${index + 1}`}
-                  className='pasted-image-preview'
+                  className="pasted-image-preview"
+                  src={image.url}
                 />
-                <button className='image-remove-button' onClick={() => removeImage(index)}>
+                <button
+                  className="image-remove-button"
+                  onClick={() => removeImage(index)}
+                >
                   ✕
                 </button>
               </div>
@@ -352,11 +390,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           </div>
         )}
 
-        <div className='input-row'>
+        <div className="input-row">
           <textarea
             ref={textAreaRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            disabled={isLoading}
             placeholder={
               quotedText
                 ? "Ask about the selected text..."
@@ -365,6 +402,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   : "Type your message or paste an image (Ctrl+V)..."
             }
             rows={3}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onCompositionEnd={() => setIsComposing(false)}
+            onCompositionStart={() => setIsComposing(true)}
             onKeyDown={(e) => {
               // Only handle Enter key when not in IME composition
               if (e.key === "Enter" && !e.shiftKey && !isComposing) {
@@ -372,18 +413,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                 handleSubmit(e);
               }
             }}
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={() => setIsComposing(false)}
-            disabled={isLoading}
           />
           <button
+            aria-label='Send message'
             type='submit'
             className='send-button'
             // Fix the mixed operator precedence with parentheses
             disabled={(!inputValue.trim() && pastedImages.length === 0) || isLoading}
-            aria-label='Send message'
           >
-            <img src={sendMessageIcon} alt='Send' className='icon-2xl' />
+            <img alt="Send" className="icon-2xl" src={sendMessageIcon} />
           </button>
         </div>
       </form>

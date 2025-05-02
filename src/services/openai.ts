@@ -1,7 +1,8 @@
 import { AzureOpenAI, OpenAI } from "openai";
-import { Message, ModelSetting, MessageContent } from "../types";
 import { Stream } from "openai/streaming";
 import { ChatCompletionMessageParam } from "openai/resources/chat";
+
+import { Message, ModelSetting, MessageContent } from "../types";
 
 // Initialize the appropriate client based on api_type
 const createClient = (settings: ModelSetting) => {
@@ -86,6 +87,7 @@ export const chatCompletion = async (
             } else if (item.type === "image_url" && item.image_url) {
               return { type: "image_url", image_url: item.image_url };
             }
+
             return item;
           }),
         };
@@ -134,17 +136,23 @@ export const chatCompletion = async (
       )) as unknown as Stream<ChatCompletionChunk>;
 
       let fullResponse = "";
+
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content || "";
+
         if (content) {
           onToken(content);
           fullResponse += content;
         }
       }
+
       return fullResponse;
     } else {
       console.log("Sending request to:", settings.baseUrl);
-      const responses = await client.chat.completions.create(requestOptions as any);
+      const responses = await client.chat.completions.create(
+        requestOptions as any,
+      );
+
       return responses.choices[0].message.content || "";
     }
   } catch (error) {
@@ -188,14 +196,17 @@ export const detectTaskType = async (
     });
 
     // Extract and clean the response
-    const taskType = response.choices[0].message.content?.trim().toLowerCase() || "chat";
+    const taskType =
+      response.choices[0].message.content?.trim().toLowerCase() || "chat";
 
     // Ensure we only return one of our expected types
     if (taskType === "canvas") return "canvas";
     if (taskType === "image") return "image";
+
     return "chat"; // Default to chat for any other response
   } catch (error) {
     console.error("Error detecting task type:", error);
+
     // Default to chat mode if there's an error
     return "chat";
   }
@@ -215,6 +226,7 @@ export const generateImageAndText = async (
 ): Promise<{ imageUrl: string; textResponse: string }> => {
   try {
     const client = createClient(settings);
+
     console.log("Generating image for prompt:", prompt);
 
     // Step 1: Generate the image first using URL format instead of base64
@@ -233,6 +245,7 @@ export const generateImageAndText = async (
 
     // Extract the URL from the response
     const imageUrl = imageResponse.data[0]?.url;
+
     if (!imageUrl) {
       throw new Error("No image URL received from the API");
     }

@@ -11,6 +11,7 @@ export const handleSidebarResizing = (
   if (!isResizingSidebar) return;
 
   const newWidth = event.clientX;
+
   // 限制寬度在合理範圍內
   if (newWidth >= 200 && newWidth <= 350) {
     setSidebarWidth(newWidth);
@@ -39,6 +40,7 @@ export const handleMarkdownResizing = (
 
     // 應用限制 (20% 到 70%)
     const limitedWidth = Math.max(20, Math.min(70, newWidthPercent));
+
     setMarkdownWidth(limitedWidth);
   }
 };
@@ -92,6 +94,7 @@ export const setupSidebarResizer = (
   setIsResizingSidebar: React.Dispatch<React.SetStateAction<boolean>>,
 ): (() => void) => {
   const sidebarResizer = sidebarResizerRef.current;
+
   if (!sidebarResizer) return () => {};
 
   const onMouseDown = (e: MouseEvent) => {
@@ -116,6 +119,7 @@ export const setupMarkdownResizer = (
   setIsResizingMarkdown: React.Dispatch<React.SetStateAction<boolean>>,
 ): (() => void) => {
   const markdownResizer = markdownResizerRef.current;
+
   if (!markdownResizer || !isMarkdownCanvasOpen) return () => {};
 
   const onMouseDown = (e: MouseEvent) => {

@@ -6,10 +6,14 @@ interface SelectionPopupProps {
   onAskGpt: (text: string) => void;
 }
 
-const SelectionPopup: React.FC<SelectionPopupProps> = ({ position, selectedText, onAskGpt }) => {
+const SelectionPopup: React.FC<SelectionPopupProps> = ({
+  position,
+  selectedText,
+  onAskGpt,
+}) => {
   return (
     <div
-      className='selection-popup'
+      className="selection-popup"
       style={{
         position: "fixed",
         top: `${position.top}px`,
@@ -17,7 +21,7 @@ const SelectionPopup: React.FC<SelectionPopupProps> = ({ position, selectedText,
         zIndex: 1000,
       }}
     >
-      <button className='ask-gpt-button' onClick={() => onAskGpt(selectedText)}>
+      <button className="ask-gpt-button" onClick={() => onAskGpt(selectedText)}>
         Ask GPT
       </button>
     </div>
