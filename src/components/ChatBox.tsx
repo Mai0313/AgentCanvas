@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 
 // Import HeroUI components
-import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
-import { Chip } from "@heroui/react";
+import { Image } from "@heroui/image";
+import { Tooltip } from "@heroui/tooltip";
 
 import { Message, ModelSetting, MessageContent } from "../types";
 
@@ -60,6 +60,51 @@ const ImageIcon = (props: any) => {
   );
 };
 
+// File icon for document files
+const FileIcon = (props: any) => {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      focusable="false"
+      height="1em"
+      role="presentation"
+      viewBox="0 0 24 24"
+      width="1em"
+      {...props}
+    >
+      <path
+        d="M15.7161 16.2234H8.49609"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M15.7161 12.0369H8.49609"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M11.2521 7.86011H8.49707"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M15.2954 2H8.8894C6.9994 2 5.45938 3.54 5.45938 5.43V18.57C5.45938 20.46 6.9594 22 8.8494 22H15.2954C17.1854 22 18.6854 20.46 18.6854 18.57V5.43C18.6854 3.54 17.1854 2 15.2954 2Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+};
+
 // Delete/close icon for removing quoted text or images
 const CloseIcon = (props: any) => {
   return (
@@ -96,7 +141,7 @@ const CloseIcon = (props: any) => {
       />
     </svg>
   );
-};
+}
 
 interface ChatBoxProps {
   messages: Message[];
@@ -141,9 +186,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   const [isComposing, setIsComposing] = useState(false);
   const [prevMessagesLength, setPrevMessagesLength] = useState(0);
   const [pastedImages, setPastedImages] = useState<
-    { url: string; file: File }[]
+    { url: string; file: File; type: string }[]
   >([]);
+  const [showPasteHint, setShowPasteHint] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  const [showImageFeedback, setShowImageFeedback] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // 檢測用戶是否位於對話底部
   const isNearBottom = () => {
@@ -189,6 +240,19 @@ const ChatBox: React.FC<ChatBoxProps> = ({
       container.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // Show paste hint after a few seconds if there are no messages yet
+  useEffect(() => {
+    if (messages.length === 0) {
+      const timer = setTimeout(() => {
+        setShowPasteHint(true);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowPasteHint(false);
+    }
+  }, [messages.length]);
 
   // 消息更新時的滾动處理
   useEffect(() => {
@@ -264,60 +328,179 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     // 註冊全局事件監聽器
     document.addEventListener(
       "setQuotedText",
-      handleSetQuotedText as EventListener,
+      handleSetQuotedText as EventListener
     );
 
     // 組件卸載時移除事件監聽器
     return () => {
       document.removeEventListener(
         "setQuotedText",
-        handleSetQuotedText as EventListener,
+        handleSetQuotedText as EventListener
       );
     };
   }, []);
 
-  // Handle paste events
+  // Handle paste events directly in the input element
   useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
+    const handlePasteInInput = (e: ClipboardEvent) => {
       if (e.clipboardData && e.clipboardData.items) {
         const items = e.clipboardData.items;
+        let hasImageOrFile = false;
 
         for (let i = 0; i < items.length; i++) {
-          if (items[i].type.indexOf("image") !== -1) {
-            e.preventDefault(); // Prevent default paste behavior
-
+          // Check if this is an image or other file
+          if (items[i].kind === "file") {
             const file = items[i].getAsFile();
-
             if (!file) continue;
+
+            hasImageOrFile = true;
+            e.preventDefault(); // Prevent default paste behavior for image files
 
             try {
               // Read the file as base64
               const reader = new FileReader();
+              const fileType = items[i].type;
 
               reader.onload = (event) => {
                 if (event.target && event.target.result) {
-                  const imageUrl = event.target.result as string;
+                  const dataUrl = event.target.result as string;
 
-                  setPastedImages((prev) => [...prev, { url: imageUrl, file }]);
+                  setPastedImages((prev) => [
+                    ...prev,
+                    {
+                      url: dataUrl,
+                      file,
+                      type: fileType,
+                    },
+                  ]);
+
+                  // Show visual feedback that image was pasted successfully
+                  setShowImageFeedback(true);
+                  setTimeout(() => setShowImageFeedback(false), 1500);
                 }
               };
+
               reader.readAsDataURL(file);
             } catch (error) {
-              console.error("Error processing pasted image:", error);
+              console.error("Error processing pasted file:", error);
             }
+          }
+        }
+
+        // If no image was found, let default behavior handle text paste
+        if (!hasImageOrFile) {
+          // Default behavior will handle text paste
+        }
+      }
+    };
+
+    // 只在输入框本身添加监听器，避免重复处理粘贴事件
+    const inputElement = inputRef.current;
+    if (inputElement) {
+      inputElement.addEventListener(
+        "paste",
+        handlePasteInInput as EventListener
+      );
+    }
+
+    return () => {
+      if (inputElement) {
+        inputElement.removeEventListener(
+          "paste",
+          handlePasteInInput as EventListener
+        );
+      }
+    };
+  }, []);
+
+  // Handle drag and drop for images
+  useEffect(() => {
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+
+      if (e.dataTransfer && e.dataTransfer.files) {
+        const files = e.dataTransfer.files;
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const fileType = file.type;
+
+          try {
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+              if (event.target && event.target.result) {
+                const dataUrl = event.target.result as string;
+
+                setPastedImages((prev) => [
+                  ...prev,
+                  {
+                    url: dataUrl,
+                    file,
+                    type: fileType,
+                  },
+                ]);
+              }
+            };
+
+            reader.readAsDataURL(file);
+          } catch (error) {
+            console.error("Error processing dropped file:", error);
           }
         }
       }
     };
 
-    // Attach paste event listener to document since HeroUI Input might not directly support ref
-    document.addEventListener("paste", handlePaste as unknown as EventListener);
+    const dropZone = dropZoneRef.current;
+    const container = messagesContainerRef.current;
+
+    if (dropZone) {
+      dropZone.addEventListener("dragover", handleDragOver as EventListener);
+      dropZone.addEventListener("dragleave", handleDragLeave as EventListener);
+      dropZone.addEventListener("drop", handleDrop as EventListener);
+    }
+
+    if (container) {
+      container.addEventListener("dragover", handleDragOver as EventListener);
+      container.addEventListener("dragleave", handleDragLeave as EventListener);
+      container.addEventListener("drop", handleDrop as EventListener);
+    }
 
     return () => {
-      document.removeEventListener(
-        "paste",
-        handlePaste as unknown as EventListener,
-      );
+      if (dropZone) {
+        dropZone.removeEventListener(
+          "dragover",
+          handleDragOver as EventListener
+        );
+        dropZone.removeEventListener(
+          "dragleave",
+          handleDragLeave as EventListener
+        );
+        dropZone.removeEventListener("drop", handleDrop as EventListener);
+      }
+
+      if (container) {
+        container.removeEventListener(
+          "dragover",
+          handleDragOver as EventListener
+        );
+        container.removeEventListener(
+          "dragleave",
+          handleDragLeave as EventListener
+        );
+        container.removeEventListener("drop", handleDrop as EventListener);
+      }
     };
   }, []);
 
@@ -329,47 +512,72 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     if (e) e.preventDefault();
 
     if (inputValue.trim() || pastedImages.length > 0) {
-      // Regular text message or text with images
-      let messageToSend: string | MessageContent[] = inputValue.trim();
+      // 添加转场动画
+      if (messages.length === 0) {
+        setIsTransitioning(true);
+        // 延迟发送消息，让动画有时间运行
+        setTimeout(() => {
+          sendMessage();
+          // 动画结束后重置状态
+          setTimeout(() => {
+            setIsTransitioning(false);
+          }, 500); // 匹配CSS动画的持续时间
+        }, 300);
+      } else {
+        sendMessage();
+      }
+    }
+  };
 
-      if (quotedText) {
-        messageToSend = `> ${quotedText}\n\n${messageToSend}`;
+  const sendMessage = () => {
+    // Regular text message or text with images
+    let messageToSend: string | MessageContent[] = inputValue.trim();
+
+    if (quotedText) {
+      messageToSend = `> ${quotedText}\n\n${messageToSend}`;
+    }
+
+    // If we have pasted images, format as a MessageContent array
+    if (pastedImages.length > 0) {
+      const contentArray: MessageContent[] = [];
+
+      // Add text content if any
+      if (messageToSend) {
+        contentArray.push({
+          type: "text",
+          text: messageToSend,
+        });
       }
 
-      // If we have pasted images, format as a MessageContent array
-      if (pastedImages.length > 0) {
-        const contentArray: MessageContent[] = [];
-
-        // Add text content if any
-        if (messageToSend) {
-          contentArray.push({
-            type: "text",
-            text: messageToSend,
-          });
-        }
-
-        // Add all pasted images
-        pastedImages.forEach((image) => {
+      // Add all pasted images
+      pastedImages.forEach((image) => {
+        if (image.type.startsWith("image/")) {
           contentArray.push({
             type: "image_url",
             image_url: {
               url: image.url,
             },
           });
-        });
+        } else {
+          // For non-image files, add them as text mentioning the file
+          contentArray.push({
+            type: "text",
+            text: `[Attached file: ${image.file.name}]`,
+          });
+        }
+      });
 
-        messageToSend = contentArray;
-      }
-
-      onSendMessage(messageToSend);
-
-      setInputValue("");
-      setQuotedText(null);
-      setPastedImages([]);
-      // 用戶發送消息後設置為自動滾動到底部
-      setAutoScrollEnabled(true);
-      userScrolledRef.current = false;
+      messageToSend = contentArray;
     }
+
+    onSendMessage(messageToSend);
+
+    setInputValue("");
+    setQuotedText(null);
+    setPastedImages([]);
+    // 用戶發送消息後設置為自動滾動到底部
+    setAutoScrollEnabled(true);
+    userScrolledRef.current = false;
   };
 
   // Handle text selection for Ask GPT feature
@@ -400,99 +608,192 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   return (
-    <div className="chat-box w-full h-full flex flex-col">
+    <div className="chat-box w-full h-full flex flex-col" ref={dropZoneRef}>
       <div
         ref={messagesContainerRef}
-        className="messages-container flex-grow bg-content1 rounded-lg p-4 overflow-auto"
+        className={`messages-container flex-grow rounded-lg p-4 overflow-auto relative ${
+          isDragging ? "border-2 border-dashed border-primary" : ""
+        } transition-all duration-500`}
       >
+        {isDragging && (
+          <div className="absolute inset-0 bg-primary/10 flex items-center justify-center backdrop-blur-sm z-10">
+            <div className="text-center p-6 bg-background/80 rounded-lg shadow-lg">
+              <ImageIcon className="text-primary text-4xl mx-auto mb-2" />
+              <p className="text-xl font-bold">Drop images or files here</p>
+            </div>
+          </div>
+        )}
+
         {messages.length === 0 ? (
-          <div className="empty-state flex flex-col items-center justify-center h-full">
-            <Card className="w-full max-w-2xl p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20">
+          <div className="flex justify-center items-center h-full">
+            <Card
+              className={`transition-transform-background flex flex-col relative overflow-hidden h-auto text-foreground box-border dark:bg-[#1e1e1e] outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 shadow-medium rounded-large transition-transform-background motion-reduce:transition-none w-full max-w-2xl p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20 ${
+                isTransitioning
+                  ? "opacity-0 transition-opacity duration-500"
+                  : "opacity-100 transition-opacity duration-500"
+              }`}
+            >
               <h2 className="text-xl font-bold mb-4">
                 Start a conversation with {settings.model || "AI"}
               </h2>
 
+              {showPasteHint && (
+                <div className="mb-4 p-3 bg-default-100 rounded-lg text-default-800 text-sm">
+                  <p>
+                    💡 Tip: You can paste images with Ctrl+V or drag & drop
+                    files into the chat!
+                  </p>
+                </div>
+              )}
+
               {/* 初始輸入框 - 當沒有消息時顯示在中央 */}
               <div className="mt-4 w-full">
+                {pastedImages.length > 0 && (
+                  <div className="pasted-images-preview mb-3">
+                    <div className="flex flex-wrap gap-2 rounded-lg">
+                      {pastedImages.map((image, index) => (
+                        <div
+                          key={index}
+                          className="pasted-image-item relative group"
+                        >
+                          {image.type.startsWith("image/") ? (
+                            <div className="relative">
+                              <Image
+                                alt={`Pasted ${index + 1}`}
+                                className="pasted-image-preview h-16 w-auto object-cover rounded-md border border-default-200"
+                                src={image.url}
+                                width={80}
+                              />
+                              <button
+                                aria-label="Remove image"
+                                className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/50 dark:bg-white/30 text-white dark:text-black opacity-80 hover:opacity-100 transition-opacity duration-200"
+                                onClick={() => removeImage(index)}
+                              >
+                                <CloseIcon />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <div className="flex items-center justify-center h-16 w-16 rounded-md border border-default-200 p-1">
+                                <Tooltip content={image.file.name}>
+                                  <div className="text-center">
+                                    <FileIcon className="text-xl mb-1" />
+                                    <p className="text-xs truncate max-w-[60px]">
+                                      {image.file.name.length > 8
+                                        ? `${image.file.name.substring(0, 5)}...`
+                                        : image.file.name}
+                                    </p>
+                                  </div>
+                                </Tooltip>
+                              </div>
+                              <button
+                                aria-label="Remove image"
+                                className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/50 dark:bg-white/30 text-white dark:text-black opacity-80 hover:opacity-100 transition-opacity duration-200"
+                                onClick={() => removeImage(index)}
+                              >
+                                <CloseIcon />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <form
                   className="initial-chat-form w-full"
                   onSubmit={handleSubmit}
                 >
-                  <Input
-                    autoFocus
-                    fullWidth
-                    classNames={{
-                      label: "text-black/50 dark:text-white/90",
-                      input: [
-                        "bg-transparent",
-                        "text-black/90 dark:text-white/90",
-                        "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                      ],
-                      innerWrapper: "bg-transparent",
-                      inputWrapper: [
-                        "shadow-sm",
-                        "bg-default-200/50",
-                        "dark:bg-default/60",
-                        "backdrop-blur-xl",
-                        "backdrop-saturate-200",
-                        "hover:bg-default-200/70",
-                        "dark:hover:bg-default/70",
-                        "group-data-[focus=true]:bg-default-200/50",
-                        "dark:group-data-[focus=true]:bg-default/60",
-                        "!cursor-text",
-                      ],
-                    }}
-                    endContent={
-                      <Button
-                        isIconOnly
+                  <div
+                    className={`custom-input-container relative ${
+                      showImageFeedback
+                        ? "animate-pulse border border-primary"
+                        : ""
+                    }`}
+                    ref={inputContainerRef}
+                  >
+                    <input
+                      ref={inputRef}
+                      autoFocus
+                      className="w-full px-4 py-3 bg-background dark:bg-[#1e1e1e] rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
+                      disabled={isLoading}
+                      placeholder="詢問任何問題"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onCompositionEnd={() => setIsComposing(false)}
+                      onCompositionStart={() => setIsComposing(true)}
+                      onKeyDown={handleKeyDown}
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                      <button
+                        aria-label="Voice input"
+                        className="p-2 rounded-full bg-transparent text-white/70 hover:text-white/90 transition-colors"
+                        type="button"
+                      >
+                        <svg
+                          width="16"
+                          height="21"
+                          viewBox="0 0 16 21"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M8 0.5C9.66 0.5 11 1.84 11 3.5V10.5C11 12.16 9.66 13.5 8 13.5C6.34 13.5 5 12.16 5 10.5V3.5C5 1.84 6.34 0.5 8 0.5ZM8 17C11.87 17 15 13.87 15 10H16.5C16.5 14.41 13.41 18.09 9.21 18.89V20.5H6.79V18.88C2.59 18.09 -0.5 14.41 -0.5 10H1C1 13.87 4.13 17 8 17Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      </button>
+                      <button
                         aria-label="Send message"
-                        color="primary"
-                        isDisabled={!inputValue.trim() || isLoading}
-                        size="sm"
+                        className="p-2 rounded-full bg-[#0084ff] hover:bg-[#0077e6] text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        disabled={
+                          (!inputValue.trim() && pastedImages.length === 0) ||
+                          isLoading
+                        }
                         type="submit"
-                        variant="flat"
                       >
                         <SendIcon />
-                      </Button>
-                    }
-                    placeholder="Type your message here and press Enter..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onCompositionEnd={() => setIsComposing(false)}
-                    onCompositionStart={() => setIsComposing(true)}
-                    onKeyDown={handleKeyDown}
-                  />
+                      </button>
+                    </div>
+                  </div>
                 </form>
               </div>
             </Card>
           </div>
         ) : (
-          messages.map((message) => (
-            <MessageItem
-              key={message.id}
-              currentModel={currentModel}
-              isEditing={editingMessageId === message.id}
-              isLoadingModels={isLoadingModels}
-              isStreaming={streamingMessageId === message.id}
-              longestCodeBlockPosition={
-                message.id === editingMessageId ? longestCodeBlockPosition : null
-              }
-              message={message}
-              toggleMarkdownCanvas={() => {
-                if (typeof message.content === "string") {
-                  toggleMarkdownCanvas(message.id, message.content);
+          <div
+            className={`chat-messages transition-opacity duration-500 ${
+              messages.length === 1 && !isTransitioning ? "animate-fadeIn" : ""
+            }`}
+          >
+            {messages.map((message) => (
+              <MessageItem
+                key={message.id}
+                currentModel={currentModel}
+                isEditing={editingMessageId === message.id}
+                isLoadingModels={isLoadingModels}
+                isStreaming={streamingMessageId === message.id}
+                longestCodeBlockPosition={
+                  message.id === editingMessageId
+                    ? longestCodeBlockPosition
+                    : null
                 }
-              }}
-              onDelete={onDelete}
-              onEdit={onEdit}
-              onAskGpt={handleAskGpt}
-              // 傳遞新的消息操作功能
-              onCopy={onCopy}
-              onRegenerate={onRegenerate}
-              // 傳遞模型相關數據
-              fetchModels={fetchModels}
-            />
-          ))
+                message={message}
+                toggleMarkdownCanvas={() => {
+                  if (typeof message.content === "string") {
+                    toggleMarkdownCanvas(message.id, message.content);
+                  }
+                }}
+                onDelete={onDelete}
+                onEdit={onEdit}
+                onAskGpt={handleAskGpt}
+                onCopy={onCopy}
+                onRegenerate={onRegenerate}
+                fetchModels={fetchModels}
+              />
+            ))}
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -526,98 +827,132 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           )}
 
           {pastedImages.length > 0 && (
-            <div className="pasted-images-container mb-2 flex flex-wrap gap-2">
-              {pastedImages.map((image, index) => (
-                <Card key={index} className="pasted-image-item relative group">
-                  <img
-                    alt={`Pasted ${index + 1}`}
-                    className="pasted-image-preview h-20 object-cover"
-                    src={image.url}
-                  />
-                  <Button
-                    isIconOnly
-                    aria-label="Remove image"
-                    className="absolute top-1 right-1 opacity-70 hover:opacity-100"
-                    color="danger"
-                    size="sm"
-                    variant="solid"
-                    onClick={() => removeImage(index)}
+            <div className="pasted-images-container mb-2">
+              <div className="flex flex-wrap gap-2 rounded-lg">
+                {pastedImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="pasted-image-item relative group"
                   >
-                    <CloseIcon />
-                  </Button>
-                </Card>
-              ))}
+                    {image.type.startsWith("image/") ? (
+                      <div className="relative">
+                        <Image
+                          alt={`Pasted ${index + 1}`}
+                          className="pasted-image-preview h-20 w-auto object-cover rounded-md border border-default-200"
+                          src={image.url}
+                          width={100}
+                        />
+                        <button
+                          aria-label="Remove image"
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/50 dark:bg-white/30 text-white dark:text-black opacity-80 hover:opacity-100 transition-opacity duration-200"
+                          onClick={() => removeImage(index)}
+                        >
+                          <CloseIcon />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <div className="flex items-center justify-center h-20 w-20 rounded-md border border-default-200 p-2">
+                          <Tooltip content={image.file.name}>
+                            <div className="text-center">
+                              <FileIcon className="text-2xl mb-1" />
+                              <p className="text-xs truncate max-w-[70px]">
+                                {image.file.name.length > 10
+                                  ? `${image.file.name.substring(0, 7)}...`
+                                  : image.file.name}
+                              </p>
+                            </div>
+                          </Tooltip>
+                        </div>
+                        <button
+                          aria-label="Remove image"
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/50 dark:bg-white/30 text-white dark:text-black opacity-80 hover:opacity-100 transition-opacity duration-200"
+                          onClick={() => removeImage(index)}
+                        >
+                          <CloseIcon />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          <div className="input-row">
-            <Input
-              ref={inputRef}
-              fullWidth
-              classNames={{
-                label: "text-black/50 dark:text-white/90",
-                input: [
-                  "bg-transparent",
-                  "text-black/90 dark:text-white/90",
-                  "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-                ],
-                innerWrapper: "bg-transparent",
-                inputWrapper: [
-                  "shadow-sm",
-                  "bg-default-200/50",
-                  "dark:bg-default/60",
-                  "backdrop-blur-xl",
-                  "backdrop-saturate-200",
-                  "hover:bg-default-200/70",
-                  "dark:hover:bg-default/70",
-                  "group-data-[focus=true]:bg-default-200/50",
-                  "dark:group-data-[focus=true]:bg-default/60",
-                  "!cursor-text",
-                ],
-              }}
-              disabled={isLoading}
-              endContent={
-                <Button
-                  isIconOnly
+          <div className="input-row flex items-center gap-2">
+            <div
+              className={`custom-input-container relative flex-grow ${
+                showImageFeedback ? "animate-pulse border border-primary" : ""
+              }`}
+              ref={inputContainerRef}
+            >
+              <input
+                ref={inputRef}
+                className="w-full px-4 py-3 bg-background dark:bg-[#1e1e1e] rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
+                disabled={isLoading}
+                placeholder={
+                  quotedText
+                    ? "詢問關於所選文本的問題..."
+                    : pastedImages.length > 0
+                    ? "為您的圖片添加描述..."
+                    : "詢問任何問題"
+                }
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onCompositionEnd={() => setIsComposing(false)}
+                onCompositionStart={() => setIsComposing(true)}
+                onKeyDown={handleKeyDown}
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <button
+                  aria-label="Voice input"
+                  className="p-2 rounded-full bg-transparent text-white/70 hover:text-white/90 transition-colors"
+                  type="button"
+                >
+                  <svg
+                    width="16"
+                    height="21"
+                    viewBox="0 0 16 21"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 0.5C9.66 0.5 11 1.84 11 3.5V10.5C11 12.16 9.66 13.5 8 13.5C6.34 13.5 5 12.16 5 10.5V3.5C5 1.84 6.34 0.5 8 0.5ZM8 17C11.87 17 15 13.87 15 10H16.5C16.5 14.41 13.41 18.09 9.21 18.89V20.5H6.79V18.88C2.59 18.09 -0.5 14.41 -0.5 10H1C1 13.87 4.13 17 8 17Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </button>
+                <button
                   aria-label="Send message"
-                  color="primary"
-                  isDisabled={
+                  className="p-2 rounded-full bg-[#0084ff] hover:bg-[#0077e6] text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={
                     (!inputValue.trim() && pastedImages.length === 0) ||
                     isLoading
                   }
-                  size="sm"
                   type="submit"
-                  variant="flat"
                 >
                   <SendIcon />
-                </Button>
-              }
-              placeholder={
-                quotedText
-                  ? "Ask about the selected text..."
-                  : pastedImages.length > 0
-                    ? "Add a description for your image..."
-                    : "Type your message or paste an image (Ctrl+V)..."
-              }
-              startContent={
-                pastedImages.length > 0 ? (
-                  <Chip color="primary" size="sm" variant="flat">
-                    <ImageIcon className="mr-1" /> {pastedImages.length}{" "}
-                    {pastedImages.length > 1 ? "images" : "image"}
-                  </Chip>
-                ) : null
-              }
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onCompositionEnd={() => setIsComposing(false)}
-              onCompositionStart={() => setIsComposing(true)}
-              onKeyDown={handleKeyDown}
-            />
+                </button>
+              </div>
+            </div>
           </div>
         </form>
       )}
     </div>
   );
 };
+
+// 添加全局CSS样式
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+`;
+document.head.appendChild(style);
 
 export default ChatBox;
