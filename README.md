@@ -1,8 +1,8 @@
-# Vite & HeroUI Template
+# Agent Canvas
 
 This is a template for creating applications using Vite and HeroUI (v2).
 
-[Try it on CodeSandbox](https://githubbox.com/frontio-ai/vite-template)
+[Try it on CodeSandbox](https://githubbox.com/Mai0313/AgentCanvas)
 
 ## Technologies Used
 

@@ -627,7 +627,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         {messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <Card
-              className={`transition-transform-background flex flex-col relative overflow-hidden h-auto text-foreground box-border dark:bg-[#1e1e1e] outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 shadow-medium rounded-large transition-transform-background motion-reduce:transition-none w-full max-w-2xl p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20 ${
+              className={`transition-transform-background flex flex-col relative overflow-hidden h-auto text-foreground box-border bg-background dark:bg-background outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 shadow-medium rounded-large transition-transform-background motion-reduce:transition-none w-full max-w-2xl p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20 ${
                 isTransitioning
                   ? "opacity-0 transition-opacity duration-500"
                   : "opacity-100 transition-opacity duration-500"
@@ -716,7 +716,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                     <input
                       ref={inputRef}
                       autoFocus
-                      className="w-full px-4 py-3 bg-background dark:bg-[#1e1e1e] rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
+                      className="w-full px-4 py-3 bg-white dark:bg-zinc-800 rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
                       disabled={isLoading}
                       placeholder="詢問任何問題"
                       value={inputValue}
@@ -728,7 +728,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
                       <button
                         aria-label="Voice input"
-                        className="p-2 rounded-full bg-transparent text-white/70 hover:text-white/90 transition-colors"
+                        className="p-2 rounded-full bg-transparent text-foreground/70 hover:text-foreground/90 transition-colors"
                         type="button"
                       >
                         <svg
@@ -888,7 +888,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
             >
               <input
                 ref={inputRef}
-                className="w-full px-4 py-3 bg-background dark:bg-[#1e1e1e] rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
+                className="w-full px-4 py-3 bg-white dark:bg-zinc-800 rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
                 disabled={isLoading}
                 placeholder={
                   quotedText
@@ -906,7 +906,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
                 <button
                   aria-label="Voice input"
-                  className="p-2 rounded-full bg-transparent text-white/70 hover:text-white/90 transition-colors"
+                  className="p-2 rounded-full bg-transparent text-foreground/70 hover:text-foreground/90 transition-colors"
                   type="button"
                 >
                   <svg
