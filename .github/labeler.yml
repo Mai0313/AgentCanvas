@@ -1,0 +1,78 @@
+# Feature Branches
+enhancement:
+  - head-branch:
+    - "feat/*"                      # Feature branches
+    - "refactor/*"                  # Refactor branches
+    - "enhance/*"                   # Enhancement branches
+    - "perf/*"                      # Performance improvement branches
+  - changed-files:
+    - any-glob-to-any-file:
+      - "src/**/*"                  # Any file in src, except documentation files
+      - "!src/docs/*"
+
+# Bug Fixes
+bug:
+  - head-branch:
+    - "^bug"                        # Branches starting with 'bug'
+    - "bug"
+    - "fix/*"                       # Fix branches
+    - "bugfix/*"                    # Bugfix branches
+    - "hotfix/*"                    # Hotfix branches
+
+# Maintenance
+chore:
+  - head-branch:
+    - "chore/*"                     # Chore branches
+    - "style/*"                     # Style branches
+    - "test/*"                      # Test branches
+    - "ci/*"                        # CI branches
+    - "cd/*"                        # CD branches
+    - "config/*"                    # Configuration branches
+  - changed-files:
+    - any-glob-to-any-file:
+      - ".github/**"                # GitHub Actions and workflows
+      - ".pre-commit-config.yaml"   # Pre-commit hooks configuration
+      - "pyproject.toml"            # Python project configuration
+      - "setup.py"                  # Python setup script
+      - "tox.ini"                   # Tox configuration
+      - "Makefile"                  # Makefile for build automation
+
+# Dependencies
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "uv.lock"                   # uv lock file
+      - "requirements.txt"          # Python dependencies
+      - "requirements.lock"         # Rye lock file
+      - "requirements-dev.lock"     # Rye dev lock file
+      - "poetry.lock"               # Poetry lock file
+      - "Pipfile"                   # Pipenv file
+      - "Pipfile.lock"              # Pipenv lock file
+
+# Documentation
+documentation:
+  - head-branch:
+    - "docs/*"                      # Documentation branches
+    - "doc/*"                       # Documentation branches
+    - "readme/*"                    # Readme branches
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/*.md"                   # Markdown files
+      - "docs/**/*"                 # Documentation files
+      - "**/*.ipynb"                # All Jupyter Notebook files
+      - "notebooks/**/*"
+      - "notebook/**/*"
+
+# Pytest Unit Tests
+unit-test:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/test_*.py"              # Unit test files
+      - "tests/**/*"                # Any file in tests directory
+
+revert:
+  - head-branch:
+    - "revert/*"                    # Revert branches
+    - "revert-*"                    # Revert branches
+    - "rollback/*"                  # Rollback branches
+    - "rollback-*"                  # Rollback branches
