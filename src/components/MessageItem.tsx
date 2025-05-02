@@ -165,12 +165,12 @@ const renderMessageImages = (message: Message) => {
           item.image_url && (
             <div key={`img-${index}`} className="message-image-container mb-4">
               <Image
-                radius="md"
-                alt="Attached"
-                className="w-full max-w-md object-cover rounded-xl"
-                src={item.image_url.url}
                 isBlurred
                 isZoomed
+                alt="Attached"
+                className="w-full max-w-md object-cover rounded-xl"
+                radius="md"
+                src={item.image_url.url}
               />
             </div>
           ),
@@ -666,12 +666,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
           !!message.imageUrl,
           <div className="message-image-container mt-4">
             <Image
-              radius="md"
-              alt="Generated"
-              className="w-full max-w-md rounded-xl"
-              src={message.imageUrl || ""}
               isBlurred
               isZoomed
+              alt="Generated"
+              className="w-full max-w-md rounded-xl"
+              radius="md"
+              src={message.imageUrl || ""}
             />
           </div>,
         )}

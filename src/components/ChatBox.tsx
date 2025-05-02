@@ -414,11 +414,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
               {/* 初始輸入框 - 當沒有消息時顯示在中央 */}
               <div className="mt-4 w-full">
-                <form className="initial-chat-form w-full" onSubmit={handleSubmit}>
+                <form
+                  className="initial-chat-form w-full"
+                  onSubmit={handleSubmit}
+                >
                   <Input
                     autoFocus
                     fullWidth
-                    placeholder="Type your message here and press Enter..."
                     classNames={{
                       label: "text-black/50 dark:text-white/90",
                       input: [
@@ -453,6 +455,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                         <SendIcon />
                       </Button>
                     }
+                    placeholder="Type your message here and press Enter..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onCompositionEnd={() => setIsComposing(false)}
@@ -579,7 +582,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   aria-label="Send message"
                   color="primary"
                   isDisabled={
-                    (!inputValue.trim() && pastedImages.length === 0) || isLoading
+                    (!inputValue.trim() && pastedImages.length === 0) ||
+                    isLoading
                   }
                   size="sm"
                   type="submit"
