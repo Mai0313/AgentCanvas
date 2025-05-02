@@ -16,9 +16,7 @@ export default function IndexPage() {
             become more&nbsp;
             <span className={title({ color: "violet" })}>interactive</span>
           </span>
-          <div className={subtitle({ class: "mt-4" })}>
-            Interactive Chatbot
-          </div>
+          <div className={subtitle({ class: "mt-4" })}>Interactive Chatbot</div>
         </div>
 
         <div className="flex gap-3">
