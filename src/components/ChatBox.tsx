@@ -141,7 +141,7 @@ const CloseIcon = (props: any) => {
       />
     </svg>
   );
-}
+};
 
 interface ChatBoxProps {
   messages: Message[];
@@ -328,14 +328,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     // 註冊全局事件監聽器
     document.addEventListener(
       "setQuotedText",
-      handleSetQuotedText as EventListener
+      handleSetQuotedText as EventListener,
     );
 
     // 組件卸載時移除事件監聽器
     return () => {
       document.removeEventListener(
         "setQuotedText",
-        handleSetQuotedText as EventListener
+        handleSetQuotedText as EventListener,
       );
     };
   }, []);
@@ -351,6 +351,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           // Check if this is an image or other file
           if (items[i].kind === "file") {
             const file = items[i].getAsFile();
+
             if (!file) continue;
 
             hasImageOrFile = true;
@@ -396,10 +397,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
     // 只在输入框本身添加监听器，避免重复处理粘贴事件
     const inputElement = inputRef.current;
+
     if (inputElement) {
       inputElement.addEventListener(
         "paste",
-        handlePasteInInput as EventListener
+        handlePasteInInput as EventListener,
       );
     }
 
@@ -407,7 +409,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
       if (inputElement) {
         inputElement.removeEventListener(
           "paste",
-          handlePasteInInput as EventListener
+          handlePasteInInput as EventListener,
         );
       }
     };
@@ -481,11 +483,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({
       if (dropZone) {
         dropZone.removeEventListener(
           "dragover",
-          handleDragOver as EventListener
+          handleDragOver as EventListener,
         );
         dropZone.removeEventListener(
           "dragleave",
-          handleDragLeave as EventListener
+          handleDragLeave as EventListener,
         );
         dropZone.removeEventListener("drop", handleDrop as EventListener);
       }
@@ -493,11 +495,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({
       if (container) {
         container.removeEventListener(
           "dragover",
-          handleDragOver as EventListener
+          handleDragOver as EventListener,
         );
         container.removeEventListener(
           "dragleave",
-          handleDragLeave as EventListener
+          handleDragLeave as EventListener,
         );
         container.removeEventListener("drop", handleDrop as EventListener);
       }
@@ -608,7 +610,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   return (
-    <div className="chat-box w-full h-full flex flex-col" ref={dropZoneRef}>
+    <div ref={dropZoneRef} className="chat-box w-full h-full flex flex-col">
       <div
         ref={messagesContainerRef}
         className={`messages-container flex-grow rounded-lg p-4 overflow-auto relative ${
@@ -706,12 +708,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   onSubmit={handleSubmit}
                 >
                   <div
+                    ref={inputContainerRef}
                     className={`custom-input-container relative ${
                       showImageFeedback
                         ? "animate-pulse border border-primary"
                         : ""
                     }`}
-                    ref={inputContainerRef}
                   >
                     <input
                       ref={inputRef}
@@ -732,10 +734,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                         type="button"
                       >
                         <svg
-                          width="16"
+                          fill="none"
                           height="21"
                           viewBox="0 0 16 21"
-                          fill="none"
+                          width="16"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
@@ -771,6 +773,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               <MessageItem
                 key={message.id}
                 currentModel={currentModel}
+                fetchModels={fetchModels}
                 isEditing={editingMessageId === message.id}
                 isLoadingModels={isLoadingModels}
                 isStreaming={streamingMessageId === message.id}
@@ -785,12 +788,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                     toggleMarkdownCanvas(message.id, message.content);
                   }
                 }}
-                onDelete={onDelete}
-                onEdit={onEdit}
                 onAskGpt={handleAskGpt}
                 onCopy={onCopy}
+                onDelete={onDelete}
+                onEdit={onEdit}
                 onRegenerate={onRegenerate}
-                fetchModels={fetchModels}
               />
             ))}
           </div>
@@ -830,10 +832,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
             <div className="pasted-images-container mb-2">
               <div className="flex flex-wrap gap-2 rounded-lg">
                 {pastedImages.map((image, index) => (
-                  <div
-                    key={index}
-                    className="pasted-image-item relative group"
-                  >
+                  <div key={index} className="pasted-image-item relative group">
                     {image.type.startsWith("image/") ? (
                       <div className="relative">
                         <Image
@@ -881,10 +880,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
           <div className="input-row flex items-center gap-2">
             <div
+              ref={inputContainerRef}
               className={`custom-input-container relative flex-grow ${
                 showImageFeedback ? "animate-pulse border border-primary" : ""
               }`}
-              ref={inputContainerRef}
             >
               <input
                 ref={inputRef}
@@ -894,8 +893,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   quotedText
                     ? "詢問關於所選文本的問題..."
                     : pastedImages.length > 0
-                    ? "為您的圖片添加描述..."
-                    : "詢問任何問題"
+                      ? "為您的圖片添加描述..."
+                      : "詢問任何問題"
                 }
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -910,10 +909,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   type="button"
                 >
                   <svg
-                    width="16"
+                    fill="none"
                     height="21"
                     viewBox="0 0 16 21"
-                    fill="none"
+                    width="16"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -943,7 +942,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 };
 
 // 添加全局CSS样式
-const style = document.createElement('style');
+const style = document.createElement("style");
+
 style.innerHTML = `
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
