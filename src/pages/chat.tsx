@@ -538,9 +538,8 @@ export default function ChatPage() {
               variant="light"
               size="sm"
               onClick={() => {
-                // eslint-disable-next-line
-                const newSettings = { ...settings };
-                // 顯示設置對話框或下拉選單
+                // 移除未使用的變數
+                // 當需要實現設置功能時可以再添加回來
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

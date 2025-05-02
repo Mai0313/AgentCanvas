@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 聊天訊息動畫效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.message-appear {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+.input-disappear {
+  animation: fadeOutDown 0.3s ease-out forwards;
+}
+
+/* 初始輸入框動畫效果 */
+.initial-input-submit {
+  animation: fadeOutDown 0.3s ease-out forwards;
+}

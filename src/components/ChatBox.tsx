@@ -406,12 +406,63 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         className="messages-container flex-grow bg-content1 rounded-lg p-4 overflow-auto"
       >
         {messages.length === 0 ? (
-          <Card className="empty-state p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20">
-            <h2 className="text-xl font-bold mb-2">
-              Start a conversation with {settings.model}
-            </h2>
-            <p className="text-default-500">Type your message below to begin</p>
-          </Card>
+          <div className="empty-state flex flex-col items-center justify-center h-full">
+            <Card className="w-full max-w-2xl p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20">
+              <h2 className="text-xl font-bold mb-4">
+                Start a conversation with {settings.model || "AI"}
+              </h2>
+
+              {/* 初始輸入框 - 當沒有消息時顯示在中央 */}
+              <div className="mt-4 w-full">
+                <form className="initial-chat-form w-full" onSubmit={handleSubmit}>
+                  <Input
+                    autoFocus
+                    fullWidth
+                    placeholder="Type your message here and press Enter..."
+                    classNames={{
+                      label: "text-black/50 dark:text-white/90",
+                      input: [
+                        "bg-transparent",
+                        "text-black/90 dark:text-white/90",
+                        "placeholder:text-default-700/50 dark:placeholder:text-white/60",
+                      ],
+                      innerWrapper: "bg-transparent",
+                      inputWrapper: [
+                        "shadow-sm",
+                        "bg-default-200/50",
+                        "dark:bg-default/60",
+                        "backdrop-blur-xl",
+                        "backdrop-saturate-200",
+                        "hover:bg-default-200/70",
+                        "dark:hover:bg-default/70",
+                        "group-data-[focus=true]:bg-default-200/50",
+                        "dark:group-data-[focus=true]:bg-default/60",
+                        "!cursor-text",
+                      ],
+                    }}
+                    endContent={
+                      <Button
+                        isIconOnly
+                        aria-label="Send message"
+                        color="primary"
+                        isDisabled={!inputValue.trim() || isLoading}
+                        size="sm"
+                        type="submit"
+                        variant="flat"
+                      >
+                        <SendIcon />
+                      </Button>
+                    }
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onCompositionEnd={() => setIsComposing(false)}
+                    onCompositionStart={() => setIsComposing(true)}
+                    onKeyDown={handleKeyDown}
+                  />
+                </form>
+              </div>
+            </Card>
+          </div>
         ) : (
           messages.map((message) => (
             <MessageItem
@@ -443,121 +494,124 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      <form className="chat-input-form mt-4" onSubmit={handleSubmit}>
-        {quotedText && (
-          <Card className="quoted-text-container mb-2 bg-content2">
-            <div className="flex items-center justify-between p-2">
-              <div className="flex items-center gap-2">
-                <div className="quote-marker w-1 h-full bg-primary rounded-full" />
-                <div className="quote-content text-sm">
-                  {quotedText.length > 100
-                    ? quotedText.substring(0, 100) + "..."
-                    : quotedText}
+      {/* 當有消息時，在底部顯示輸入框 */}
+      {messages.length > 0 && (
+        <form className="chat-input-form mt-4" onSubmit={handleSubmit}>
+          {quotedText && (
+            <Card className="quoted-text-container mb-2 bg-content2">
+              <div className="flex items-center justify-between p-2">
+                <div className="flex items-center gap-2">
+                  <div className="quote-marker w-1 h-full bg-primary rounded-full" />
+                  <div className="quote-content text-sm">
+                    {quotedText.length > 100
+                      ? quotedText.substring(0, 100) + "..."
+                      : quotedText}
+                  </div>
                 </div>
-              </div>
-              <Button
-                isIconOnly
-                aria-label="Remove quoted text"
-                color="danger"
-                size="sm"
-                variant="light"
-                onClick={removeQuotedText}
-              >
-                <CloseIcon />
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {pastedImages.length > 0 && (
-          <div className="pasted-images-container mb-2 flex flex-wrap gap-2">
-            {pastedImages.map((image, index) => (
-              <Card key={index} className="pasted-image-item relative group">
-                <img
-                  alt={`Pasted ${index + 1}`}
-                  className="pasted-image-preview h-20 object-cover"
-                  src={image.url}
-                />
                 <Button
                   isIconOnly
-                  aria-label="Remove image"
-                  className="absolute top-1 right-1 opacity-70 hover:opacity-100"
+                  aria-label="Remove quoted text"
                   color="danger"
                   size="sm"
-                  variant="solid"
-                  onClick={() => removeImage(index)}
+                  variant="light"
+                  onClick={removeQuotedText}
                 >
                   <CloseIcon />
                 </Button>
-              </Card>
-            ))}
-          </div>
-        )}
+              </div>
+            </Card>
+          )}
 
-        <div className="input-row">
-          <Input
-            ref={inputRef}
-            fullWidth
-            classNames={{
-              label: "text-black/50 dark:text-white/90",
-              input: [
-                "bg-transparent",
-                "text-black/90 dark:text-white/90",
-                "placeholder:text-default-700/50 dark:placeholder:text-white/60",
-              ],
-              innerWrapper: "bg-transparent",
-              inputWrapper: [
-                "shadow-sm",
-                "bg-default-200/50",
-                "dark:bg-default/60",
-                "backdrop-blur-xl",
-                "backdrop-saturate-200",
-                "hover:bg-default-200/70",
-                "dark:hover:bg-default/70",
-                "group-data-[focus=true]:bg-default-200/50",
-                "dark:group-data-[focus=true]:bg-default/60",
-                "!cursor-text",
-              ],
-            }}
-            disabled={isLoading}
-            endContent={
-              <Button
-                isIconOnly
-                aria-label="Send message"
-                color="primary"
-                isDisabled={
-                  (!inputValue.trim() && pastedImages.length === 0) || isLoading
-                }
-                size="sm"
-                type="submit"
-                variant="flat"
-              >
-                <SendIcon />
-              </Button>
-            }
-            placeholder={
-              quotedText
-                ? "Ask about the selected text..."
-                : pastedImages.length > 0
-                  ? "Add a description for your image..."
-                  : "Type your message or paste an image (Ctrl+V)..."
-            }
-            startContent={
-              pastedImages.length > 0 ? (
-                <Chip color="primary" size="sm" variant="flat">
-                  <ImageIcon className="mr-1" /> {pastedImages.length}{" "}
-                  {pastedImages.length > 1 ? "images" : "image"}
-                </Chip>
-              ) : null
-            }
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onCompositionEnd={() => setIsComposing(false)}
-            onCompositionStart={() => setIsComposing(true)}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
-      </form>
+          {pastedImages.length > 0 && (
+            <div className="pasted-images-container mb-2 flex flex-wrap gap-2">
+              {pastedImages.map((image, index) => (
+                <Card key={index} className="pasted-image-item relative group">
+                  <img
+                    alt={`Pasted ${index + 1}`}
+                    className="pasted-image-preview h-20 object-cover"
+                    src={image.url}
+                  />
+                  <Button
+                    isIconOnly
+                    aria-label="Remove image"
+                    className="absolute top-1 right-1 opacity-70 hover:opacity-100"
+                    color="danger"
+                    size="sm"
+                    variant="solid"
+                    onClick={() => removeImage(index)}
+                  >
+                    <CloseIcon />
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          <div className="input-row">
+            <Input
+              ref={inputRef}
+              fullWidth
+              classNames={{
+                label: "text-black/50 dark:text-white/90",
+                input: [
+                  "bg-transparent",
+                  "text-black/90 dark:text-white/90",
+                  "placeholder:text-default-700/50 dark:placeholder:text-white/60",
+                ],
+                innerWrapper: "bg-transparent",
+                inputWrapper: [
+                  "shadow-sm",
+                  "bg-default-200/50",
+                  "dark:bg-default/60",
+                  "backdrop-blur-xl",
+                  "backdrop-saturate-200",
+                  "hover:bg-default-200/70",
+                  "dark:hover:bg-default/70",
+                  "group-data-[focus=true]:bg-default-200/50",
+                  "dark:group-data-[focus=true]:bg-default/60",
+                  "!cursor-text",
+                ],
+              }}
+              disabled={isLoading}
+              endContent={
+                <Button
+                  isIconOnly
+                  aria-label="Send message"
+                  color="primary"
+                  isDisabled={
+                    (!inputValue.trim() && pastedImages.length === 0) || isLoading
+                  }
+                  size="sm"
+                  type="submit"
+                  variant="flat"
+                >
+                  <SendIcon />
+                </Button>
+              }
+              placeholder={
+                quotedText
+                  ? "Ask about the selected text..."
+                  : pastedImages.length > 0
+                    ? "Add a description for your image..."
+                    : "Type your message or paste an image (Ctrl+V)..."
+              }
+              startContent={
+                pastedImages.length > 0 ? (
+                  <Chip color="primary" size="sm" variant="flat">
+                    <ImageIcon className="mr-1" /> {pastedImages.length}{" "}
+                    {pastedImages.length > 1 ? "images" : "image"}
+                  </Chip>
+                ) : null
+              }
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onCompositionEnd={() => setIsComposing(false)}
+              onCompositionStart={() => setIsComposing(true)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+        </form>
+      )}
     </div>
   );
 };
