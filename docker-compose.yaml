@@ -1,0 +1,62 @@
+services:
+  redis:
+    image: redis:alpine
+    healthcheck:
+      test: redis-cli ping
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    volumes:
+      - redis-data:/var/lib/redis
+    restart: always
+    pull_policy: always
+
+  postgresql:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    healthcheck:
+      test: pg_isready -U postgres
+      start_period: 10s
+      timeout: 1s
+      retries: 5
+      interval: 5s
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    restart: always
+    pull_policy: always
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - ${MONGO_PORT:-27017}:${MONGO_PORT:-27017}
+    volumes:
+      - mongo-data/mongodb:/data/db
+    restart: always
+    pull_policy: always
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - ${MYSQL_PORT:-3306}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mysql}
+      MYSQL_USER: ${MYSQL_USER:-mysql}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mysql}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: always
+    pull_policy: always
+
+volumes:
+  redis-data: {}
+  mysql-data: {}
+  mongo-data: {}
+  postgresql-data: {}

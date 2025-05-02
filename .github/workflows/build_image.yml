@@ -1,0 +1,117 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Publish Docker image
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+permissions: write-all
+
+env:
+  BUILDKIT_NO_CLIENT_TOKEN: 1 # docker buildkit env
+  # gitea action download node.js skip certificate !https
+  NODE_TLS_REJECT_UNAUTHORIZED: 0
+
+jobs:
+  build_images:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    # container: catthehacker/ubuntu:act-22.04  # Uncomment it if you use it on Gitea
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - name: Build and Push Images (Latest / Release)
+            target_step: prod
+            tag: ghcr.io/mai0313/${{ github.event.repository.name }}
+
+    steps:
+      - name: Disable SSL Verify
+        run: git config --global http.sslVerify false
+
+      # - name: Setup MTK Certification
+      #   uses: https://gitea.mediatek.inc/actions/mtk-cert-action@v1.2.0
+
+      # - name: Setup SSH Key
+      #   uses: shimataro/ssh-key-action@v2.7.0
+      #   with:
+      #     key: ${{ secrets.SSH_KEY }}
+      #     name: id_rsa
+      #     known_hosts: unnecessary
+      #     config: |
+      #       Host *
+      #         StrictHostKeyChecking no
+      #         UserKnownHostsFile=/dev/null
+      #     if_key_exists: replace
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to the Container registry
+        uses: docker/login-action@v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup docker context for buildx
+        run: |
+          docker context create builders || docker context use builders
+
+      - name: Set up Docker BuildX
+        uses: docker/setup-buildx-action@v3
+        # with:
+        #   endpoint: builders
+        #   config-inline: |
+        #     debug = true
+        #     insecure-entitlements = [ "network.host", "security.insecure" ]
+        #     [registry."oa-mirror.mediatek.inc:5000"]
+        #       http = true
+        #       insecure = true
+        #     [registry."mtkomcr.mediatek.inc"]
+        #       http = false
+        #       insecure = true
+        #     [registry."mtksms10.mediatek.inc:5000"]
+        #       http = true
+        #       insecure = true
+        #     [registry."gitea.mediatek.inc"]
+        #       http = false
+        #       insecure = true
+        #     [worker.oci]
+        #       [worker.oci.environmentfile]
+        #         GIT_SSL_NO_VERIFY = "true"
+
+      - name: ${{ matrix.target.name }}
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          file: ./docker/Dockerfile
+          target: ${{ matrix.target.target_step }}
+          build-args: ${{ matrix.target.build_args }}
+          labels: ${{ github.sha }}
+          tags: |
+            ${{ matrix.target.tag }}:latest
+            ${{ matrix.target.tag }}:${{ github.sha }}
+          sbom: false
+          provenance: false
+          cache-from: type=registry,ref=${{ matrix.target.tag }}:buildcache
+          cache-to: type=registry,ref=${{ matrix.target.tag }}:buildcache,image-manifest=true,oci-mediatypes=true,mode=max
