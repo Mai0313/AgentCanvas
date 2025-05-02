@@ -18,6 +18,7 @@ import { BlockNoteEditor } from "@blocknote/core";
 // Import HeroUI components
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
+import { Image } from "@heroui/image";
 import {
   Dropdown,
   DropdownTrigger,
@@ -154,6 +155,32 @@ const RegenerateIcon = (props: any) => (
     />
   </svg>
 );
+
+const renderMessageImages = (message: Message) => {
+  if (Array.isArray(message.content)) {
+    const images = message.content
+      .filter((item) => item.type === "image_url")
+      .map(
+        (item, index) =>
+          item.image_url && (
+            <div key={`img-${index}`} className="message-image-container mb-4">
+              <Image
+                radius="md"
+                alt="Attached"
+                className="w-full max-w-md object-cover rounded-xl"
+                src={item.image_url.url}
+                isBlurred
+                isZoomed
+              />
+            </div>
+          ),
+      );
+
+    return images.length > 0 ? <div className="space-y-2">{images}</div> : null;
+  }
+
+  return null;
+};
 
 interface MessageItemProps {
   message: Message;
@@ -459,32 +486,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
     }
   };
 
-  // Function to render images from MessageContent array
-  const renderMessageImages = () => {
-    if (Array.isArray(message.content)) {
-      const images = message.content
-        .filter((item) => item.type === "image_url")
-        .map(
-          (item, index) =>
-            item.image_url && (
-              <div key={`img-${index}`} className="message-image-container">
-                <Card className="w-full max-w-md overflow-hidden">
-                  <img
-                    alt="Attached"
-                    className="w-full object-cover"
-                    src={item.image_url.url}
-                  />
-                </Card>
-              </div>
-            ),
-        );
-
-      return images.length > 0 ? <>{images}</> : null;
-    }
-
-    return null;
-  };
-
   // Function to render the message content with BlockNote or fallback options
   const processMessageContent = (): ReactNode => {
     // 如果處於編輯模式，渲染文本編輯區
@@ -658,19 +659,20 @@ const MessageItem: React.FC<MessageItemProps> = ({
             <Spinner color="primary" size="sm" />
           </div>,
         )}
-        {/* Render images from message content array */}
-        {Array.isArray(message.content) && renderMessageImages()}
-        {/* Render legacy image URL if present */}
+        {/* Render images from message content array using HeroUI Image */}
+        {Array.isArray(message.content) && renderMessageImages(message)}
+        {/* Render legacy image URL if present using HeroUI Image */}
         {renderConditional(
           !!message.imageUrl,
           <div className="message-image-container mt-4">
-            <Card className="w-full max-w-md overflow-hidden">
-              <img
-                alt="Generated"
-                className="w-full object-cover"
-                src={message.imageUrl || ""}
-              />
-            </Card>
+            <Image
+              radius="md"
+              alt="Generated"
+              className="w-full max-w-md rounded-xl"
+              src={message.imageUrl || ""}
+              isBlurred
+              isZoomed
+            />
           </div>,
         )}
       </div>
