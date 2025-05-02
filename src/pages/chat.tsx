@@ -488,28 +488,32 @@ export default function ChatPage() {
             className={`sidebar h-full bg-content1/50 dark:bg-content1/10 border-r border-default-200 dark:border-default-800 flex flex-col transition-width duration-300 ease-in-out ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}
             style={{ width: `${sidebarWidth}px` }}
           >
-            {/* 添加收起/展開按鈕 */}
-            <Button
-              isIconOnly
-              aria-label="Toggle Sidebar"
-              variant="light"
-              size="sm"
-              className={`absolute top-2 z-20 ${isSidebarCollapsed ? 'right-2' : 'right-2'} hover:bg-default-200 dark:hover:bg-default-800`}
-              onClick={toggleSidebar}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* 側邊欄摺疊按鈕移動到這裡 - 在側邊欄主體的開始位置 */}
+            <div className="flex justify-end p-2">
+              <Button
+                isIconOnly
+                aria-label="Toggle Sidebar"
+                variant="light"
+                size="sm"
+                className="hover:bg-default-200 dark:hover:bg-default-800"
+                onClick={toggleSidebar}
+              >
                 {isSidebarCollapsed ? (
-                  <path d="M8 6L14 12L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 6L14 12L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 ) : (
-                  <path d="M16 6L10 12L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 6L10 12L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 )}
-              </svg>
-            </Button>
+              </Button>
+            </div>
 
             {/* 只在展開時顯示完整內容 */}
             {!isSidebarCollapsed && (
               <>
-                <Card className="m-2 shadow-sm">
+                <Card className="mx-2 shadow-sm">
                   <div className="p-3">
                     <Button 
                       className="w-full mb-3"
@@ -612,14 +616,15 @@ export default function ChatPage() {
                     </Dropdown>
                   </div>
 
-                  {/* Additional model settings */}
+                  {/* 簡化後的 ModelSettings */}
                   <ModelSettings settings={settings} onSettingsChange={setSettings} />
                 </div>
               </>
             )}
+            
             {/* 當摺疊時只顯示圖標 */}
             {isSidebarCollapsed && (
-              <div className="flex flex-col items-center pt-12 space-y-6">
+              <div className="flex flex-col items-center pt-4 space-y-6">
                 <Button 
                   isIconOnly
                   aria-label="New Chat"
@@ -658,7 +663,7 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* Sidebar resizer */}
+            {/* Sidebar resizer - 只在展開時顯示 */}
             {!isSidebarCollapsed && (
               <div
                 ref={sidebarResizerRef}
