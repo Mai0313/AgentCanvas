@@ -400,10 +400,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   return (
-    <div className="chat-box">
+    <div className="chat-box w-full h-full flex flex-col">
       <div
         ref={messagesContainerRef}
-        className="messages-container bg-content1 rounded-lg p-4"
+        className="messages-container flex-grow bg-content1 rounded-lg p-4 overflow-auto"
       >
         {messages.length === 0 ? (
           <Card className="empty-state p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20">

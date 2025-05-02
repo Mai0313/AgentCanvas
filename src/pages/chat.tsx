@@ -473,14 +473,14 @@ export default function ChatPage() {
 
   return (
     <DefaultLayout>
-      <div className="flex flex-col items-center w-full py-4">
-        <div className="inline-block max-w-lg text-center justify-center mb-4">
+      <div className="flex flex-col w-full h-full">
+        <div className="text-center mb-2">
           <h1 className={title()}>Chat</h1>
         </div>
 
         <div
           ref={appContainerRef}
-          className="app flex w-full h-[calc(100vh-200px)] relative"
+          className="app flex w-full h-[calc(100vh-120px)] relative"
         >
           {/* Sidebar with resizer - Updated with HeroUI components */}
           <div
@@ -598,7 +598,7 @@ export default function ChatPage() {
                               startContent={
                                 settings.model === model ? (
                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M5 13L9 17L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M5 13L9 17L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                   </svg>
                                 ) : null
                               }
