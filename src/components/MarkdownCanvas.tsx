@@ -193,6 +193,9 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     // Update BlockNote editor content
     const importMarkdown = async () => {
       try {
+        // 避免重複處理相同的內容
+        if (cleanContent.trim() === "") return;
+
         // Convert markdown to BlockNote blocks
         const blocks = await editor.tryParseMarkdownToBlocks(cleanContent);
 
@@ -201,17 +204,17 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
           editor.replaceBlocks(editor.document, blocks);
         }
 
-        // Batch our state updates to avoid the infinite loop
-        // Only update hasInitialContent if needed and not already done
+        // 將狀態更新移出 useEffect 依賴循環
         if (shouldSetHasInitialContent) {
+          // 使用函數形式的 setState 來避免依賴於當前狀態
           setHasInitialContent(true);
         }
 
-        // These updates don't depend on hasInitialContent
+        // 這些更新不依賴於 hasInitialContent
         setContentFullyLoaded(true);
 
-        // 當有結束標記時才生成標題
-        if (hasClosing) {
+        // 當有結束標記時才生成標題，但移出無限循環
+        if (hasClosing && !shouldGenerateTitle) {
           setShouldGenerateTitle(true);
         }
       } catch (error) {
@@ -224,9 +227,11 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       }
     };
 
+    // 只有當內容發生變化時才執行導入
     importMarkdown();
-    // 添加 hasInitialContent 到依賴數組，但使用條件檢查來避免無限循環
-  }, [content, editor, isStreaming, hasEndingBackticks, hasInitialContent]);
+
+    // 從依賴項中移除可能導致循環的狀態
+  }, [content, editor, isStreaming, hasEndingBackticks]);
 
   // Reset copy success message after 2 seconds
   useEffect(() => {
