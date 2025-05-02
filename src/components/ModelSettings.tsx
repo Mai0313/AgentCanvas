@@ -1,8 +1,8 @@
 import React from "react";
 import { ModelSetting } from "../types";
-// import { Input } from "@heroui/input";
-// import { Select, SelectItem } from "@heroui/select";
-// import { Accordion, AccordionItem } from "@heroui/accordion";
+import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
+import { Accordion, AccordionItem } from "@heroui/accordion";
 
 interface ModelSettingsProps {
   settings: ModelSetting;
@@ -36,7 +36,7 @@ const ModelSettings: React.FC<ModelSettingsProps> = ({
 
   return (
     <div className="model-settings">
-      {/* <Accordion isCompact>
+      <Accordion isCompact>
         <AccordionItem
           key="api-settings"
           aria-label="API Settings"
@@ -162,7 +162,7 @@ const ModelSettings: React.FC<ModelSettingsProps> = ({
             </div>
           </div>
         </AccordionItem>
-      </Accordion> */}
+      </Accordion>
     </div>
   );
 };
