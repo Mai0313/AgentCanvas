@@ -56,12 +56,12 @@ const SelectionPopup: React.FC<SelectionPopupProps> = ({
     >
       <Card className="py-1 px-1 selection-popup-card">
         <Button
-          color="primary" 
-          variant="flat"
+          className="whitespace-nowrap"
+          color="primary"
           size="sm"
           startContent={<AskIcon />}
+          variant="flat"
           onClick={() => onAskGpt(selectedText)}
-          className="whitespace-nowrap"
         >
           Ask GPT
         </Button>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
+
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
 import ChatBox from "@/components/ChatBox";
@@ -7,7 +8,10 @@ import ModelSettings from "@/components/ModelSettings";
 import MarkdownCanvas from "@/components/MarkdownCanvas";
 import { Message, ModelSetting, MessageContent } from "@/types";
 import { fetchModels, detectTaskType } from "@/services/openai";
-import { extractLongestCodeBlock, detectInProgressCodeBlock } from "@/utils/markdownUtils";
+import {
+  extractLongestCodeBlock,
+  detectInProgressCodeBlock,
+} from "@/utils/markdownUtils";
 import { getDefaultModelSettings } from "@/utils/modelUtils";
 import {
   copyMessage,
@@ -31,7 +35,9 @@ import {
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [settings, setSettings] = useState<ModelSetting>(getDefaultModelSettings());
+  const [settings, setSettings] = useState<ModelSetting>(
+    getDefaultModelSettings(),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string>(uuidv4());
@@ -40,7 +46,9 @@ export default function ChatPage() {
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [isMarkdownCanvasOpen, setIsMarkdownCanvasOpen] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
+    null,
+  );
 
   // State to track code block position
   const [codeBlockPosition, setCodeBlockPosition] = useState<{
@@ -57,11 +65,9 @@ export default function ChatPage() {
   // Refs for resizable elements
   const appContainerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const mainContainerRef = useRef<HTMLDivElement>(null);
-  const markdownContainerRef = useRef<HTMLDivElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const sidebarResizerRef = useRef<HTMLDivElement>(null);
+  const contentContainerRef = useRef<HTMLDivElement>(null);
   const markdownResizerRef = useRef<HTMLDivElement>(null);
+  const sidebarResizerRef = useRef<HTMLDivElement>(null);
 
   // Model states
   const [availableModels, setAvailableModels] = useState<string[]>([]);
@@ -73,12 +79,14 @@ export default function ChatPage() {
     const event = new CustomEvent("setQuotedText", {
       detail: { quotedText: selectedText },
     });
+
     document.dispatchEvent(event);
 
     // Focus the chat input field
     const chatInputElement = document.querySelector(
       ".chat-input-form textarea",
     ) as HTMLTextAreaElement;
+
     if (chatInputElement) {
       chatInputElement.focus();
     }
@@ -105,7 +113,10 @@ export default function ChatPage() {
   };
 
   // 處理消息重新生成 - 使用新模組
-  const handleRegenerateMessage = async (messageId: string, modelName?: string) => {
+  const handleRegenerateMessage = async (
+    messageId: string,
+    modelName?: string,
+  ) => {
     await regenerateMessage(
       messageId,
       modelName,
@@ -122,7 +133,13 @@ export default function ChatPage() {
   const getAvailableModels = async () => {
     if (!settings.apiKey || !settings.baseUrl) {
       // 如果沒有設置 API 密鑰或基礎 URL，則返回預設模型列表
-      return ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo", "claude-instant-v1", "claude-v2"];
+      return [
+        "gpt-4",
+        "gpt-4-turbo",
+        "gpt-3.5-turbo",
+        "claude-instant-v1",
+        "claude-v2",
+      ];
     }
 
     setIsLoadingModels(true);
@@ -131,6 +148,7 @@ export default function ChatPage() {
         onStart: () => setIsLoadingModels(true),
         onSuccess: (data) => {
           const modelIds = data.map((model) => model.id);
+
           setAvailableModels(modelIds);
         },
         onError: (error) => {
@@ -151,13 +169,17 @@ export default function ChatPage() {
     } catch (error) {
       console.error("Error fetching models:", error);
       setIsLoadingModels(false);
+
       return availableModels;
     }
   };
 
   // Setup sidebar resizer - 使用新模組
   useEffect(() => {
-    const cleanupSidebarResizer = setupSidebarResizer(sidebarResizerRef, setIsResizingSidebar);
+    const cleanupSidebarResizer = setupSidebarResizer(
+      sidebarResizerRef,
+      setIsResizingSidebar,
+    );
 
     return cleanupSidebarResizer;
   }, []);
@@ -179,7 +201,7 @@ export default function ChatPage() {
       isResizingSidebar,
       isResizingMarkdown,
       isMarkdownCanvasOpen,
-      mainContainerRef,
+      contentContainerRef,
       setSidebarWidth,
       setMarkdownWidth,
       setIsResizingSidebar,
@@ -192,7 +214,9 @@ export default function ChatPage() {
   // Memoize generateNewThreadId to avoid dependency issues
   const generateNewThreadId = useCallback(() => {
     // Generate UUID and remove all hyphens, then take substring
-    const newThreadId = "thread_dvc_" + uuidv4().replace(/-/g, "").substring(0, 16);
+    const newThreadId =
+      "thread_dvc_" + uuidv4().replace(/-/g, "").substring(0, 16);
+
     setThreadId(newThreadId);
 
     // Update URL with the new thread ID without page reload
@@ -200,6 +224,7 @@ export default function ChatPage() {
 
     // Ensure the URL is properly formed with the base path
     const basePath = "/chat";
+
     if (basePath && !url.pathname.startsWith(basePath)) {
       url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
     }
@@ -232,8 +257,13 @@ export default function ChatPage() {
       // Update path if needed but keep the thread ID
       if (needsPathUpdate) {
         const newPath = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname.replace(/^\//, "")}`;
+
         url.pathname = newPath;
-        window.history.replaceState({ threadId: existingThreadId }, "", url.toString());
+        window.history.replaceState(
+          { threadId: existingThreadId },
+          "",
+          url.toString(),
+        );
       }
     } else {
       // Only generate new ID if we don't have one
@@ -258,6 +288,7 @@ export default function ChatPage() {
       content,
       timestamp: new Date(),
     };
+
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
     setError(null);
@@ -271,6 +302,7 @@ export default function ChatPage() {
 
       // Only detect task type if we have text content
       let taskType: "canvas" | "image" | "chat" = "chat"; // Default to chat
+
       if (messageText) {
         try {
           taskType = await detectTaskType(messageText, settings);
@@ -289,12 +321,18 @@ export default function ChatPage() {
         timestamp: new Date(),
         isGeneratingImage: taskType === "image", // Mark as generating image if detected as image task
       };
+
       setMessages((prev) => [...prev, assistantMessage]);
       setStreamingMessageId(assistantMessageId);
 
       if (taskType === "image") {
         // Handle image generation - 使用新模組
-        await handleImageGeneration(messageText, assistantMessageId, settings, setMessages);
+        await handleImageGeneration(
+          messageText,
+          assistantMessageId,
+          settings,
+          setMessages,
+        );
       } else if (taskType === "canvas") {
         // Enhanced canvas mode with two-step generation - 使用新模組
         await handleCanvasMode(
@@ -332,7 +370,11 @@ export default function ChatPage() {
   const toggleMarkdownCanvas = (messageId: string, content: string) => {
     // If already open for this message, close it
     if (isMarkdownCanvasOpen && editingMessageId === messageId) {
-      closeMarkdownCanvas(setIsMarkdownCanvasOpen, setEditingMessageId, setCodeBlockPosition);
+      closeMarkdownCanvas(
+        setIsMarkdownCanvasOpen,
+        setEditingMessageId,
+        setCodeBlockPosition,
+      );
     } else {
       // First try to find any in-progress code block
       const { codeBlock: inProgressBlock, blockPosition: inProgressPosition } =
@@ -351,7 +393,9 @@ export default function ChatPage() {
         );
       } else {
         // Fall back to completed code block
-        const { longestBlock, blockPosition } = extractLongestCodeBlock(content);
+        const { longestBlock, blockPosition } =
+          extractLongestCodeBlock(content);
+
         if (longestBlock && blockPosition) {
           openMarkdownCanvas(
             messageId,
@@ -379,75 +423,93 @@ export default function ChatPage() {
   };
 
   const handleCloseMarkdownCanvas = () => {
-    closeMarkdownCanvas(setIsMarkdownCanvasOpen, setEditingMessageId, setCodeBlockPosition);
+    closeMarkdownCanvas(
+      setIsMarkdownCanvasOpen,
+      setEditingMessageId,
+      setCodeBlockPosition,
+    );
   };
 
   return (
     <DefaultLayout>
-      <div className="flex flex-col items-center gap-4 py-4">
+      <div className="flex flex-col items-center w-full py-4">
         <div className="inline-block max-w-lg text-center justify-center mb-4">
           <h1 className={title()}>Chat</h1>
         </div>
-        
-        <div className="app w-full h-[calc(100vh-200px)]" ref={appContainerRef}>
+
+        <div
+          ref={appContainerRef}
+          className="app flex w-full h-[calc(100vh-200px)] relative"
+        >
           {/* Sidebar with resizer */}
-          <div className="sidebar" ref={sidebarRef} style={{ width: `${sidebarWidth}px` }}>
-            <div className="thread-controls">
-              <button className="new-thread-btn" onClick={startNewThread}>
+          <div
+            ref={sidebarRef}
+            className="sidebar h-full bg-default-50 dark:bg-default-900 border-r border-default-200 dark:border-default-800"
+            style={{ width: `${sidebarWidth}px` }}
+          >
+            <div className="thread-controls p-4 border-b border-default-200 dark:border-default-800">
+              <button
+                className="new-thread-btn w-full p-2 mb-2 bg-primary text-white rounded-md hover:bg-primary-600 transition-colors"
+                onClick={startNewThread}
+              >
                 New Conversation
               </button>
-              <div className="thread-id">Thread ID: {threadId}</div>
+              <div className="thread-id text-xs text-default-500 mt-2 truncate">
+                Thread ID: {threadId}
+              </div>
             </div>
             <ModelSettings settings={settings} onSettingsChange={setSettings} />
-            <div className="sidebar-resizer" ref={sidebarResizerRef} />
+            <div
+              ref={sidebarResizerRef}
+              className="sidebar-resizer absolute top-0 right-0 w-1 h-full bg-default-300/30 hover:bg-primary/50 cursor-col-resize z-10"
+            />
           </div>
 
-          {/* Main container with chat and markdown */}
-          <div ref={mainContainerRef} className="main-container flex flex-row h-full">
-            {/* Chat container */}
+          {/* Main content area with chat and markdown */}
+          <div
+            ref={contentContainerRef}
+            className="flex flex-1 h-full overflow-hidden"
+          >
+            {/* Chat content area */}
             <div
-              ref={chatContainerRef}
-              className="chat-container flex-grow overflow-auto"
+              className="flex-grow h-full overflow-auto bg-default-50/30 dark:bg-default-900/30"
               style={{
-                width: isMarkdownCanvasOpen ? `${100 - markdownWidth}%` : "100%",
+                width: isMarkdownCanvasOpen
+                  ? `${100 - markdownWidth}%`
+                  : "100%",
               }}
             >
               <ChatBox
+                currentModel={settings.model}
+                editingMessageId={editingMessageId}
+                fetchModels={getAvailableModels}
+                isLoading={isLoading}
+                isLoadingModels={isLoadingModels}
+                longestCodeBlockPosition={codeBlockPosition}
                 messages={messages}
                 settings={settings}
-                onSendMessage={handleSendMessage}
-                isLoading={isLoading}
                 streamingMessageId={streamingMessageId}
-                editingMessageId={editingMessageId}
-                longestCodeBlockPosition={codeBlockPosition}
                 toggleMarkdownCanvas={toggleMarkdownCanvas}
                 onCopy={handleCopyMessage}
-                onEdit={handleEditMessage}
                 onDelete={handleDeleteMessage}
+                onEdit={handleEditMessage}
                 onRegenerate={handleRegenerateMessage}
-                fetchModels={getAvailableModels}
-                currentModel={settings.model}
-                isLoadingModels={isLoadingModels}
+                onSendMessage={handleSendMessage}
               />
 
               {isLoading && (
-                <div className="loading-indicator">
+                <div className="loading-indicator flex items-center justify-center p-4">
+                  <div className="spinner mr-2 w-5 h-5 border-2 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin" />
                   <p>Thinking...</p>
                 </div>
               )}
 
               {error && (
-                <div className="error-message">
+                <div className="error-message flex items-center justify-between p-4 bg-danger-50 dark:bg-danger-900/50 text-danger border border-danger m-4 rounded-lg">
                   <p>{error}</p>
                   <button
+                    className="ml-4 p-1 rounded-full hover:bg-danger-100 dark:hover:bg-danger-800"
                     onClick={() => setError(null)}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "white",
-                      marginLeft: "10px",
-                      cursor: "pointer",
-                    }}
                   >
                     ✕
                   </button>
@@ -458,18 +520,20 @@ export default function ChatPage() {
             {/* Markdown editor with resizer */}
             {isMarkdownCanvasOpen && (
               <>
-                <div ref={markdownResizerRef} className="resizer cursor-col-resize w-1 bg-primary/30 hover:bg-primary/50" />
                 <div
-                  ref={markdownContainerRef}
-                  className="markdown-container overflow-auto h-full"
+                  ref={markdownResizerRef}
+                  className="resizer cursor-col-resize w-1 bg-primary/30 hover:bg-primary/50 z-10"
+                />
+                <div
+                  className="overflow-auto h-full bg-default-100/30 dark:bg-default-900/60"
                   style={{ width: `${markdownWidth}%` }}
                 >
                   <MarkdownCanvas
                     content={markdownContent}
                     isOpen={isMarkdownCanvasOpen}
+                    onAskGpt={handleAskGpt}
                     onClose={handleCloseMarkdownCanvas}
                     onSave={handleSaveMarkdown}
-                    onAskGpt={handleAskGpt}
                   />
                 </div>
               </>

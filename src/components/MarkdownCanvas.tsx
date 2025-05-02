@@ -545,68 +545,113 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
   return (
     <div ref={canvasRef} className="markdown-canvas">
-      <div className="markdown-header">
-        <div style={{ display: "flex", alignItems: "center" }}>
+      <div className="markdown-header bg-default-100 dark:bg-default-800 border-b border-default-200 dark:border-default-700 p-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <button
-            className="close-button"
+            className="close-button p-1 rounded-full hover:bg-default-200 dark:hover:bg-default-700 transition-colors"
             title="Close editor"
             onClick={handleClose}
           >
-            <img alt="Close" height="24" src={closeIcon} width="24" />
+            <img alt="Close" className="w-5 h-5" src={closeIcon} />
           </button>
-          <h3>{title}</h3>
-          <div className="language-badge">
-            {codeLanguage !== "plaintext" && codeLanguage}
-          </div>
+          <h3 className="font-medium text-lg truncate max-w-[250px]">
+            {title}
+          </h3>
+          {codeLanguage !== "plaintext" && (
+            <div className="language-badge px-2 py-0.5 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs rounded-md">
+              {codeLanguage}
+            </div>
+          )}
           <button
-            className="title-button"
+            className={`title-button ml-2 px-2 py-1 text-xs rounded-md flex items-center gap-1 
+                      ${
+                        isGeneratingTitle || !hasClosingBackticks
+                          ? "bg-default-200/50 dark:bg-default-700/50 text-default-500 dark:text-default-400 cursor-not-allowed"
+                          : "bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800"
+                      }`}
             disabled={isGeneratingTitle || !hasClosingBackticks}
             title={
               !hasClosingBackticks
                 ? "Waiting for the code block to be done."
-                : ""
+                : "Generate AI title for this code"
             }
             onClick={handleManualGenerateTitle}
           >
-            {isGeneratingTitle ? "Generating..." : "AI Title"}
+            {isGeneratingTitle ? (
+              <>
+                <span className="inline-block w-3 h-3 border-2 border-t-primary-500 border-r-primary-500 border-b-primary-500 border-l-transparent rounded-full animate-spin mr-1" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <svg
+                  className="w-3 h-3"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    clipRule="evenodd"
+                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                    fillRule="evenodd"
+                  />
+                </svg>
+                AI Title
+              </>
+            )}
           </button>
           <button
-            className="title-button"
-            style={{ marginLeft: "8px" }}
+            className="edit-button ml-2 px-2 py-1 text-xs rounded-md flex items-center gap-1 bg-default-200 dark:bg-default-700 hover:bg-default-300 dark:hover:bg-default-600 transition-colors"
             onClick={toggleRawView}
           >
-            <img alt="Edit" height="8" src={editCodeIcon} width="8" />
+            <img alt="Edit" className="w-3 h-3 opacity-70" src={editCodeIcon} />
             {isRawView ? "Save" : "Edit"}
           </button>
         </div>
         <div className="markdown-controls">
           <button
-            className={`icon-button ${copySuccess ? "success" : ""}`}
-            title={copySuccess ? "Copied" : "Copy"}
+            className={`copy-button p-1.5 rounded-md hover:bg-default-200 dark:hover:bg-default-700 transition-colors ${copySuccess ? "text-success" : ""}`}
+            title={copySuccess ? "Copied!" : "Copy code"}
             onClick={handleCopyCode}
           >
-            <img alt="Copy" height="24" src={copyCodeIcon} width="24" />
+            {copySuccess ? (
+              <svg
+                className="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clipRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  fillRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <img alt="Copy" className="w-5 h-5" src={copyCodeIcon} />
+            )}
           </button>
         </div>
       </div>
 
-      <div className="markdown-content">
+      <div className="markdown-content h-[calc(100%-40px)] overflow-auto">
         {showLoadingIndicator ? (
-          <div className="loading-editor">Loading Canvas...</div>
+          <div className="loading-editor flex items-center justify-center h-full text-default-500">
+            <div className="flex flex-col items-center">
+              <div className="spinner w-8 h-8 border-3 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin mb-2" />
+              <span>Loading Canvas...</span>
+            </div>
+          </div>
         ) : isRawView ? (
           <textarea
             ref={rawEditorRef}
-            className="markdown-editor"
+            className="markdown-editor w-full h-full p-4 bg-default-50 dark:bg-default-900 font-mono text-sm resize-none focus:outline-none"
             value={rawMarkdown}
             wrap="off"
             onChange={handleRawMarkdownChange}
           />
         ) : (
-          <div
-            ref={previewRef}
-            className="blocknote-container"
-            style={{ height: "100%" }}
-          >
+          <div ref={previewRef} className="blocknote-container h-full">
             {/* Switch to BlockNoteView from Mantine with proper formatting toolbar */}
             <BlockNoteView
               editable={editMode}

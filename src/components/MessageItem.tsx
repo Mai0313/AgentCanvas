@@ -18,7 +18,12 @@ import { BlockNoteEditor } from "@blocknote/core";
 // Import HeroUI components
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 import { Spinner } from "@heroui/react";
 import { Textarea } from "@heroui/react";
 
@@ -42,16 +47,16 @@ const CopyIcon = (props: any) => (
     <path
       d="M16 12.9V17.1C16 20.6 14.6 22 11.1 22H6.9C3.4 22 2 20.6 2 17.1V12.9C2 9.4 3.4 8 6.9 8H11.1C14.6 8 16 9.4 16 12.9Z"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
     <path
       d="M22 6.9V11.1C22 14.6 20.6 16 17.1 16H16V12.9C16 9.4 14.6 8 11.1 8H8V6.9C8 3.4 9.4 2 12.9 2H17.1C20.6 2 22 3.4 22 6.9Z"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
   </svg>
 );
@@ -70,25 +75,25 @@ const EditIcon = (props: any) => (
     <path
       d="M11.4925 2.78906H7.75349C4.67849 2.78906 2.75049 4.96606 2.75049 8.04806V16.3621C2.75049 19.4441 4.66949 21.6211 7.75349 21.6211H16.5775C19.6625 21.6211 21.5815 19.4441 21.5815 16.3621V12.3341"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
     <path
-      fillRule="evenodd"
       clipRule="evenodd"
       d="M8.82812 10.921L16.3011 3.44799C17.2321 2.51799 18.7411 2.51799 19.6721 3.44799L20.8891 4.66499C21.8201 5.59599 21.8201 7.10599 20.8891 8.03599L13.3801 15.545C12.9731 15.952 12.4211 16.181 11.8451 16.181H8.09912L8.19312 12.401C8.20712 11.845 8.43412 11.315 8.82812 10.921Z"
+      fillRule="evenodd"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
     <path
       d="M15.1655 4.60254L19.7315 9.16854"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
   </svg>
 );
@@ -129,23 +134,23 @@ const RegenerateIcon = (props: any) => (
     <path
       d="M22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12Z"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
     <path
       d="M15.97 12.4699L9.41998 12.4999"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
     <path
       d="M12.7 9.3302L16 12.5002L12.7 15.6702"
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeWidth="1.5"
     />
   </svg>
 );
@@ -317,11 +322,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
   // 當模型下拉選單打開時，獲取可用模型
   useEffect(() => {
-    if (
-      fetchModels &&
-      availableModels.length === 0 &&
-      !loadingModels
-    ) {
+    if (fetchModels && availableModels.length === 0 && !loadingModels) {
       setLoadingModels(true);
       fetchModels()
         .then((models) => {
@@ -477,6 +478,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
               </div>
             ),
         );
+
       return images.length > 0 ? <>{images}</> : null;
     }
 
@@ -492,26 +494,20 @@ const MessageItem: React.FC<MessageItemProps> = ({
           <Textarea
             ref={textareaRef}
             fullWidth
-            minRows={5}
-            maxRows={20}
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
             classNames={{
               input: "resize-y min-h-[120px] p-2",
-              inputWrapper: "bg-default-100 dark:bg-default-50"
+              inputWrapper: "bg-default-100 dark:bg-default-50",
             }}
+            maxRows={20}
+            minRows={5}
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
           />
           <div className="edit-buttons flex justify-end gap-2 mt-2">
-            <Button 
-              color="primary"
-              onClick={handleSave}
-            >
+            <Button color="primary" onClick={handleSave}>
               Send
             </Button>
-            <Button 
-              variant="flat"
-              onClick={handleCancel}
-            >
+            <Button variant="flat" onClick={handleCancel}>
               Cancel
             </Button>
           </div>
@@ -522,9 +518,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
     // 如果正在生成圖像，顯示動態加載效果
     if (message.isGeneratingImage) {
       return (
-        <Card key="generating-image" className="generating-image-container p-4 text-center">
+        <Card
+          key="generating-image"
+          className="generating-image-container p-4 text-center"
+        >
           <div className="flex flex-col items-center justify-center">
-            <Spinner size="lg" color="primary" className="mb-4" />
+            <Spinner className="mb-4" color="primary" size="lg" />
             <div className="generating-image-text">
               {typeof message.content === "string"
                 ? message.content
@@ -584,7 +583,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
     if (isBlockNoteLoading && (!isStreaming || !hasInitialContent)) {
       return (
         <div className="message-loading flex justify-center p-2">
-          <Spinner size="sm" color="primary" />
+          <Spinner color="primary" size="sm" />
           <span className="ml-2">Loading content...</span>
         </div>
       );
@@ -611,22 +610,28 @@ const MessageItem: React.FC<MessageItemProps> = ({
   };
 
   // Define a bg color class based on the role
-  const roleBgClass = message.role === "assistant" 
-    ? "bg-primary-50 dark:bg-primary-900/20" 
-    : "bg-default-50 dark:bg-default-100/10";
+  const roleBgClass =
+    message.role === "assistant"
+      ? "bg-primary-50 dark:bg-primary-900/20"
+      : "bg-default-50 dark:bg-default-100/10";
 
   // Helper for conditional rendering with proper TypeScript typing
-  const renderConditional = (condition: boolean, element: JSX.Element | null) => {
+  const renderConditional = (
+    condition: boolean,
+    element: JSX.Element | null,
+  ) => {
     return condition ? element : null;
   };
 
   return (
-    <Card 
+    <Card
       ref={messageRef}
       className={`message mb-4 ${isStreaming ? "border-primary" : ""} ${isEditMode ? "border-warning" : ""}`}
       onMouseUp={handleMouseUp}
     >
-      <div className={`message-header flex justify-between items-center p-2 px-4 ${roleBgClass} rounded-t-lg`}>
+      <div
+        className={`message-header flex justify-between items-center p-2 px-4 ${roleBgClass} rounded-t-lg`}
+      >
         <span className="role font-medium">
           {message.role === "assistant" ? "AI" : "You"}
         </span>
@@ -635,9 +640,9 @@ const MessageItem: React.FC<MessageItemProps> = ({
           {renderConditional(
             isStreaming && !message.isGeneratingImage,
             <span className="streaming-indicator ml-2 text-primary">
-              <Spinner size="sm" className="inline-block mr-1" />
+              <Spinner className="inline-block mr-1" size="sm" />
               typing...
-            </span>
+            </span>,
           )}
         </span>
       </div>
@@ -645,13 +650,13 @@ const MessageItem: React.FC<MessageItemProps> = ({
       <div className="message-content p-4">
         {processMessageContent()}
         {renderConditional(
-          isStreaming && 
+          isStreaming &&
             message.content === "" &&
             !message.isGeneratingImage &&
             !message.isGeneratingCode,
           <div className="typing-indicator flex justify-center">
-            <Spinner size="sm" color="primary" />
-          </div>
+            <Spinner color="primary" size="sm" />
+          </div>,
         )}
         {/* Render images from message content array */}
         {Array.isArray(message.content) && renderMessageImages()}
@@ -663,10 +668,10 @@ const MessageItem: React.FC<MessageItemProps> = ({
               <img
                 alt="Generated"
                 className="w-full object-cover"
-                src={message.imageUrl || ''}
+                src={message.imageUrl || ""}
               />
             </Card>
-          </div>
+          </div>,
         )}
       </div>
 
@@ -675,19 +680,19 @@ const MessageItem: React.FC<MessageItemProps> = ({
         !isEditMode && !isStreaming,
         <div className="message-actions flex flex-wrap gap-2 p-2 px-4 border-t">
           <Button
-            variant="flat"
             color={copySuccess ? "success" : "default"}
             size="sm"
             startContent={<CopyIcon />}
+            variant="flat"
             onClick={handleCopy}
           >
             {copySuccess ? "Copied" : "Copy"}
           </Button>
 
           <Button
-            variant="flat"
             size="sm"
             startContent={<EditIcon />}
+            variant="flat"
             onClick={handleEdit}
           >
             Edit
@@ -698,10 +703,10 @@ const MessageItem: React.FC<MessageItemProps> = ({
             message.role === "assistant",
             <>
               <Button
-                variant="flat"
                 color="danger"
                 size="sm"
                 startContent={<DeleteIcon />}
+                variant="flat"
                 onClick={handleDelete}
               >
                 Delete
@@ -710,15 +715,15 @@ const MessageItem: React.FC<MessageItemProps> = ({
               <Dropdown>
                 <DropdownTrigger>
                   <Button
-                    variant="flat"
                     color="secondary"
                     size="sm"
                     startContent={<RegenerateIcon />}
+                    variant="flat"
                   >
                     Regenerate
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu 
+                <DropdownMenu
                   aria-label="Regenerate options"
                   onAction={(key) => {
                     if (key === "current") {
@@ -728,16 +733,25 @@ const MessageItem: React.FC<MessageItemProps> = ({
                     }
                   }}
                 >
-                  <DropdownItem key="current">Current ({currentModel || "default"})</DropdownItem>
-                  <DropdownItem key="divider" className="h-px bg-default-200 dark:bg-default-100" />
-                  
+                  <DropdownItem key="current">
+                    Current ({currentModel || "default"})
+                  </DropdownItem>
+                  <DropdownItem
+                    key="divider"
+                    className="h-px bg-default-200 dark:bg-default-100"
+                  />
+
                   {renderConditional(
                     loadingModels || isLoadingModels,
-                    <DropdownItem key="loading" isDisabled startContent={<Spinner size="sm" />}>
+                    <DropdownItem
+                      key="loading"
+                      isDisabled
+                      startContent={<Spinner size="sm" />}
+                    >
                       Loading models...
-                    </DropdownItem>
+                    </DropdownItem>,
                   )}
-                  
+
                   {renderConditional(
                     availableModels.length > 0 &&
                       !loadingModels &&
@@ -746,26 +760,24 @@ const MessageItem: React.FC<MessageItemProps> = ({
                       {availableModels
                         .filter((model) => model !== currentModel)
                         .map((model) => (
-                          <DropdownItem key={model}>
-                            {model}
-                          </DropdownItem>
+                          <DropdownItem key={model}>{model}</DropdownItem>
                         ))}
-                    </>
+                    </>,
                   )}
-                      
+
                   {renderConditional(
                     !loadingModels &&
                       !isLoadingModels &&
                       availableModels.length === 0,
                     <DropdownItem key="no-models" isDisabled>
                       No other models available
-                    </DropdownItem>
+                    </DropdownItem>,
                   )}
                 </DropdownMenu>
               </Dropdown>
-            </>
+            </>,
           )}
-        </div>
+        </div>,
       )}
 
       {renderConditional(
@@ -774,7 +786,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
           position={popupPosition}
           selectedText={selectedText}
           onAskGpt={handleAskGpt}
-        />
+        />,
       )}
     </Card>
   );

@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Message, ModelSetting, MessageContent } from "../types";
-import MessageItem from "./MessageItem";
 
 // Import HeroUI components
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Chip } from "@heroui/react";
+
+import { Message, ModelSetting, MessageContent } from "../types";
+
+import MessageItem from "./MessageItem";
 
 // Search icon for the input field
 const SendIcon = (props: any) => {
@@ -309,10 +311,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     };
 
     // Attach paste event listener to document since HeroUI Input might not directly support ref
-    document.addEventListener('paste', handlePaste as unknown as EventListener);
+    document.addEventListener("paste", handlePaste as unknown as EventListener);
 
     return () => {
-      document.removeEventListener('paste', handlePaste as unknown as EventListener);
+      document.removeEventListener(
+        "paste",
+        handlePaste as unknown as EventListener,
+      );
     };
   }, []);
 
@@ -396,13 +401,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
   return (
     <div className="chat-box">
-      <div 
-        ref={messagesContainerRef} 
+      <div
+        ref={messagesContainerRef}
         className="messages-container bg-content1 rounded-lg p-4"
       >
         {messages.length === 0 ? (
           <Card className="empty-state p-8 text-center bg-gradient-to-br from-primary-400/20 to-secondary-400/20">
-            <h2 className="text-xl font-bold mb-2">Start a conversation with {settings.model}</h2>
+            <h2 className="text-xl font-bold mb-2">
+              Start a conversation with {settings.model}
+            </h2>
             <p className="text-default-500">Type your message below to begin</p>
           </Card>
         ) : (
@@ -448,13 +455,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                     : quotedText}
                 </div>
               </div>
-              <Button 
+              <Button
                 isIconOnly
-                size="sm" 
-                variant="light" 
-                color="danger" 
-                onClick={removeQuotedText}
                 aria-label="Remove quoted text"
+                color="danger"
+                size="sm"
+                variant="light"
+                onClick={removeQuotedText}
               >
                 <CloseIcon />
               </Button>
@@ -473,12 +480,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                 />
                 <Button
                   isIconOnly
+                  aria-label="Remove image"
+                  className="absolute top-1 right-1 opacity-70 hover:opacity-100"
+                  color="danger"
                   size="sm"
                   variant="solid"
-                  color="danger"
-                  className="absolute top-1 right-1 opacity-70 hover:opacity-100"
                   onClick={() => removeImage(index)}
-                  aria-label="Remove image"
                 >
                   <CloseIcon />
                 </Button>
@@ -491,39 +498,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           <Input
             ref={inputRef}
             fullWidth
-            disabled={isLoading}
-            placeholder={
-              quotedText
-                ? "Ask about the selected text..."
-                : pastedImages.length > 0
-                  ? "Add a description for your image..."
-                  : "Type your message or paste an image (Ctrl+V)..."
-            }
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onCompositionEnd={() => setIsComposing(false)}
-            onCompositionStart={() => setIsComposing(true)}
-            onKeyDown={handleKeyDown}
-            startContent={
-              pastedImages.length > 0 ? (
-                <Chip color="primary" variant="flat" size="sm">
-                  <ImageIcon className="mr-1" /> {pastedImages.length} {pastedImages.length > 1 ? 'images' : 'image'}
-                </Chip>
-              ) : null
-            }
-            endContent={
-              <Button
-                isIconOnly 
-                color="primary"
-                type="submit"
-                variant="flat"
-                size="sm"
-                isDisabled={(!inputValue.trim() && pastedImages.length === 0) || isLoading}
-                aria-label='Send message'
-              >
-                <SendIcon />
-              </Button>
-            }
             classNames={{
               label: "text-black/50 dark:text-white/90",
               input: [
@@ -545,6 +519,42 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                 "!cursor-text",
               ],
             }}
+            disabled={isLoading}
+            endContent={
+              <Button
+                isIconOnly
+                aria-label="Send message"
+                color="primary"
+                isDisabled={
+                  (!inputValue.trim() && pastedImages.length === 0) || isLoading
+                }
+                size="sm"
+                type="submit"
+                variant="flat"
+              >
+                <SendIcon />
+              </Button>
+            }
+            placeholder={
+              quotedText
+                ? "Ask about the selected text..."
+                : pastedImages.length > 0
+                  ? "Add a description for your image..."
+                  : "Type your message or paste an image (Ctrl+V)..."
+            }
+            startContent={
+              pastedImages.length > 0 ? (
+                <Chip color="primary" size="sm" variant="flat">
+                  <ImageIcon className="mr-1" /> {pastedImages.length}{" "}
+                  {pastedImages.length > 1 ? "images" : "image"}
+                </Chip>
+              ) : null
+            }
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onCompositionEnd={() => setIsComposing(false)}
+            onCompositionStart={() => setIsComposing(true)}
+            onKeyDown={handleKeyDown}
           />
         </div>
       </form>
