@@ -1,10 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-
-import { Message, ModelSetting } from "../types";
-import { getDefaultModelSettings } from "../utils/modelUtils";
-import { chatCompletion } from "../services/openai";
-
-// Import BlockNote components and styles
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
@@ -20,11 +14,11 @@ import {
   UnnestBlockButton,
   useCreateBlockNote,
 } from "@blocknote/react";
-
-// 導入代碼塊高亮功能
 import { codeBlock } from "@blocknote/code-block";
 
-// 導入圖標
+import { Message, ModelSetting } from "../types";
+import { getDefaultModelSettings } from "../utils/modelUtils";
+import { chatCompletion } from "../services/openai";
 import closeIcon from "../assets/icon/close-icon.svg";
 import copyCodeIcon from "../assets/icon/copy-code.svg";
 import editCodeIcon from "../assets/icon/edit-code.svg";
@@ -35,7 +29,6 @@ interface MarkdownCanvasProps {
   content: string;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (content: string) => void;
   onAskGpt?: (selectedText: string) => void;
   modelSettings?: ModelSetting; // Add modelSettings prop
 }
@@ -44,7 +37,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   content,
   isOpen,
   onClose,
-  onSave,
   onAskGpt,
   modelSettings,
 }) => {

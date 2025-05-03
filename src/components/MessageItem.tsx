@@ -5,17 +5,12 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-
-import { Message } from "../types";
-
-// Import BlockNote components
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteEditor } from "@blocknote/core";
-
-// Import HeroUI components
+import { useCreateBlockNote } from "@blocknote/react";
+import { codeBlock } from "@blocknote/code-block";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Image } from "@heroui/image";
@@ -28,8 +23,7 @@ import {
 import { Spinner } from "@heroui/react";
 import { Textarea } from "@heroui/react";
 
-// 導入代碼塊高亮功能
-import { codeBlock } from "@blocknote/code-block";
+import { Message } from "../types";
 
 import SelectionPopup from "./SelectionPopup";
 

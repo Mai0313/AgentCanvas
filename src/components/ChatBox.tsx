@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-
-// Import HeroUI components
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Image } from "@heroui/image";
@@ -717,7 +715,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   >
                     <input
                       ref={inputRef}
-                      autoFocus
                       className="w-full px-4 py-3 bg-white dark:bg-zinc-800 rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
                       disabled={isLoading}
                       placeholder="詢問任何問題"
