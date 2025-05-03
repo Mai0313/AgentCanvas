@@ -93,7 +93,7 @@ export default defineConfig([
     files: ["**/*.ts", "**/*.tsx"],
 
     rules: {
-      "no-console": ["warn", { "allow": ["warn", "error"] }],
+      "no-console": ["warn", { "allow": ["warn", "error", "log"] }],
       "react/prop-types": "off",
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
