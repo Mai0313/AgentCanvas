@@ -108,7 +108,7 @@ export default function ChatPage() {
 
   // 處理消息編輯 - 使用新模組
   const handleEditMessage = (messageId: string, newContent: string) => {
-    editMessage(messageId, newContent, messages, setMessages);
+    editMessage(messageId, newContent, setMessages);
   };
 
   // 處理消息刪除 - 使用新模組

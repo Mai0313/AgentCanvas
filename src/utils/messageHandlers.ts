@@ -22,7 +22,6 @@ export const copyMessage = (
 export const editMessage = (
   messageId: string,
   newContent: string,
-  messages: Message[],
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
 ): void => {
   setMessages((prev) => {

@@ -1,6 +1,7 @@
 import { AzureOpenAI, OpenAI } from "openai";
 import { Stream } from "openai/streaming";
-import { ChatCompletionMessageParam } from "openai/resources/chat";
+// Fix the import path for ChatCompletionMessageParam
+import type { ChatCompletionMessageParam } from "openai/resources";
 
 import { Message, ModelSetting, MessageContent } from "../types";
 

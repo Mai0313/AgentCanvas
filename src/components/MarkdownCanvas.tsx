@@ -30,7 +30,8 @@ interface MarkdownCanvasProps {
   isOpen: boolean;
   onClose: () => void;
   onAskGpt?: (selectedText: string) => void;
-  modelSettings?: ModelSetting; // Add modelSettings prop
+  onSave?: (editedContent: string) => void; // Add the onSave prop
+  modelSettings?: ModelSetting;
 }
 
 const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
