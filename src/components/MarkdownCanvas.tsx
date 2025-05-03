@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-import { Message } from "../types";
+import { Message, ModelSetting } from "../types";
 import { getDefaultModelSettings } from "../utils/modelUtils";
 import { chatCompletion } from "../services/openai";
 
@@ -37,6 +37,7 @@ interface MarkdownCanvasProps {
   onClose: () => void;
   onSave: (content: string) => void;
   onAskGpt?: (selectedText: string) => void;
+  modelSettings?: ModelSetting; // Add modelSettings prop
 }
 
 const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
@@ -45,6 +46,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   onClose,
   onSave,
   onAskGpt,
+  modelSettings,
 }) => {
   // Create the editor instance with proper configuration
   // Call useCreateBlockNote directly at the component level (not inside a callback)
@@ -459,8 +461,8 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     console.log("Generating title via Chat Completion API");
 
     try {
-      // Default settings for the API call with specific model for title generation
-      const settings = getDefaultModelSettings("gpt-4o-mini");
+      // Use the user's current model settings or fall back to default if not provided
+      const settings = modelSettings || getDefaultModelSettings();
 
       const messages: Message[] = [
         {
@@ -495,7 +497,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       setIsGeneratingTitle(false);
       setShouldGenerateTitle(false);
     }
-  }, [getCleanCodeContent, loadingEditor, hasClosingBackticks]);
+  }, [getCleanCodeContent, loadingEditor, hasClosingBackticks, modelSettings]);
 
   // Effect for title generation based on shouldGenerateTitle flag
   useEffect(() => {

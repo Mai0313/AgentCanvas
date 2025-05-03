@@ -137,13 +137,7 @@ export default function ChatPage() {
   const getAvailableModels = async () => {
     if (!settings.apiKey || !settings.baseUrl) {
       // 如果沒有設置 API 密鑰或基礎 URL，則返回預設模型列表
-      return [
-        "gpt-4",
-        "gpt-4-turbo",
-        "gpt-3.5-turbo",
-        "claude-instant-v1",
-        "claude-v2",
-      ];
+      return ["gpt-4o"];
     }
 
     setIsLoadingModels(true);
@@ -158,13 +152,7 @@ export default function ChatPage() {
         onError: (error) => {
           console.error("Failed to fetch models:", error);
           // 失敗时使用預設模型列表
-          setAvailableModels([
-            "gpt-4",
-            "gpt-4-turbo",
-            "gpt-3.5-turbo",
-            "claude-instant-v1",
-            "claude-v2",
-          ]);
+          setAvailableModels(["gpt-4o"]);
         },
         onComplete: () => setIsLoadingModels(false),
       });
@@ -770,6 +758,7 @@ export default function ChatPage() {
                   <MarkdownCanvas
                     content={markdownContent}
                     isOpen={isMarkdownCanvasOpen}
+                    modelSettings={settings}
                     onAskGpt={handleAskGpt}
                     onClose={handleCloseMarkdownCanvas}
                     onSave={handleSaveMarkdown}
