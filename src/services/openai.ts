@@ -215,6 +215,60 @@ export const detectTaskType = async (
 };
 
 /**
+ * Refine a user prompt for better image generation
+ * @param originalPrompt The original prompt from the user
+ * @param settings Model settings
+ * @returns A refined prompt optimized for image generation
+ */
+export const refineImagePrompt = async (
+  originalPrompt: string,
+  settings: ModelSetting,
+): Promise<string> => {
+  try {
+    const client = createClient(settings);
+
+    // System message to instruct the AI how to refine the prompt
+    const systemMessage: ChatCompletionMessageParam = {
+      role: "system",
+      content:
+        "You are a prompt engineering expert specializing in optimizing image generation prompts. " +
+        "Your task is to refine the user's input into a detailed, clear prompt that will produce high-quality images. " +
+        "Include details about style, lighting, composition, colors, and other visual elements as appropriate. " +
+        "Make the prompt specific and vivid, but maintain the user's original intent. " +
+        "Respond with ONLY the refined prompt text, no explanations or additional text.",
+    };
+
+    // User message with the original prompt
+    const userMessage: ChatCompletionMessageParam = {
+      role: "user",
+      content: originalPrompt,
+    };
+
+    // Request the refined prompt with focused temperature
+    const response = await client.chat.completions.create({
+      model: settings.model,
+      messages: [systemMessage, userMessage],
+      temperature: 0.7, // Balanced between creativity and consistency
+      max_tokens: 500, // Allow for a detailed prompt
+    });
+
+    // Extract the refined prompt
+    const refinedPrompt =
+      response.choices[0].message.content?.trim() || originalPrompt;
+
+    console.log("Original prompt:", originalPrompt);
+    console.log("Refined prompt:", refinedPrompt);
+
+    return refinedPrompt;
+  } catch (error) {
+    console.error("Error refining image prompt:", error);
+
+    // Fall back to the original prompt if refinement fails
+    return originalPrompt;
+  }
+};
+
+/**
  * Generate an image based on the prompt and then use the image in chat completion to get a description
  * @param prompt The prompt for image generation
  * @param settings Model settings
@@ -229,11 +283,15 @@ export const generateImageAndText = async (
   try {
     const client = createClient(settings);
 
-    console.log("Generating image for prompt:", prompt);
+    // Step 1: Refine the user's prompt for better image generation
+    console.log("Refining prompt for image generation");
+    const refinedPrompt = await refineImagePrompt(prompt, settings);
 
-    // Step 1: Generate the image first using URL format instead of base64
+    console.log("Generating image for refined prompt:", refinedPrompt);
+
+    // Step 2: Generate the image using the refined prompt
     const imageResponse = await client.images.generate({
-      prompt,
+      prompt: refinedPrompt,
       n: 1,
       model: "dall-e-3", // Using DALL-E 3 model
       response_format: "url", // Request URL rather than base64
@@ -254,7 +312,7 @@ export const generateImageAndText = async (
 
     console.log("Image generated successfully, now getting description");
 
-    // Step 2: Use the image in chat completion to generate a description
+    // Step 3: Use the image in chat completion to generate a description
     const systemMessage = {
       role: "system",
       content:
