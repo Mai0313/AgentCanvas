@@ -359,6 +359,25 @@ export default function ChatPage() {
     }
   };
 
+  useEffect(() => {
+    // 首頁 quickstart 自動帶入訊息
+    if (typeof window !== "undefined") {
+      const quickMsg = window.localStorage.getItem("quickstart_message");
+
+      if (quickMsg) {
+        try {
+          const parsed = JSON.parse(quickMsg);
+
+          // 僅當目前沒有訊息時才自動發送
+          if (messages.length === 0) {
+            handleSendMessage(parsed);
+          }
+        } catch (e) {}
+        window.localStorage.removeItem("quickstart_message");
+      }
+    }
+  }, []); // 只在初次載入時執行
+
   const toggleMarkdownCanvas = (messageId: string, content: string) => {
     // If already open for this message, close it
     if (isMarkdownCanvasOpen && editingMessageId === messageId) {

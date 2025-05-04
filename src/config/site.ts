@@ -5,10 +5,6 @@ export const siteConfig = {
   description: "Agent Canvas, a web-based platform for interactive Chatbot",
   navItems: [
     {
-      label: "Home",
-      href: "/",
-    },
-    {
       label: "Chat",
       href: "/chat",
     },
@@ -17,44 +13,10 @@ export const siteConfig = {
       href: "/about",
     },
   ],
-  navMenuItems: [
-    {
-      label: "Profile",
-      href: "/profile",
-    },
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-    },
-    {
-      label: "Projects",
-      href: "/projects",
-    },
-    {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
-    },
-  ],
   links: {
-    github: "https://www.mediatek.com/",
+    github: "https://github.com/Mai0313/AgentCanvas",
     twitter: "https://www.mediatek.com/",
-    docs: "https://www.mediatek.com/",
+    docs: "https://github.com/Mai0313/AgentCanvas/blob/master/README.md",
     discord: "https://www.mediatek.com/",
   },
 };
