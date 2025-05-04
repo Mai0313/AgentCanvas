@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-
-// Import HeroUI components
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Image } from "@heroui/image";
@@ -9,6 +7,7 @@ import { Tooltip } from "@heroui/tooltip";
 import { Message, ModelSetting, MessageContent } from "../types";
 
 import MessageItem from "./MessageItem";
+import SplitText from "./SplitText";
 
 // Search icon for the input field
 const SendIcon = (props: any) => {
@@ -636,15 +635,38 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               }`}
             >
               <h2 className="text-xl font-bold mb-4">
-                Start a conversation with {settings.model || "AI"}
+                <SplitText
+                  text={`Start a conversation with ${settings.model || "AI"}`}
+                  className="inline-block"
+                  delay={40}
+                  animationFrom={{
+                    opacity: 0,
+                    transform: "translate3d(0,30px,0)",
+                  }}
+                  animationTo={{
+                    opacity: 1,
+                    transform: "translate3d(0,0,0)",
+                  }}
+                  easing="easeOutCubic"
+                />
               </h2>
 
               {showPasteHint && (
                 <div className="mb-4 p-3 bg-default-100 rounded-lg text-default-800 text-sm">
-                  <p>
-                    💡 Tip: You can paste images with Ctrl+V or drag & drop
-                    files into the chat!
-                  </p>
+                  <SplitText
+                    text="💡 Tip: You can paste images with Ctrl+V or drag & drop files into the chat!"
+                    className="inline-block"
+                    delay={20}
+                    animationFrom={{
+                      opacity: 0,
+                      transform: "translate3d(0,20px,0)",
+                    }}
+                    animationTo={{
+                      opacity: 1,
+                      transform: "translate3d(0,0,0)",
+                    }}
+                    easing="easeOutCubic"
+                  />
                 </div>
               )}
 
@@ -717,7 +739,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   >
                     <input
                       ref={inputRef}
-                      autoFocus
                       className="w-full px-4 py-3 bg-white dark:bg-zinc-800 rounded-full border-none outline-none text-foreground placeholder:text-foreground/60 shadow-md backdrop-blur-xl"
                       disabled={isLoading}
                       placeholder="詢問任何問題"

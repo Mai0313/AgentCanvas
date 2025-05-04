@@ -9,7 +9,7 @@ LABEL maintainer="Wei Lee <mai@mai0313.com>" \
 
 ########################################################################################
 
-FROM base AS prod
+FROM builder AS prod
 WORKDIR /app
 COPY . .
 RUN yarn install && \

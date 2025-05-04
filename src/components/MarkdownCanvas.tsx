@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-
-import { Message } from "../types";
-import { getDefaultModelSettings } from "../utils/modelUtils";
-import { chatCompletion } from "../services/openai";
-
-// Import BlockNote components and styles
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  Suspense,
+} from "react";
 import "@blocknote/core/fonts/inter.css";
+// Import BlockNoteView directly to avoid TypeScript errors
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
+// Import these directly for TypeScript compatibility
 import {
   BasicTextStyleButton,
   BlockTypeSelect,
@@ -20,11 +22,12 @@ import {
   UnnestBlockButton,
   useCreateBlockNote,
 } from "@blocknote/react";
-
-// 導入代碼塊高亮功能
+// Import codeBlock functionality
 import { codeBlock } from "@blocknote/code-block";
 
-// 導入圖標
+import { Message, ModelSetting } from "../types";
+import { getDefaultModelSettings } from "../utils/modelUtils";
+import { chatCompletion } from "../services/openai";
 import closeIcon from "../assets/icon/close-icon.svg";
 import copyCodeIcon from "../assets/icon/copy-code.svg";
 import editCodeIcon from "../assets/icon/edit-code.svg";
@@ -35,21 +38,21 @@ interface MarkdownCanvasProps {
   content: string;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (content: string) => void;
   onAskGpt?: (selectedText: string) => void;
+  onSave?: (editedContent: string) => void;
+  modelSettings?: ModelSetting;
 }
 
 const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   content,
   isOpen,
   onClose,
-  onSave,
   onAskGpt,
+  modelSettings,
 }) => {
   // Create the editor instance with proper configuration
-  // Call useCreateBlockNote directly at the component level (not inside a callback)
   const editor = useCreateBlockNote({
-    // 添加代碼塊高亮配置
+    // Add code block highlighting config
     codeBlock,
     // Providing a default block to avoid the "initialContent must be non-empty" error
     initialContent: [
@@ -161,7 +164,32 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     const languageMatch = content.match(/^```([^\s\n]+)/);
 
     if (languageMatch && languageMatch[1]) {
-      setCodeLanguage(languageMatch[1]);
+      const detectedLanguage = languageMatch[1];
+
+      setCodeLanguage(detectedLanguage);
+
+      // Dynamically load language modules when detected
+      // This is done without affecting the component rendering
+      if (detectedLanguage !== "plaintext") {
+        // Only try to load the language module if it's possibly a real programming language
+        import("../utils/languageLoader.ts")
+          .then((module) => {
+            // This utility function would handle importing language-specific modules
+            // But we won't block rendering on this
+            if (module.loadLanguage) {
+              module.loadLanguage(detectedLanguage).catch(() => {
+                // Just log the error, don't crash if language module not found
+                console.log(
+                  `Optional language ${detectedLanguage} not available`,
+                );
+              });
+            }
+          })
+          .catch(() => {
+            // Silently fail if the language loader doesn't exist
+            // This is fine as it's just an optimization
+          });
+      }
     } else {
       setCodeLanguage("plaintext");
     }
@@ -459,8 +487,8 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     console.log("Generating title via Chat Completion API");
 
     try {
-      // Default settings for the API call with specific model for title generation
-      const settings = getDefaultModelSettings("gpt-4o-mini");
+      // Use the user's current model settings or fall back to default if not provided
+      const settings = modelSettings || getDefaultModelSettings();
 
       const messages: Message[] = [
         {
@@ -495,7 +523,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       setIsGeneratingTitle(false);
       setShouldGenerateTitle(false);
     }
-  }, [getCleanCodeContent, loadingEditor, hasClosingBackticks]);
+  }, [getCleanCodeContent, loadingEditor, hasClosingBackticks, modelSettings]);
 
   // Effect for title generation based on shouldGenerateTitle flag
   useEffect(() => {
@@ -652,62 +680,72 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
           />
         ) : (
           <div ref={previewRef} className="blocknote-container h-full">
-            {/* Switch to BlockNoteView from Mantine with proper formatting toolbar */}
-            <BlockNoteView
-              editable={editMode}
-              editor={editor}
-              formattingToolbar={false}
-              theme="dark"
+            <Suspense
+              fallback={
+                <div className="loading-editor flex items-center justify-center h-full text-default-500">
+                  <div className="flex flex-col items-center">
+                    <div className="spinner w-8 h-8 border-3 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin mb-2" />
+                    <span>Loading editor...</span>
+                  </div>
+                </div>
+              }
             >
-              <FormattingToolbarController
-                formattingToolbar={() => (
-                  <FormattingToolbar>
-                    <BlockTypeSelect key={"blockTypeSelect"} />
+              <BlockNoteView
+                editable={editMode}
+                editor={editor}
+                formattingToolbar={false}
+                theme="dark"
+              >
+                <FormattingToolbarController
+                  formattingToolbar={() => (
+                    <FormattingToolbar>
+                      <BlockTypeSelect key={"blockTypeSelect"} />
 
-                    <BasicTextStyleButton
-                      key={"boldStyleButton"}
-                      basicTextStyle={"bold"}
-                    />
-                    <BasicTextStyleButton
-                      key={"italicStyleButton"}
-                      basicTextStyle={"italic"}
-                    />
-                    <BasicTextStyleButton
-                      key={"underlineStyleButton"}
-                      basicTextStyle={"underline"}
-                    />
-                    <BasicTextStyleButton
-                      key={"strikeStyleButton"}
-                      basicTextStyle={"strike"}
-                    />
-                    <BasicTextStyleButton
-                      key={"codeStyleButton"}
-                      basicTextStyle={"code"}
-                    />
+                      <BasicTextStyleButton
+                        key={"boldStyleButton"}
+                        basicTextStyle={"bold"}
+                      />
+                      <BasicTextStyleButton
+                        key={"italicStyleButton"}
+                        basicTextStyle={"italic"}
+                      />
+                      <BasicTextStyleButton
+                        key={"underlineStyleButton"}
+                        basicTextStyle={"underline"}
+                      />
+                      <BasicTextStyleButton
+                        key={"strikeStyleButton"}
+                        basicTextStyle={"strike"}
+                      />
+                      <BasicTextStyleButton
+                        key={"codeStyleButton"}
+                        basicTextStyle={"code"}
+                      />
 
-                    <TextAlignButton
-                      key={"textAlignLeftButton"}
-                      textAlignment={"left"}
-                    />
-                    <TextAlignButton
-                      key={"textAlignCenterButton"}
-                      textAlignment={"center"}
-                    />
-                    <TextAlignButton
-                      key={"textAlignRightButton"}
-                      textAlignment={"right"}
-                    />
+                      <TextAlignButton
+                        key={"textAlignLeftButton"}
+                        textAlignment={"left"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignCenterButton"}
+                        textAlignment={"center"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignRightButton"}
+                        textAlignment={"right"}
+                      />
 
-                    <ColorStyleButton key={"colorStyleButton"} />
+                      <ColorStyleButton key={"colorStyleButton"} />
 
-                    <NestBlockButton key={"nestBlockButton"} />
-                    <UnnestBlockButton key={"unnestBlockButton"} />
+                      <NestBlockButton key={"nestBlockButton"} />
+                      <UnnestBlockButton key={"unnestBlockButton"} />
 
-                    <CreateLinkButton key={"createLinkButton"} />
-                  </FormattingToolbar>
-                )}
-              />
-            </BlockNoteView>
+                      <CreateLinkButton key={"createLinkButton"} />
+                    </FormattingToolbar>
+                  )}
+                />
+              </BlockNoteView>
+            </Suspense>
 
             {showSelectionPopup && (
               <SelectionPopup
