@@ -372,7 +372,9 @@ export default function ChatPage() {
           if (messages.length === 0) {
             handleSendMessage(parsed);
           }
-        } catch (e) {}
+        } catch (err) {
+          console.error("Error in task detection:", err);
+        }
         window.localStorage.removeItem("quickstart_message");
       }
     }

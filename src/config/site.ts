@@ -15,8 +15,5 @@ export const siteConfig = {
   ],
   links: {
     github: "https://github.com/Mai0313/AgentCanvas",
-    twitter: "https://www.mediatek.com/",
-    docs: "https://github.com/Mai0313/AgentCanvas/blob/master/README.md",
-    discord: "https://www.mediatek.com/",
   },
 };
