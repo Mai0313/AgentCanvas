@@ -5,6 +5,7 @@ import { getDefaultModelSettings } from "@/utils/modelUtils";
 import { Message, MessageContent, ModelSetting } from "@/types";
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
+import SplitText from "@/components/SplitText";
 
 export default function IndexPage() {
   const [messages] = useState<Message[]>([]);
@@ -34,13 +35,39 @@ export default function IndexPage() {
         className={`flex flex-col items-center justify-center gap-4 py-8 md:py-10 transition-opacity duration-500 ${transitioning ? "opacity-0" : "opacity-100"}`}
       >
         <div className="inline-block max-w-lg text-center justify-center">
-          <span className={title()}>Make&nbsp;</span>
-          <span className={title({ color: "violet" })}>Agent&nbsp;</span>
+          <SplitText
+            text="Make"
+            className={title()}
+            delay={60}
+            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
+            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+            easing="easeOutCubic"
+          />
+          <SplitText
+            text=" Agent"
+            className={title({ color: "violet" })}
+            delay={60}
+            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
+            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+            easing="easeOutCubic"
+          />
           <br />
-          <span className={title()}>
-            become more&nbsp;
-            <span className={title({ color: "violet" })}>interactive</span>
-          </span>
+          <SplitText
+            text="become more "
+            className={title()}
+            delay={60}
+            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
+            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+            easing="easeOutCubic"
+          />
+          <SplitText
+            text="interactive"
+            className={title({ color: "violet" })}
+            delay={60}
+            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
+            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+            easing="easeOutCubic"
+          />
         </div>
         <div className="w-full max-w-2xl mt-8">
           <ChatBox
