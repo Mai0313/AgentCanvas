@@ -9,6 +9,7 @@ import {
   DropdownItem,
 } from "@heroui/dropdown";
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
+import { Alert } from "@heroui/alert";
 
 import DefaultLayout from "@/layouts/default";
 import ChatBox from "@/components/ChatBox";
@@ -76,6 +77,9 @@ export default function ChatPage() {
   // Model states
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState<boolean>(false);
+
+  // 新增一個 state 控制 Alert 顯示
+  const [showThinking, setShowThinking] = useState(false);
 
   // Handle text selection from both chat and markdown canvas
   const handleAskGpt = (selectedText: string) => {
@@ -192,6 +196,17 @@ export default function ChatPage() {
 
     return cleanupResizeHandlers;
   }, [isResizingMarkdown, isMarkdownCanvasOpen]);
+
+  // 監控 isLoading 狀態，自動顯示/隱藏 Alert
+  useEffect(() => {
+    if (isLoading) {
+      setShowThinking(true);
+    } else if (showThinking) {
+      // 延遲 500ms 再關閉，避免閃爍
+      const timer = setTimeout(() => setShowThinking(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   // Memoize generateNewThreadId to avoid dependency issues
   const generateNewThreadId = useCallback(() => {
@@ -445,6 +460,17 @@ export default function ChatPage() {
 
   return (
     <DefaultLayout>
+      {/* Thinking Alert 右上角浮動顯示 */}
+      {showThinking && (
+        <div className="fixed top-6 right-6 z-[9999]">
+          <Alert color="primary" variant="solid" className="shadow-lg animate-fadeInUp">
+            <div className="flex items-center gap-2">
+              <span className="spinner w-4 h-4 border-2 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin" />
+              Thinking...
+            </div>
+          </Alert>
+        </div>
+      )}
       <div className="flex flex-col w-full h-full">
         {/* 頂部導航欄 - 包含New Conversation、模型選擇和Thread ID */}
         <div className="flex items-center justify-between p-2 bg-content1/30 border-b border-default-200 dark:border-default-800">
@@ -710,13 +736,6 @@ export default function ChatPage() {
                 onRegenerate={handleRegenerateMessage}
                 onSendMessage={handleSendMessage}
               />
-
-              {isLoading && (
-                <div className="loading-indicator flex items-center justify-center p-4">
-                  <div className="spinner mr-2 w-5 h-5 border-2 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin" />
-                  <p>Thinking...</p>
-                </div>
-              )}
 
               {error && (
                 <div className="error-message flex items-center justify-between p-4 bg-danger-50 dark:bg-danger-900/50 text-danger border border-danger m-4 rounded-lg">

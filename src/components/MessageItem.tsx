@@ -500,7 +500,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
           />
           <div className="edit-buttons flex justify-end gap-2 mt-2">
             <Button color="primary" onClick={handleSave}>
-              Send
+              Save
             </Button>
             <Button variant="flat" onClick={handleCancel}>
               Cancel
