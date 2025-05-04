@@ -204,6 +204,7 @@ export default function ChatPage() {
     } else if (showThinking) {
       // 延遲 500ms 再關閉，避免閃爍
       const timer = setTimeout(() => setShowThinking(false), 500);
+
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
@@ -463,7 +464,11 @@ export default function ChatPage() {
       {/* Thinking Alert 右上角浮動顯示 */}
       {showThinking && (
         <div className="fixed top-6 right-6 z-[9999]">
-          <Alert color="primary" variant="solid" className="shadow-lg animate-fadeInUp">
+          <Alert
+            className="shadow-lg animate-fadeInUp"
+            color="primary"
+            variant="solid"
+          >
             <div className="flex items-center gap-2">
               <span className="spinner w-4 h-4 border-2 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin" />
               Thinking...
