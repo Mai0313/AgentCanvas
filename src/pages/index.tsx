@@ -36,37 +36,37 @@ export default function IndexPage() {
       >
         <div className="inline-block max-w-lg text-center justify-center">
           <SplitText
-            text="Make"
+            animationFrom={{ opacity: 0, transform: "translate3d(0,40px,0)" }}
+            animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
             className={title()}
             delay={60}
-            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
-            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
             easing="easeOutCubic"
+            text="Make"
           />
           <SplitText
-            text=" Agent"
+            animationFrom={{ opacity: 0, transform: "translate3d(0,40px,0)" }}
+            animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
             className={title({ color: "violet" })}
             delay={60}
-            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
-            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
             easing="easeOutCubic"
+            text=" Agent"
           />
           <br />
           <SplitText
-            text="become more "
+            animationFrom={{ opacity: 0, transform: "translate3d(0,40px,0)" }}
+            animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
             className={title()}
             delay={60}
-            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
-            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
             easing="easeOutCubic"
+            text="become more "
           />
           <SplitText
-            text="interactive"
+            animationFrom={{ opacity: 0, transform: "translate3d(0,40px,0)" }}
+            animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
             className={title({ color: "violet" })}
             delay={60}
-            animationFrom={{ opacity: 0, transform: 'translate3d(0,40px,0)' }}
-            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
             easing="easeOutCubic"
+            text="interactive"
           />
         </div>
         <div className="w-full max-w-2xl mt-8">

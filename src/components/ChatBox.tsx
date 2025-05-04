@@ -636,9 +636,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
             >
               <h2 className="text-xl font-bold mb-4">
                 <SplitText
-                  text={`Start a conversation with ${settings.model || "AI"}`}
-                  className="inline-block"
-                  delay={40}
                   animationFrom={{
                     opacity: 0,
                     transform: "translate3d(0,30px,0)",
@@ -647,16 +644,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                     opacity: 1,
                     transform: "translate3d(0,0,0)",
                   }}
+                  className="inline-block"
+                  delay={40}
                   easing="easeOutCubic"
+                  text={`Start a conversation with ${settings.model || "AI"}`}
                 />
               </h2>
 
               {showPasteHint && (
                 <div className="mb-4 p-3 bg-default-100 rounded-lg text-default-800 text-sm">
                   <SplitText
-                    text="💡 Tip: You can paste images with Ctrl+V or drag & drop files into the chat!"
-                    className="inline-block"
-                    delay={20}
                     animationFrom={{
                       opacity: 0,
                       transform: "translate3d(0,20px,0)",
@@ -665,7 +662,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                       opacity: 1,
                       transform: "translate3d(0,0,0)",
                     }}
+                    className="inline-block"
+                    delay={20}
                     easing="easeOutCubic"
+                    text="💡 Tip: You can paste images with Ctrl+V or drag & drop files into the chat!"
                   />
                 </div>
               )}
