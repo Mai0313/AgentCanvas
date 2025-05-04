@@ -699,7 +699,7 @@ export default function ChatPage() {
           >
             {/* Chat content area */}
             <div
-              className="flex-grow h-full overflow-auto bg-default-50/30 dark:bg-default-900/30"
+              className="flex-grow h-full overflow-auto bg-transparent"
               style={{
                 width: isMarkdownCanvasOpen
                   ? `${100 - markdownWidth}%`
