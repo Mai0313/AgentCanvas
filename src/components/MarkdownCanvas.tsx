@@ -48,6 +48,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   isOpen,
   onClose,
   onAskGpt,
+  onSave,
   modelSettings,
 }) => {
   // Create the editor instance with proper configuration
@@ -69,9 +70,8 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     ],
   });
 
-  const [editMode] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [rawMarkdown, setRawMarkdown] = useState("");
-  const [isRawView, setIsRawView] = useState(false);
   const [loadingEditor, setLoadingEditor] = useState(true);
 
   // 新增狀態來防止閃爍
@@ -81,7 +81,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
   // Other existing states
   const canvasRef = useRef<HTMLDivElement>(null);
-  const rawEditorRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState("Code Editor");
   const [codeLanguage, setCodeLanguage] = useState("plaintext");
@@ -303,7 +302,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   // Listen for selection changes in the editor
   useEffect(() => {
     const handleSelection = () => {
-      if (isRawView || editMode) return;
+      if (editMode) return;
 
       const selection = window.getSelection();
 
@@ -359,7 +358,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       selectionObserver.disconnect();
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [editor, isRawView, editMode]);
+  }, [editor, editMode]);
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -381,10 +380,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
   // Get clean code content from the editor
   const getCleanCodeContent = useCallback(async (): Promise<string> => {
-    if (isRawView) {
-      return rawMarkdown;
-    }
-
     try {
       const markdown = await editor.blocksToMarkdownLossy(editor.document);
       // Remove markdown fence if present
@@ -401,22 +396,21 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
       return rawMarkdown;
     }
-  }, [editor, isRawView, rawMarkdown]);
+  }, [editor, rawMarkdown]);
 
-  // Handle raw markdown changes in textarea
-  const handleRawMarkdownChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
-    const newContent = e.target.value;
-
-    setRawMarkdown(newContent);
-
-    // 檢查原始編輯模式中是否有完整的代碼塊
-    // 我們將原始文本包裝在代碼標記中進行檢查
-    const wrappedContent = `\`\`\`${codeLanguage}\n${newContent}\n\`\`\``;
-    const hasClosing = hasEndingBackticks(wrappedContent);
-
-    setHasClosingBackticks(hasClosing);
+  // --- 新增: 儲存與取消編輯 ---
+  const handleStartEdit = () => {
+    setEditMode(true);
+  };
+  const handleCancelEdit = () => {
+    setEditMode(false);
+  };
+  const handleSaveEdit = async () => {
+    if (onSave) {
+      const markdown = await editor.blocksToMarkdownLossy(editor.document);
+      onSave(markdown);
+    }
+    setEditMode(false);
   };
 
   // Copy code to clipboard
@@ -438,39 +432,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     if (onAskGpt) {
       onAskGpt(text);
       setShowSelectionPopup(false);
-    }
-  };
-
-  // Toggle raw view
-  const toggleRawView = () => {
-    if (!isRawView) {
-      // Get current content as markdown before switching to raw view
-      editor.blocksToMarkdownLossy(editor.document).then((markdown) => {
-        let cleanContent = markdown;
-
-        setRawMarkdown(cleanContent);
-        setIsRawView(true);
-      });
-    } else {
-      setIsRawView(false);
-
-      // Update the editor with the raw markdown
-      const updateFromRaw = async () => {
-        try {
-          const blocks = await editor.tryParseMarkdownToBlocks(rawMarkdown);
-
-          editor.replaceBlocks(editor.document, blocks);
-
-          // 檢查轉換後的內容是否有完整代碼塊
-          const hasClosing = hasEndingBackticks(rawMarkdown);
-
-          setHasClosingBackticks(hasClosing);
-        } catch (error) {
-          console.error("Error updating from raw markdown:", error);
-        }
-      };
-
-      updateFromRaw();
     }
   };
 
@@ -576,11 +537,23 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       <div className="markdown-header bg-default-100 dark:bg-zinc-900 border-b border-default-200 dark:border-default-700 p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
-            className="close-button p-1 rounded-full hover:bg-default-200 dark:hover:bg-default-700 transition-colors"
+            className={`close-button p-1 rounded-full hover:bg-default-200 dark:hover:bg-default-700 transition-colors text-foreground`}
             title="Close editor"
             onClick={handleClose}
           >
-            <img alt="Close" className="w-5 h-5" src={closeIcon} />
+            <svg
+              className="w-5 h-5 text-foreground"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
           </button>
           <h3 className="font-medium text-lg truncate max-w-[250px] text-foreground">
             {title}
@@ -627,26 +600,65 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
               </>
             )}
           </button>
-          <button
-            className="edit-button ml-2 px-2 py-1 text-xs rounded-md flex items-center gap-1 bg-default-200 dark:bg-default-700 hover:bg-default-300 dark:hover:bg-default-600 transition-colors"
-            onClick={toggleRawView}
-          >
-            <img alt="Edit" className="w-3 h-3 opacity-70" src={editCodeIcon} />
-            {isRawView ? "Save" : "Edit"}
-          </button>
+          {/* Edit 按鈕：切換 editMode 狀態 */}
+          {!editMode && (
+            <button
+              className={`edit-button ml-2 px-2 py-1 text-xs rounded-md flex items-center gap-1 transition-colors ${
+                isGeneratingTitle || !hasClosingBackticks
+                  ? "bg-default-200/50 dark:bg-default-700/50 text-default-500 dark:text-default-400 cursor-not-allowed"
+                  : "bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800"
+              }`}
+              onClick={handleStartEdit}
+              disabled={isGeneratingTitle || !hasClosingBackticks}
+            >
+              <svg
+                className="w-3 h-3 opacity-70"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M15.232 5.232l3.536 3.536M9 11l6 6M3 21h18"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path d="M16.243 3.757a2.121 2.121 0 113 3L7.5 19.5 3 21l1.5-4.5L16.243 3.757z" />
+              </svg>
+              Edit
+            </button>
+          )}
+          {/* 編輯狀態下顯示 Save/Cancel */}
+          {editMode && (
+            <>
+              <button
+                className="ml-2 px-2 py-1 text-xs rounded-md flex items-center gap-1 bg-success-200 dark:bg-success-700 hover:bg-success-300 dark:hover:bg-success-600 transition-colors"
+                onClick={handleSaveEdit}
+              >
+                Save
+              </button>
+              <button
+                className="ml-2 px-2 py-1 text-xs rounded-md flex items-center gap-1 bg-default-200 dark:bg-default-700 hover:bg-default-300 dark:hover:bg-default-600 transition-colors"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </button>
+            </>
+          )}
         </div>
         <div className="markdown-controls">
           <button
-            className={`copy-button p-1.5 rounded-md hover:bg-default-200 dark:hover:bg-default-700 transition-colors ${copySuccess ? "text-success" : ""}`}
+            className={`copy-button p-1.5 rounded-md hover:bg-default-200 dark:hover:bg-default-700 transition-colors text-foreground ${
+              copySuccess ? "text-success" : ""
+            }`}
             title={copySuccess ? "Copied!" : "Copy code"}
             onClick={handleCopyCode}
           >
             {copySuccess ? (
               <svg
-                className="w-5 h-5"
+                className="w-5 h-5 text-success"
                 fill="currentColor"
                 viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   clipRule="evenodd"
@@ -655,7 +667,16 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
                 />
               </svg>
             ) : (
-              <img alt="Copy" className="w-5 h-5" src={copyCodeIcon} />
+              <svg
+                className="w-5 h-5 text-foreground"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+              </svg>
             )}
           </button>
         </div>
@@ -668,14 +689,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
               <span>Loading Canvas...</span>
             </div>
           </div>
-        ) : isRawView ? (
-          <textarea
-            ref={rawEditorRef}
-            className="markdown-editor w-full h-full p-4 bg-default-50 dark:bg-default-900 font-mono text-sm resize-none focus:outline-none"
-            value={rawMarkdown}
-            wrap="off"
-            onChange={handleRawMarkdownChange}
-          />
         ) : (
           <div ref={previewRef} className="blocknote-container h-full">
             <Suspense
@@ -691,7 +704,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
               <BlockNoteView
                 editable={editMode}
                 editor={editor}
-                formattingToolbar={false}
+                formattingToolbar={editMode}
                 theme="dark"
               >
                 <FormattingToolbarController

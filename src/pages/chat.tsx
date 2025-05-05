@@ -404,6 +404,7 @@ export default function ChatPage() {
     }
   };
 
+  // 讓 Save 觸發後自動引用進 ChatBox
   const handleSaveMarkdown = (editedContent: string) => {
     saveMarkdownContent(
       editedContent,
@@ -411,6 +412,13 @@ export default function ChatPage() {
       setMessages,
       setMarkdownContent,
     );
+    // 觸發 AskGPT 流程，將內容引用到 ChatBox
+    if (editedContent) {
+      const event = new CustomEvent("setQuotedText", {
+        detail: { quotedText: editedContent },
+      });
+      document.dispatchEvent(event);
+    }
   };
 
   const handleCloseMarkdownCanvas = () => {
