@@ -417,6 +417,7 @@ export default function ChatPage() {
       const event = new CustomEvent("setQuotedText", {
         detail: { quotedText: editedContent },
       });
+
       document.dispatchEvent(event);
     }
   };

@@ -28,9 +28,6 @@ import { codeBlock } from "@blocknote/code-block";
 import { Message, ModelSetting } from "../types";
 import { getDefaultModelSettings } from "../utils/modelUtils";
 import { chatCompletion } from "../services/openai";
-import closeIcon from "../assets/icon/close-icon.svg";
-import copyCodeIcon from "../assets/icon/copy-code.svg";
-import editCodeIcon from "../assets/icon/edit-code.svg";
 
 import SelectionPopup from "./SelectionPopup";
 
@@ -408,6 +405,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   const handleSaveEdit = async () => {
     if (onSave) {
       const markdown = await editor.blocksToMarkdownLossy(editor.document);
+
       onSave(markdown);
     }
     setEditMode(false);
@@ -549,9 +547,9 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
               viewBox="0 0 24 24"
             >
               <path
+                d="M6 18L18 6M6 6l12 12"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
               />
             </svg>
           </button>
@@ -608,8 +606,8 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
                   ? "bg-default-200/50 dark:bg-default-700/50 text-default-500 dark:text-default-400 cursor-not-allowed"
                   : "bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800"
               }`}
-              onClick={handleStartEdit}
               disabled={isGeneratingTitle || !hasClosingBackticks}
+              onClick={handleStartEdit}
             >
               <svg
                 className="w-3 h-3 opacity-70"
@@ -674,7 +672,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
                 strokeWidth="2"
                 viewBox="0 0 24 24"
               >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <rect height="13" rx="2" ry="2" width="13" x="9" y="9" />
                 <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
               </svg>
             )}
