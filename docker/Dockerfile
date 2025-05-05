@@ -1,5 +1,4 @@
-ARG PYTHON_VERSION=3.10
-FROM nikolaik/python-nodejs:python${PYTHON_VERSION}-nodejs20 AS builder
+FROM node:lts-alpine3.21 AS builder
 
 LABEL maintainer="Wei Lee <mai@mai0313.com>" \
     org.label-schema.name="agentcanvas" \
