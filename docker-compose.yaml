@@ -15,7 +15,7 @@ services:
       VITE_AZURE_API_VERSION: 2025-03-01-preview
     command:
       - yarn
-      - start
+      - preview
       # - dev
       - --host=0.0.0.0
       - --port=3000
