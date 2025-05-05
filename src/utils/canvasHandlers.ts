@@ -119,6 +119,9 @@ export const handleCanvasMode = async (
   // 步驟1：生成代碼
   try {
     // 第一步：生成代碼並在過程中累積結果
+    console.log("用戶語言:", userLanguage);
+    console.log("用戶消息ID:", userMessage.id);
+    console.log("用戶消息內容:", userMessage.content);
     await chatCompletion(
       [codeSystemMessage, userMessage],
       settings,
