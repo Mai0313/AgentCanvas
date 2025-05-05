@@ -41,7 +41,7 @@ export default function IndexPage() {
             className={title()}
             delay={60}
             easing="easeOutCubic"
-            text="Make"
+            text="Agent"
           />
           <SplitText
             animationFrom={{ opacity: 0, transform: "translate3d(0,40px,0)" }}
@@ -49,7 +49,7 @@ export default function IndexPage() {
             className={title({ color: "violet" })}
             delay={60}
             easing="easeOutCubic"
-            text=" Agent"
+            text="Canvas"
           />
           <br />
           <SplitText
@@ -58,7 +58,7 @@ export default function IndexPage() {
             className={title()}
             delay={60}
             easing="easeOutCubic"
-            text="become more "
+            text="makes you "
           />
           <SplitText
             animationFrom={{ opacity: 0, transform: "translate3d(0,40px,0)" }}
@@ -66,7 +66,7 @@ export default function IndexPage() {
             className={title({ color: "violet" })}
             delay={60}
             easing="easeOutCubic"
-            text="interactive"
+            text="geninus"
           />
         </div>
         <div className="w-full max-w-2xl mt-8">
