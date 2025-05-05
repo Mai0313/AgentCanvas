@@ -732,8 +732,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           >
             {(() => {
               // 找到最後一則 assistant 訊息的 index
-              const lastAssistantIdx = [...messages].reverse().findIndex(m => m.role === "assistant");
-              const insertIdx = lastAssistantIdx === -1 ? -1 : messages.length - 1 - lastAssistantIdx;
+              const lastAssistantIdx = [...messages]
+                .reverse()
+                .findIndex((m) => m.role === "assistant");
+              const insertIdx =
+                lastAssistantIdx === -1
+                  ? -1
+                  : messages.length - 1 - lastAssistantIdx;
+
               return messages.map((message, idx) => {
                 // 在最後一則 assistant 訊息的上方插入按鈕
                 if (
@@ -758,9 +764,26 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                               width="24"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path d="M16 13L4 25.4322L16 37" stroke="#333" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                              <path d="M32 13L44 25.4322L32 37" stroke="#333" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                              <path d="M28 4L21 44" stroke="#333" strokeLinecap="round" strokeWidth="4" />
+                              <path
+                                d="M16 13L4 25.4322L16 37"
+                                stroke="#333"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="4"
+                              />
+                              <path
+                                d="M32 13L44 25.4322L32 37"
+                                stroke="#333"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="4"
+                              />
+                              <path
+                                d="M28 4L21 44"
+                                stroke="#333"
+                                strokeLinecap="round"
+                                strokeWidth="4"
+                              />
                             </svg>
                           </span>
                           <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">
@@ -790,6 +813,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                     </React.Fragment>
                   );
                 }
+
                 // 其他訊息正常渲染
                 return (
                   <React.Fragment key={message.id}>
