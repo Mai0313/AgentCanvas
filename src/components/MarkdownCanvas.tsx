@@ -7,7 +7,12 @@ import React, {
 } from "react";
 import "@blocknote/core/fonts/inter.css";
 // Import BlockNoteView directly to avoid TypeScript errors
-import { BlockNoteView } from "@blocknote/mantine";
+import {
+  BlockNoteView,
+  darkDefaultTheme,
+  lightDefaultTheme,
+  Theme,
+} from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 // Import these directly for TypeScript compatibility
 import {
@@ -30,6 +35,82 @@ import { getDefaultModelSettings } from "../utils/modelUtils";
 import { chatCompletion } from "../services/openai";
 
 import SelectionPopup from "./SelectionPopup";
+
+// 自訂 BlockNote theme，顏色參考 tailwind 的 bg-background/text-foreground
+const lightCanvasTheme = {
+  colors: {
+    editor: {
+      text: "#18181b", // 或 '#18181b' (tailwind text-foreground)
+      background: "#ffffff", // tailwind bg-background (light)
+    },
+    menu: {
+      text: "#18181b",
+      background: "#e5e7eb",
+    },
+    tooltip: {
+      text: "#18181b",
+      background: "#f1f5f9",
+    },
+    hovered: {
+      text: "#18181b",
+      background: "#e0e7ef",
+    },
+    selected: {
+      text: "#18181b",
+      background: "#cbd5e1",
+    },
+    disabled: {
+      text: "#a1a1aa",
+      background: "#e5e7eb",
+    },
+    shadow: "#cbd5e1",
+    border: "#e5e7eb",
+    sideMenu: "#f1f5f9",
+    highlights: lightDefaultTheme.colors!.highlights,
+  },
+  borderRadius: 8,
+  fontFamily: "inherit",
+} satisfies Theme;
+
+const darkCanvasTheme = {
+  ...lightCanvasTheme,
+  colors: {
+    ...lightCanvasTheme.colors,
+    editor: {
+      text: "#f4f4f5", // tailwind text-foreground (dark)
+      background: "#18181b", // tailwind bg-background (dark)
+    },
+    menu: {
+      text: "#f4f4f5",
+      background: "#27272a",
+    },
+    tooltip: {
+      text: "#f4f4f5",
+      background: "#27272a",
+    },
+    hovered: {
+      text: "#f4f4f5",
+      background: "#27272a",
+    },
+    selected: {
+      text: "#f4f4f5",
+      background: "#3f3f46",
+    },
+    disabled: {
+      text: "#71717a",
+      background: "#27272a",
+    },
+    shadow: "#18181b",
+    border: "#27272a",
+    sideMenu: "#18181b",
+    highlights: darkDefaultTheme.colors!.highlights,
+  },
+} satisfies Theme;
+
+const canvasTheme = {
+  light: lightCanvasTheme,
+  dark: darkCanvasTheme,
+};
 
 interface MarkdownCanvasProps {
   content: string;
@@ -706,44 +787,20 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
                 editable={editMode}
                 editor={editor}
                 formattingToolbar={editMode}
-                theme="dark"
+                theme={canvasTheme}
               >
                 <FormattingToolbarController
                   formattingToolbar={() => (
                     <FormattingToolbar>
                       <BlockTypeSelect key={"blockTypeSelect"} />
-                      <BasicTextStyleButton
-                        key={"boldStyleButton"}
-                        basicTextStyle={"bold"}
-                      />
-                      <BasicTextStyleButton
-                        key={"italicStyleButton"}
-                        basicTextStyle={"italic"}
-                      />
-                      <BasicTextStyleButton
-                        key={"underlineStyleButton"}
-                        basicTextStyle={"underline"}
-                      />
-                      <BasicTextStyleButton
-                        key={"strikeStyleButton"}
-                        basicTextStyle={"strike"}
-                      />
-                      <BasicTextStyleButton
-                        key={"codeStyleButton"}
-                        basicTextStyle={"code"}
-                      />
-                      <TextAlignButton
-                        key={"textAlignLeftButton"}
-                        textAlignment={"left"}
-                      />
-                      <TextAlignButton
-                        key={"textAlignCenterButton"}
-                        textAlignment={"center"}
-                      />
-                      <TextAlignButton
-                        key={"textAlignRightButton"}
-                        textAlignment={"right"}
-                      />
+                      <BasicTextStyleButton key={"boldStyleButton"} basicTextStyle={"bold"} />
+                      <BasicTextStyleButton key={"italicStyleButton"} basicTextStyle={"italic"} />
+                      <BasicTextStyleButton key={"underlineStyleButton"} basicTextStyle={"underline"} />
+                      <BasicTextStyleButton key={"strikeStyleButton"} basicTextStyle={"strike"} />
+                      <BasicTextStyleButton key={"codeStyleButton"} basicTextStyle={"code"} />
+                      <TextAlignButton key={"textAlignLeftButton"} textAlignment={"left"} />
+                      <TextAlignButton key={"textAlignCenterButton"} textAlignment={"center"} />
+                      <TextAlignButton key={"textAlignRightButton"} textAlignment={"right"} />
                       <ColorStyleButton key={"colorStyleButton"} />
                       <NestBlockButton key={"nestBlockButton"} />
                       <UnnestBlockButton key={"unnestBlockButton"} />
