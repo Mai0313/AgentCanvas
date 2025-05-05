@@ -16,10 +16,6 @@ import ChatBox from "@/components/ChatBox";
 import MarkdownCanvas from "@/components/MarkdownCanvas";
 import { Message, ModelSetting, MessageContent } from "@/types";
 import { fetchModels, detectTaskType } from "@/services/openai";
-import {
-  extractLongestCodeBlock,
-  detectInProgressCodeBlock,
-} from "@/utils/markdownUtils";
 import { getDefaultModelSettings } from "@/utils/modelUtils";
 import {
   copyMessage,
@@ -58,12 +54,6 @@ export default function ChatPage() {
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
     null,
   );
-
-  // State to track code block position
-  const [codeBlockPosition, setCodeBlockPosition] = useState<{
-    start: number;
-    end: number;
-  } | null>(null);
 
   // Resizable layout states
   const [markdownWidth, setMarkdownWidth] = useState(40); // Default 40% width for markdown
@@ -353,7 +343,6 @@ export default function ChatPage() {
           assistantMessageId,
           setMarkdownContent,
           setEditingMessageId,
-          setCodeBlockPosition,
           setIsMarkdownCanvasOpen,
         );
       } else {
@@ -402,45 +391,16 @@ export default function ChatPage() {
   const toggleMarkdownCanvas = (messageId: string, content: string) => {
     // If already open for this message, close it
     if (isMarkdownCanvasOpen && editingMessageId === messageId) {
-      closeMarkdownCanvas(
-        setIsMarkdownCanvasOpen,
-        setEditingMessageId,
-        setCodeBlockPosition,
-      );
+      closeMarkdownCanvas(setIsMarkdownCanvasOpen, setEditingMessageId);
     } else {
-      // First try to find any in-progress code block
-      const { codeBlock: inProgressBlock, blockPosition: inProgressPosition } =
-        detectInProgressCodeBlock(content, 0);
-
-      if (inProgressBlock && inProgressPosition) {
-        openMarkdownCanvas(
-          messageId,
-          inProgressBlock,
-          inProgressPosition,
-          setMarkdownContent,
-          setEditingMessageId,
-          setCodeBlockPosition,
-          setIsMarkdownCanvasOpen,
-          isMarkdownCanvasOpen,
-        );
-      } else {
-        // Fall back to completed code block
-        const { longestBlock, blockPosition } =
-          extractLongestCodeBlock(content);
-
-        if (longestBlock && blockPosition) {
-          openMarkdownCanvas(
-            messageId,
-            longestBlock,
-            blockPosition,
-            setMarkdownContent,
-            setEditingMessageId,
-            setCodeBlockPosition,
-            setIsMarkdownCanvasOpen,
-            isMarkdownCanvasOpen,
-          );
-        }
-      }
+      openMarkdownCanvas(
+        messageId,
+        content,
+        setMarkdownContent,
+        setEditingMessageId,
+        setIsMarkdownCanvasOpen,
+        isMarkdownCanvasOpen,
+      );
     }
   };
 
@@ -448,18 +408,13 @@ export default function ChatPage() {
     saveMarkdownContent(
       editedContent,
       editingMessageId,
-      codeBlockPosition,
       setMessages,
       setMarkdownContent,
     );
   };
 
   const handleCloseMarkdownCanvas = () => {
-    closeMarkdownCanvas(
-      setIsMarkdownCanvasOpen,
-      setEditingMessageId,
-      setCodeBlockPosition,
-    );
+    closeMarkdownCanvas(setIsMarkdownCanvasOpen, setEditingMessageId);
   };
 
   return (
@@ -733,7 +688,6 @@ export default function ChatPage() {
                 fetchModels={getAvailableModels}
                 isLoading={isLoading}
                 isLoadingModels={isLoadingModels}
-                longestCodeBlockPosition={codeBlockPosition}
                 messages={messages}
                 settings={settings}
                 streamingMessageId={streamingMessageId}

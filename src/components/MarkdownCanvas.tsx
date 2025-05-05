@@ -582,7 +582,9 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
           >
             <img alt="Close" className="w-5 h-5" src={closeIcon} />
           </button>
-          <h3 className="font-medium text-lg truncate max-w-[250px]">{title}</h3>
+          <h3 className="font-medium text-lg truncate max-w-[250px]">
+            {title}
+          </h3>
           {codeLanguage !== "plaintext" && (
             <div className="language-badge px-2 py-0.5 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs rounded-md">
               {codeLanguage}
@@ -609,8 +611,17 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
               </>
             ) : (
               <>
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path clipRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" fillRule="evenodd" />
+                <svg
+                  className="w-3 h-3"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    clipRule="evenodd"
+                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                    fillRule="evenodd"
+                  />
                 </svg>
                 AI Title
               </>
@@ -631,8 +642,17 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
             onClick={handleCopyCode}
           >
             {copySuccess ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd" />
+              <svg
+                className="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clipRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  fillRule="evenodd"
+                />
               </svg>
             ) : (
               <img alt="Copy" className="w-5 h-5" src={copyCodeIcon} />
@@ -678,14 +698,38 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
                   formattingToolbar={() => (
                     <FormattingToolbar>
                       <BlockTypeSelect key={"blockTypeSelect"} />
-                      <BasicTextStyleButton key={"boldStyleButton"} basicTextStyle={"bold"} />
-                      <BasicTextStyleButton key={"italicStyleButton"} basicTextStyle={"italic"} />
-                      <BasicTextStyleButton key={"underlineStyleButton"} basicTextStyle={"underline"} />
-                      <BasicTextStyleButton key={"strikeStyleButton"} basicTextStyle={"strike"} />
-                      <BasicTextStyleButton key={"codeStyleButton"} basicTextStyle={"code"} />
-                      <TextAlignButton key={"textAlignLeftButton"} textAlignment={"left"} />
-                      <TextAlignButton key={"textAlignCenterButton"} textAlignment={"center"} />
-                      <TextAlignButton key={"textAlignRightButton"} textAlignment={"right"} />
+                      <BasicTextStyleButton
+                        key={"boldStyleButton"}
+                        basicTextStyle={"bold"}
+                      />
+                      <BasicTextStyleButton
+                        key={"italicStyleButton"}
+                        basicTextStyle={"italic"}
+                      />
+                      <BasicTextStyleButton
+                        key={"underlineStyleButton"}
+                        basicTextStyle={"underline"}
+                      />
+                      <BasicTextStyleButton
+                        key={"strikeStyleButton"}
+                        basicTextStyle={"strike"}
+                      />
+                      <BasicTextStyleButton
+                        key={"codeStyleButton"}
+                        basicTextStyle={"code"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignLeftButton"}
+                        textAlignment={"left"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignCenterButton"}
+                        textAlignment={"center"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignRightButton"}
+                        textAlignment={"right"}
+                      />
                       <ColorStyleButton key={"colorStyleButton"} />
                       <NestBlockButton key={"nestBlockButton"} />
                       <UnnestBlockButton key={"unnestBlockButton"} />

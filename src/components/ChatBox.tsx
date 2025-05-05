@@ -149,7 +149,6 @@ interface ChatBoxProps {
   isLoading: boolean;
   streamingMessageId?: string | null;
   editingMessageId?: string | null;
-  longestCodeBlockPosition?: { start: number; end: number } | null;
   toggleMarkdownCanvas: (messageId: string, content: string) => void;
   // 新增的消息操作功能
   onCopy?: (content: string) => void;
@@ -168,7 +167,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   isLoading,
   streamingMessageId,
   editingMessageId,
-  longestCodeBlockPosition,
   toggleMarkdownCanvas,
   onCopy,
   onEdit,
@@ -798,11 +796,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                 isEditing={editingMessageId === message.id}
                 isLoadingModels={isLoadingModels}
                 isStreaming={streamingMessageId === message.id}
-                longestCodeBlockPosition={
-                  message.id === editingMessageId
-                    ? longestCodeBlockPosition
-                    : null
-                }
                 message={message}
                 toggleMarkdownCanvas={() => {
                   if (typeof message.content === "string") {

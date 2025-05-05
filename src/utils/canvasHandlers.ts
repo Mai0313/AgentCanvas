@@ -9,12 +9,8 @@ import { chatCompletion } from "../services/openai";
 export const openMarkdownCanvas = (
   messageId: string,
   content: string,
-  position: { start: number; end: number },
   setMarkdownContent: React.Dispatch<React.SetStateAction<string>>,
   setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>,
-  setCodeBlockPosition: React.Dispatch<
-    React.SetStateAction<{ start: number; end: number } | null>
-  >,
   setIsMarkdownCanvasOpen: React.Dispatch<React.SetStateAction<boolean>>,
   isMarkdownCanvasOpen: boolean,
 ): void => {
@@ -28,7 +24,6 @@ export const openMarkdownCanvas = (
   setTimeout(() => {
     setMarkdownContent(content);
     setEditingMessageId(messageId);
-    setCodeBlockPosition(position);
     setIsMarkdownCanvasOpen(true);
   }, 50);
 };
@@ -39,13 +34,9 @@ export const openMarkdownCanvas = (
 export const closeMarkdownCanvas = (
   setIsMarkdownCanvasOpen: React.Dispatch<React.SetStateAction<boolean>>,
   setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>,
-  setCodeBlockPosition: React.Dispatch<
-    React.SetStateAction<{ start: number; end: number } | null>
-  >,
 ): void => {
   setIsMarkdownCanvasOpen(false);
   setEditingMessageId(null);
-  setCodeBlockPosition(null);
 };
 
 /**
@@ -54,7 +45,6 @@ export const closeMarkdownCanvas = (
 export const saveMarkdownContent = (
   editedContent: string,
   editingMessageId: string | null,
-  codeBlockPosition: { start: number; end: number } | null,
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   setMarkdownContent: React.Dispatch<React.SetStateAction<string>>,
 ): void => {
@@ -64,21 +54,11 @@ export const saveMarkdownContent = (
       (m) => m.id === editingMessageId,
     );
 
-    if (messageIndex !== -1 && codeBlockPosition) {
-      const originalContent = updatedMessages[messageIndex].content;
-
-      // 暫時只處理字串類型的內容
-      if (typeof originalContent === "string") {
-        const newContent =
-          originalContent.substring(0, codeBlockPosition.start) +
-          editedContent +
-          originalContent.substring(codeBlockPosition.end);
-
-        updatedMessages[messageIndex] = {
-          ...updatedMessages[messageIndex],
-          content: newContent,
-        };
-      }
+    if (messageIndex !== -1) {
+      updatedMessages[messageIndex] = {
+        ...updatedMessages[messageIndex],
+        content: editedContent,
+      };
     }
 
     return updatedMessages;
@@ -97,9 +77,6 @@ export const handleCanvasMode = async (
   assistantMessageId: string,
   setMarkdownContent: React.Dispatch<React.SetStateAction<string>>,
   setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>,
-  setCodeBlockPosition: React.Dispatch<
-    React.SetStateAction<{ start: number; end: number } | null>
-  >,
   setIsMarkdownCanvasOpen: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<void> => {
   // 步驟 1: 僅生成代碼塊 - 這將直接輸出到 MarkdownCanvas
@@ -118,7 +95,6 @@ export const handleCanvasMode = async (
   // 立即打開 MarkdownCanvas 以準備流式輸出
   setMarkdownContent("");
   setEditingMessageId(codeMessageId);
-  setCodeBlockPosition({ start: 0, end: 0 });
   setIsMarkdownCanvasOpen(true);
 
   // 使用靜態的占位文本，並標記為正在生成代碼，這樣ChatBox中就不會顯示"Loading content..."了
@@ -150,7 +126,6 @@ export const handleCanvasMode = async (
 
         // 每收到一個token就更新MarkdownCanvas內容 - 實現真正的流式輸出
         setMarkdownContent(codeBlock);
-        setCodeBlockPosition({ start: 0, end: codeBlock.length });
 
         // 不更新ChatBox中的消息內容，因為我們已經設置了靜態占位符
       },
