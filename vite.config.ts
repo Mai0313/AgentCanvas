@@ -27,65 +27,13 @@ export default defineConfig({
             return "syntax-highlighter";
           }
 
-          // Split language modules into separate chunks
-          // Common web languages
+          // 修改此處: 將所有語言模組合併到一個 chunk 中而不是分成多個
           if (
-            id.includes("/javascript") ||
-            id.includes("/typescript") ||
-            id.includes("/jsx") ||
-            id.includes("/tsx")
+            id.includes(
+              "node_modules/react-syntax-highlighter/dist/esm/languages/",
+            )
           ) {
-            return "lang-web";
-          }
-
-          // Backend languages group
-          if (
-            id.includes("/python") ||
-            id.includes("/java") ||
-            id.includes("/csharp") ||
-            id.includes("/php") ||
-            id.includes("/ruby")
-          ) {
-            return "lang-backend";
-          }
-
-          // System languages group
-          if (
-            id.includes("/cpp") ||
-            id.includes("/c") ||
-            id.includes("/rust") ||
-            id.includes("/go") ||
-            id.includes("/swift")
-          ) {
-            return "lang-system";
-          }
-
-          // Data and markup languages
-          if (
-            id.includes("/json") ||
-            id.includes("/xml") ||
-            id.includes("/yaml") ||
-            id.includes("/html") ||
-            id.includes("/css") ||
-            id.includes("/scss") ||
-            id.includes("/less") ||
-            id.includes("/markdown") ||
-            id.includes("/mdx")
-          ) {
-            return "lang-markup";
-          }
-
-          // Other less common languages
-          if (
-            id.includes("/kotlin") ||
-            id.includes("/scala") ||
-            id.includes("/haskell") ||
-            id.includes("/r") ||
-            id.includes("/julia") ||
-            id.includes("/wasm") ||
-            id.includes("/lua")
-          ) {
-            return "lang-other";
+            return "lang-all";
           }
 
           // Group BlockNote editor packages
@@ -109,6 +57,9 @@ export default defineConfig({
         drop_console: true, // Remove console logs in production
         drop_debugger: true, // Remove debugger statements in production
       },
+      // 修改此處: 保留類別名稱和構造函數以避免問題
+      keep_classnames: true,
+      keep_fnames: true,
     },
   },
 });
