@@ -5,12 +5,6 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import "@blocknote/core/fonts/inter.css";
-import { BlockNoteView } from "@blocknote/mantine";
-import "@blocknote/mantine/style.css";
-import { BlockNoteEditor } from "@blocknote/core";
-import { useCreateBlockNote } from "@blocknote/react";
-import { codeBlock } from "@blocknote/code-block";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Image } from "@heroui/image";
@@ -26,6 +20,7 @@ import { Textarea } from "@heroui/react";
 import { Message } from "../types";
 
 import SelectionPopup from "./SelectionPopup";
+import SplitText from "./SplitText";
 
 // Icons for the action buttons
 const CopyIcon = (props: any) => (
@@ -195,8 +190,6 @@ interface MessageItemProps {
 const MessageItem: React.FC<MessageItemProps> = ({
   message,
   isStreaming = false,
-  // longestCodeBlockPosition = null,
-  // toggleMarkdownCanvas,
   onAskGpt,
   onCopy,
   onEdit,
@@ -214,40 +207,9 @@ const MessageItem: React.FC<MessageItemProps> = ({
   const [copySuccess, setCopySuccess] = useState(false);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
-  const [blockNoteEditor, setBlockNoteEditor] =
-    useState<BlockNoteEditor | null>(null);
-  const [isBlockNoteLoading, setIsBlockNoteLoading] = useState(true);
-
-  // Keep track of streaming state to prevent flickering
-  const [hasInitialContent, setHasInitialContent] = useState(false);
-  const prevStreamingRef = useRef(isStreaming);
 
   const messageRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Initialize a read-only editor for displaying content
-  // Call useCreateBlockNote hook directly at the component level (not inside a callback)
-  const editor = useCreateBlockNote({
-    // 添加代碼高亮支持
-    codeBlock,
-    initialContent: [
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: "Loading...",
-            styles: {},
-          },
-        ],
-      },
-    ],
-  });
-
-  // Store the editor instance
-  useEffect(() => {
-    setBlockNoteEditor(editor);
-  }, [editor]);
 
   // Helper function to convert message content to string, wrapped in useCallback
   const getMessageContentAsString = useCallback((): string => {
@@ -264,82 +226,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
     return "";
   }, [message.content]);
-
-  // Update streaming state tracking
-  useEffect(() => {
-    // When we have content and we're streaming, mark that we have initial content
-    if (isStreaming && getMessageContentAsString().trim() !== "") {
-      setHasInitialContent(true);
-    }
-
-    // If streaming stops, reset our flag after a short delay
-    if (!isStreaming && prevStreamingRef.current) {
-      setTimeout(() => {
-        setHasInitialContent(false);
-      }, 500); // Small delay to avoid flickering when streaming ends
-    }
-
-    prevStreamingRef.current = isStreaming;
-  }, [isStreaming, getMessageContentAsString]);
-
-  // Update BlockNote editor content when message changes
-  useEffect(() => {
-    const updateEditor = async () => {
-      if (!blockNoteEditor) return;
-
-      // Get the content string
-      const contentStr = getMessageContentAsString();
-      const hasContent = contentStr.trim() !== "";
-
-      // Only show loading initially or when not streaming
-      // This prevents flickering during streaming
-      if (!isStreaming && !isGeneratingContent()) {
-        setIsBlockNoteLoading(true);
-      }
-
-      try {
-        // Only update the editor if we have content
-        if (hasContent) {
-          const blocks =
-            await blockNoteEditor.tryParseMarkdownToBlocks(contentStr);
-
-          if (blocks && blocks.length > 0) {
-            blockNoteEditor.replaceBlocks(blockNoteEditor.document, blocks);
-          }
-
-          // Only mark as not loading when we're not streaming or we have initial content
-          if (!isStreaming || (isStreaming && hasInitialContent)) {
-            setIsBlockNoteLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error("Error parsing content to BlockNote format:", error);
-        setIsBlockNoteLoading(false);
-      }
-
-      // Make editor read-only
-      blockNoteEditor._tiptapEditor.setEditable(false);
-    };
-
-    // Check if we're in any special state that should prevent loading indicator
-    function isGeneratingContent() {
-      return message.isGeneratingImage || message.isGeneratingCode;
-    }
-
-    // Update the editor when message content changes
-    if (!isEditMode && blockNoteEditor) {
-      updateEditor();
-    }
-  }, [
-    message.content,
-    blockNoteEditor,
-    getMessageContentAsString,
-    isEditMode,
-    isStreaming,
-    hasInitialContent,
-    message.isGeneratingImage,
-    message.isGeneratingCode,
-  ]);
 
   // 當模型下拉選單打開時，獲取可用模型
   useEffect(() => {
@@ -480,9 +366,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
     }
   };
 
-  // Function to render the message content with BlockNote or fallback options
+  // Function to render the message content with SplitText
   const processMessageContent = (): ReactNode => {
-    // 如果處於編輯模式，渲染文本編輯區
     if (isEditMode) {
       return (
         <div key="edit-container" className="edit-container w-full">
@@ -510,7 +395,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
       );
     }
 
-    // 如果正在生成圖像，顯示動態加載效果
     if (message.isGeneratingImage) {
       return (
         <Card
@@ -529,7 +413,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
       );
     }
 
-    // 如果正在生成代碼，顯示靜態占位符，防止內容跳動
     if (message.isGeneratingCode) {
       return (
         <Card key="generating-code" className="generating-code-container p-4">
@@ -545,54 +428,18 @@ const MessageItem: React.FC<MessageItemProps> = ({
       );
     }
 
-    // For streaming content, once we have initial content, always show the editor
-    // This prevents flickering during streaming updates
-    if (isStreaming && hasInitialContent && blockNoteEditor) {
-      return (
-        <div className="blocknote-message-container">
-          <BlockNoteView
-            editable={false}
-            editor={blockNoteEditor}
-            formattingToolbar={false}
-            theme="dark"
-          />
-        </div>
-      );
-    }
-
-    // If this is normal (non-streaming) content, use BlockNote for formatting
-    if (blockNoteEditor && !isBlockNoteLoading) {
-      return (
-        <div className="blocknote-message-container">
-          <BlockNoteView
-            editable={false}
-            editor={blockNoteEditor}
-            formattingToolbar={false}
-            theme="dark"
-          />
-        </div>
-      );
-    }
-
-    // Only show loading indicator if we're not streaming or we don't have content yet
-    if (isBlockNoteLoading && (!isStreaming || !hasInitialContent)) {
-      return (
-        <div className="message-loading flex justify-center p-2">
-          <Spinner color="primary" size="sm" />
-          <span className="ml-2">Loading content...</span>
-        </div>
-      );
-    }
-
-    // Fallback to original rendering if BlockNote isn't available
     const messageContent = getMessageContentAsString();
-
     return (
-      <div className="message-text-fallback text-default-700 dark:text-default-300">
-        {messageContent.split("\n").map((line, i) => (
-          <div key={i}>{line || <br />}</div>
-        ))}
-      </div>
+      <SplitText
+        text={messageContent}
+        className="text-foreground text-base whitespace-pre-line"
+        delay={isStreaming ? 10 : 20} // 更快的動畫速度
+        animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+        animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+        easing="easeOutCubic"
+        threshold={0.2}
+        rootMargin="-50px"
+      />
     );
   };
 

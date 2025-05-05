@@ -573,7 +573,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
   return (
     <div ref={canvasRef} className="markdown-canvas">
-      <div className="markdown-header bg-default-100 dark:bg-default-800 border-b border-default-200 dark:border-default-700 p-2 flex items-center justify-between">
+      <div className="markdown-header bg-default-100 dark:bg-zinc-900 border-b border-default-200 dark:border-default-700 p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             className="close-button p-1 rounded-full hover:bg-default-200 dark:hover:bg-default-700 transition-colors"
@@ -582,7 +582,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
           >
             <img alt="Close" className="w-5 h-5" src={closeIcon} />
           </button>
-          <h3 className="font-medium text-lg truncate max-w-[250px]">
+          <h3 className="font-medium text-lg truncate max-w-[250px] text-foreground">
             {title}
           </h3>
           {codeLanguage !== "plaintext" && (
