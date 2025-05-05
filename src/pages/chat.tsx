@@ -56,7 +56,9 @@ export default function ChatPage() {
   );
   // 新增：縮小狀態與對應訊息ID
   const [isMarkdownMinimized, setIsMarkdownMinimized] = useState(false);
-  const [minimizedMarkdownMessageId, setMinimizedMarkdownMessageId] = useState<string | null>(null);
+  const [minimizedMarkdownMessageId, setMinimizedMarkdownMessageId] = useState<
+    string | null
+  >(null);
 
   // Resizable layout states
   const [markdownWidth, setMarkdownWidth] = useState(40); // Default 40% width for markdown
@@ -755,17 +757,17 @@ export default function ChatPage() {
                 fetchModels={getAvailableModels}
                 isLoading={isLoading}
                 isLoadingModels={isLoadingModels}
+                isMarkdownMinimized={isMarkdownMinimized}
                 messages={messages}
+                minimizedMarkdownMessageId={minimizedMarkdownMessageId}
                 settings={settings}
                 streamingMessageId={streamingMessageId}
                 toggleMarkdownCanvas={toggleMarkdownCanvas}
-                isMarkdownMinimized={isMarkdownMinimized}
-                minimizedMarkdownMessageId={minimizedMarkdownMessageId}
-                onRestoreMarkdownCanvas={handleRestoreMarkdownCanvas}
                 onCopy={handleCopyMessage}
                 onDelete={handleDeleteMessage}
                 onEdit={handleEditMessage}
                 onRegenerate={handleRegenerateMessage}
+                onRestoreMarkdownCanvas={handleRestoreMarkdownCanvas}
                 onSendMessage={handleSendMessage}
               />
 

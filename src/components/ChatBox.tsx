@@ -319,17 +319,21 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     const handlePasteInChatBox = (e: ClipboardEvent) => {
       if (e.clipboardData && e.clipboardData.items) {
         const items = e.clipboardData.items;
+
         for (let i = 0; i < items.length; i++) {
           if (items[i].kind === "file") {
             const file = items[i].getAsFile();
+
             if (!file) continue;
             e.preventDefault();
             try {
               const reader = new FileReader();
               const fileType = items[i].type;
+
               reader.onload = (event) => {
                 if (event.target && event.target.result) {
                   const dataUrl = event.target.result as string;
+
                   setPastedImages((prev) => [
                     ...prev,
                     {
@@ -351,12 +355,20 @@ const ChatBox: React.FC<ChatBoxProps> = ({
       }
     };
     const chatBoxEl = dropZoneRef.current;
+
     if (chatBoxEl) {
-      chatBoxEl.addEventListener("paste", handlePasteInChatBox as EventListener);
+      chatBoxEl.addEventListener(
+        "paste",
+        handlePasteInChatBox as EventListener,
+      );
     }
+
     return () => {
       if (chatBoxEl) {
-        chatBoxEl.removeEventListener("paste", handlePasteInChatBox as EventListener);
+        chatBoxEl.removeEventListener(
+          "paste",
+          handlePasteInChatBox as EventListener,
+        );
       }
     };
   }, []);
@@ -571,18 +583,43 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           <div className="flex justify-center my-2">
             <button
               className="markdown-mini-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors shadow"
-              onClick={onRestoreMarkdownCanvas}
               title="展開 Canvas 編輯器"
+              onClick={onRestoreMarkdownCanvas}
             >
               <span className="inline-block align-middle">
                 {/* 雙箭頭SVG */}
-                <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 13L4 25.4322L16 37" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M32 13L44 25.4322L32 37" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M28 4L21 44" stroke="#333" strokeWidth="4" strokeLinecap="round"/>
+                <svg
+                  fill="none"
+                  height="24"
+                  viewBox="0 0 48 48"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M16 13L4 25.4322L16 37"
+                    stroke="#333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="4"
+                  />
+                  <path
+                    d="M32 13L44 25.4322L32 37"
+                    stroke="#333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="4"
+                  />
+                  <path
+                    d="M28 4L21 44"
+                    stroke="#333"
+                    strokeLinecap="round"
+                    strokeWidth="4"
+                  />
                 </svg>
               </span>
-              <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">展開 Canvas 編輯器</span>
+              <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">
+                展開 Canvas 編輯器
+              </span>
             </button>
           </div>
         )}
@@ -746,6 +783,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   fetchModels={fetchModels}
                   isEditing={editingMessageId === message.id}
                   isLoadingModels={isLoadingModels}
+                  isMarkdownMinimized={
+                    isMarkdownMinimized &&
+                    minimizedMarkdownMessageId === message.id
+                  }
                   isStreaming={streamingMessageId === message.id}
                   message={message}
                   toggleMarkdownCanvas={() => {
@@ -758,9 +799,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   onDelete={onDelete}
                   onEdit={onEdit}
                   onRegenerate={onRegenerate}
-                  isMarkdownMinimized={
-                    isMarkdownMinimized && minimizedMarkdownMessageId === message.id
-                  }
                   onRestoreMarkdownCanvas={onRestoreMarkdownCanvas}
                 />
               </React.Fragment>

@@ -508,17 +508,42 @@ const MessageItem: React.FC<MessageItemProps> = ({
         <div className="flex justify-center my-2">
           <button
             className="markdown-mini-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors shadow"
-            onClick={onRestoreMarkdownCanvas}
             title="展開 Canvas 編輯器"
+            onClick={onRestoreMarkdownCanvas}
           >
             <span className="inline-block align-middle">
-              <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 13L4 25.4322L16 37" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M32 13L44 25.4322L32 37" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M28 4L21 44" stroke="#333" strokeWidth="4" strokeLinecap="round"/>
+              <svg
+                fill="none"
+                height="24"
+                viewBox="0 0 48 48"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 13L4 25.4322L16 37"
+                  stroke="#333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="4"
+                />
+                <path
+                  d="M32 13L44 25.4322L32 37"
+                  stroke="#333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="4"
+                />
+                <path
+                  d="M28 4L21 44"
+                  stroke="#333"
+                  strokeLinecap="round"
+                  strokeWidth="4"
+                />
               </svg>
             </span>
-            <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">展開 Canvas 編輯器</span>
+            <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">
+              展開 Canvas 編輯器
+            </span>
           </button>
         </div>
       )}
