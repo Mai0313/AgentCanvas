@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { Message, ModelSetting } from "../types";
-import { chatCompletion } from "../services/openai";
+import { chatCompletion } from "./openai";
 
 /**
  * 開啟 Markdown 畫布

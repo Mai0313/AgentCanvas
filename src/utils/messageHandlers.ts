@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { Message, ModelSetting } from "../types";
-import { chatCompletion, generateImageAndText } from "../services/openai";
+import { chatCompletion, generateImageAndText } from "./openai";
 
 /**
  * 處理消息複製功能

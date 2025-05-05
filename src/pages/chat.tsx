@@ -15,7 +15,7 @@ import DefaultLayout from "@/layouts/default";
 import ChatBox from "@/components/ChatBox";
 import MarkdownCanvas from "@/components/MarkdownCanvas";
 import { Message, ModelSetting, MessageContent } from "@/types";
-import { fetchModels, detectTaskType, detectUserLang } from "@/services/openai";
+import { fetchModels, detectTaskType, detectUserLang } from "@/utils/openai";
 import { getDefaultModelSettings } from "@/utils/modelUtils";
 import {
   copyMessage,

@@ -32,7 +32,7 @@ import { codeBlock } from "@blocknote/code-block";
 
 import { Message, ModelSetting } from "../types";
 import { getDefaultModelSettings } from "../utils/modelUtils";
-import { chatCompletion } from "../services/openai";
+import { chatCompletion } from "../utils/openai.ts";
 
 import SelectionPopup from "./SelectionPopup";
 
