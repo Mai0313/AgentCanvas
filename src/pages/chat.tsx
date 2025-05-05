@@ -81,6 +81,9 @@ export default function ChatPage() {
   // 新增一個 state 控制 Alert 顯示
   const [showThinking, setShowThinking] = useState(false);
 
+  // fullscreen 狀態 class
+  const fullscreenClass = isMarkdownCanvasOpen ? "main-content-fullscreen" : "";
+
   // Handle text selection from both chat and markdown canvas
   const handleAskGpt = (selectedText: string) => {
     // 創建一個自定義事件來傳遞選中的文字
@@ -713,7 +716,7 @@ export default function ChatPage() {
           {/* Main content area with chat and markdown */}
           <div
             ref={contentContainerRef}
-            className="flex flex-1 h-full overflow-hidden"
+            className={`flex flex-1 h-full overflow-hidden ${fullscreenClass}`}
           >
             {/* Chat content area */}
             <div
