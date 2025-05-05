@@ -122,7 +122,7 @@ export const handleCanvasMode = async (
     await chatCompletion(
       [codeSystemMessage, userMessage],
       settings,
-      userLanguage,
+      "en-US",
       (token) => {
         codeBlock += token;
 
