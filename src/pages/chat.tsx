@@ -457,7 +457,7 @@ export default function ChatPage() {
       setMessages,
       setMarkdownContent,
     );
-    // 觸發 AskGPT 流程，將內容引用到 ChatBox
+    // 觸發 Ask GPT 流程，將內容引用到 ChatBox
     if (editedContent) {
       const event = new CustomEvent("setQuotedText", {
         detail: { quotedText: editedContent },
