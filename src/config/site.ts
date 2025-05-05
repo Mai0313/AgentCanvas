@@ -9,8 +9,8 @@ export const siteConfig = {
       href: "/chat",
     },
     {
-      label: "About",
-      href: "/about",
+      label: "DeepWiki",
+      href: "/deepwiki",
     },
   ],
   links: {

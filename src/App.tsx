@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import IndexPage from "@/pages/index";
 import ChatPage from "@/pages/chat";
-import AboutPage from "@/pages/about";
+import DeepWikiPage from "@/pages/deepwiki";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
       {/* <Route element={<ChatPage />} path="/chat/:id/:title" /> */}
       {/* <Route element={<ChatPage />} path="/chat/:id/:title/:model" /> */}
       {/* <Route element={<ChatPage />} path="/chat/:id/:title/:model/:prompt" /> */}
-      <Route element={<AboutPage />} path="/about" />
+      <Route element={<DeepWikiPage />} path="/deepwiki" />
     </Routes>
   );
 }
