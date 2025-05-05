@@ -578,51 +578,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           isDragging ? "border-2 border-dashed border-primary" : ""
         } transition-all duration-500`}
       >
-        {/* 縮小的 MarkdownCanvas 按鈕，插入到 AI 最後一則訊息下方 */}
-        {isMarkdownMinimized && minimizedMarkdownMessageId && (
-          <div className="flex justify-center my-2">
-            <button
-              className="markdown-mini-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors shadow"
-              title="展開 Canvas 編輯器"
-              onClick={onRestoreMarkdownCanvas}
-            >
-              <span className="inline-block align-middle">
-                {/* 雙箭頭SVG */}
-                <svg
-                  fill="none"
-                  height="24"
-                  viewBox="0 0 48 48"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M16 13L4 25.4322L16 37"
-                    stroke="#333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="4"
-                  />
-                  <path
-                    d="M32 13L44 25.4322L32 37"
-                    stroke="#333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="4"
-                  />
-                  <path
-                    d="M28 4L21 44"
-                    stroke="#333"
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                  />
-                </svg>
-              </span>
-              <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">
-                展開 Canvas 編輯器
-              </span>
-            </button>
-          </div>
-        )}
         {messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <Card
@@ -775,29 +730,92 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               messages.length === 1 && !isTransitioning ? "animate-fadeIn" : ""
             }`}
           >
-            {messages.map((message) => (
-              <React.Fragment key={message.id}>
-                <MessageItem
-                  key={message.id}
-                  currentModel={currentModel}
-                  fetchModels={fetchModels}
-                  isEditing={editingMessageId === message.id}
-                  isLoadingModels={isLoadingModels}
-                  isStreaming={streamingMessageId === message.id}
-                  message={message}
-                  toggleMarkdownCanvas={() => {
-                    if (typeof message.content === "string") {
-                      toggleMarkdownCanvas(message.id, message.content);
-                    }
-                  }}
-                  onAskGpt={handleAskGpt}
-                  onCopy={onCopy}
-                  onDelete={onDelete}
-                  onEdit={onEdit}
-                  onRegenerate={onRegenerate}
-                />
-              </React.Fragment>
-            ))}
+            {(() => {
+              // 找到最後一則 assistant 訊息的 index
+              const lastAssistantIdx = [...messages].reverse().findIndex(m => m.role === "assistant");
+              const insertIdx = lastAssistantIdx === -1 ? -1 : messages.length - 1 - lastAssistantIdx;
+              return messages.map((message, idx) => {
+                // 在最後一則 assistant 訊息的上方插入按鈕
+                if (
+                  isMarkdownMinimized &&
+                  minimizedMarkdownMessageId &&
+                  insertIdx === idx
+                ) {
+                  return (
+                    <React.Fragment key={message.id + "-with-canvas-btn"}>
+                      <div className="flex justify-center my-2">
+                        <button
+                          className="markdown-mini-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors shadow"
+                          title="展開 Canvas 編輯器"
+                          onClick={onRestoreMarkdownCanvas}
+                        >
+                          <span className="inline-block align-middle">
+                            {/* 雙箭頭SVG */}
+                            <svg
+                              fill="none"
+                              height="24"
+                              viewBox="0 0 48 48"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M16 13L4 25.4322L16 37" stroke="#333" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
+                              <path d="M32 13L44 25.4322L32 37" stroke="#333" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
+                              <path d="M28 4L21 44" stroke="#333" strokeLinecap="round" strokeWidth="4" />
+                            </svg>
+                          </span>
+                          <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">
+                            展開 Canvas 編輯器
+                          </span>
+                        </button>
+                      </div>
+                      <MessageItem
+                        key={message.id}
+                        currentModel={currentModel}
+                        fetchModels={fetchModels}
+                        isEditing={editingMessageId === message.id}
+                        isLoadingModels={isLoadingModels}
+                        isStreaming={streamingMessageId === message.id}
+                        message={message}
+                        toggleMarkdownCanvas={() => {
+                          if (typeof message.content === "string") {
+                            toggleMarkdownCanvas(message.id, message.content);
+                          }
+                        }}
+                        onAskGpt={handleAskGpt}
+                        onCopy={onCopy}
+                        onDelete={onDelete}
+                        onEdit={onEdit}
+                        onRegenerate={onRegenerate}
+                      />
+                    </React.Fragment>
+                  );
+                }
+                // 其他訊息正常渲染
+                return (
+                  <React.Fragment key={message.id}>
+                    <MessageItem
+                      key={message.id}
+                      currentModel={currentModel}
+                      fetchModels={fetchModels}
+                      isEditing={editingMessageId === message.id}
+                      isLoadingModels={isLoadingModels}
+                      isStreaming={streamingMessageId === message.id}
+                      message={message}
+                      toggleMarkdownCanvas={() => {
+                        if (typeof message.content === "string") {
+                          toggleMarkdownCanvas(message.id, message.content);
+                        }
+                      }}
+                      onAskGpt={handleAskGpt}
+                      onCopy={onCopy}
+                      onDelete={onDelete}
+                      onEdit={onEdit}
+                      onRegenerate={onRegenerate}
+                    />
+                  </React.Fragment>
+                );
+              });
+            })()}
           </div>
         )}
         <div ref={messagesEndRef} />
