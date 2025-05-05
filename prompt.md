@@ -61,3 +61,6 @@
     - 先透過第一個 `chatCompletion` 來回答使用者的問題
     - 透過第二個 `chatCompletion` 來生成修改後的代碼並輸出到 `MarkdownCanvas`
 如果把 `MarkdownCanvas` 改成一個function call的話會不會比較好處理？
+
+
+`yarn run docusaurus generate-typedoc`
