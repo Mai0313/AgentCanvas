@@ -8,10 +8,10 @@ export const siteConfig = {
       label: "Chat",
       href: "/chat",
     },
-    {
-      label: "DeepWiki",
-      href: "/deepwiki",
-    },
+    // {
+    //   label: "DeepWiki",
+    //   href: "/deepwiki",
+    // },
   ],
   links: {
     github: "https://github.com/Mai0313/AgentCanvas",
