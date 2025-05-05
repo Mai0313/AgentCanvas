@@ -108,6 +108,7 @@ jobs:
           tags: |
             ${{ matrix.target.tag }}:latest
             ${{ matrix.target.tag }}:${{ github.sha }}
+            ${{ matrix.target.tag }}:${{ github.ref }}
           sbom: false
           provenance: false
           cache-from: type=registry,ref=${{ matrix.target.tag }}:buildcache
