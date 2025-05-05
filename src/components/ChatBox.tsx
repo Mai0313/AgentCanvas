@@ -607,7 +607,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   return (
-    <div ref={dropZoneRef} className="chat-box w-full h-full flex flex-col">
+    <div ref={dropZoneRef} className="chat-box w-full h-full flex flex-col bg-background text-foreground dark:bg-background">
       <div
         ref={messagesContainerRef}
         className={`messages-container flex-grow rounded-lg p-4 overflow-auto relative ${
@@ -633,20 +633,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               }`}
             >
               <h2 className="text-xl font-bold mb-4">
-                <SplitText
-                  animationFrom={{
-                    opacity: 0,
-                    transform: "translate3d(0,30px,0)",
-                  }}
-                  animationTo={{
-                    opacity: 1,
-                    transform: "translate3d(0,0,0)",
-                  }}
-                  className="inline-block"
-                  delay={40}
-                  easing="easeOutCubic"
-                  text={`Start a conversation with ${settings.model || "AI"}`}
-                />
+                {`Start a conversation with ${settings.model || "AI"}`}
               </h2>
 
               {showPasteHint && (
@@ -816,7 +803,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
       {/* 當有消息時，在底部顯示輸入框 */}
       {messages.length > 0 && (
-        <form className="chat-input-form mt-4" onSubmit={handleSubmit}>
+        <form className="chat-input-form mt-4 mb-4" onSubmit={handleSubmit}>
           {quotedText && (
             <Card className="quoted-text-container mb-2 bg-content2">
               <div className="flex items-center justify-between p-2">

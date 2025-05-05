@@ -725,11 +725,11 @@ export default function ChatPage() {
           {/* Main content area with chat and markdown */}
           <div
             ref={contentContainerRef}
-            className={`flex flex-1 h-full overflow-hidden ${fullscreenClass}`}
+            className={`flex flex-1 h-full overflow-hidden ${fullscreenClass} bg-background text-foreground dark:bg-background`}
           >
             {/* Chat content area */}
             <div
-              className="flex-grow h-full overflow-auto bg-transparent"
+              className="flex-grow h-full overflow-auto bg-background text-foreground dark:bg-background"
               style={{
                 width: isMarkdownCanvasOpen
                   ? `${100 - markdownWidth}%`

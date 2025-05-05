@@ -531,7 +531,10 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   const showLoadingIndicator = loadingEditor && !hasInitialContent;
 
   return (
-    <div ref={canvasRef} className="markdown-canvas">
+    <div
+      ref={canvasRef}
+      className="markdown-canvas bg-background text-foreground dark:bg-background h-full w-full"
+    >
       <div className="markdown-header bg-default-100 dark:bg-zinc-900 border-b border-default-200 dark:border-default-700 p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
