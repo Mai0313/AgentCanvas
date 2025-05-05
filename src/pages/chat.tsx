@@ -15,7 +15,7 @@ import DefaultLayout from "@/layouts/default";
 import ChatBox from "@/components/ChatBox";
 import MarkdownCanvas from "@/components/MarkdownCanvas";
 import { Message, ModelSetting, MessageContent } from "@/types";
-import { fetchModels, detectTaskType } from "@/services/openai";
+import { fetchModels, detectTaskType, detectUserLang } from "@/services/openai";
 import { getDefaultModelSettings } from "@/utils/modelUtils";
 import {
   copyMessage,
@@ -73,6 +73,19 @@ export default function ChatPage() {
 
   // fullscreen 狀態 class
   const fullscreenClass = isMarkdownCanvasOpen ? "main-content-fullscreen" : "";
+
+  // Add state for mode and language, initialized from URL if present
+  const getUrlParam = (param: string) => {
+    if (typeof window === "undefined") return null;
+    const url = new URL(window.location.href);
+
+    return url.searchParams.get(param);
+  };
+
+  const [mode, setMode] = useState<string>(() => getUrlParam("mode") || "");
+  const [userLanguage, setUserLanguage] = useState<string>(
+    () => getUrlParam("lang") || "",
+  );
 
   // Handle text selection from both chat and markdown canvas
   const handleAskGpt = (selectedText: string) => {
@@ -202,40 +215,41 @@ export default function ChatPage() {
     }
   }, [isLoading]);
 
-  // Memoize generateNewThreadId to avoid dependency issues
-  const generateNewThreadId = useCallback(() => {
-    // Generate UUID and remove all hyphens, then take substring
-    const newThreadId =
-      "thread_dvc_" + uuidv4().replace(/-/g, "").substring(0, 16);
+  // Update generateNewThreadId to also set mode and language in URL
+  const generateNewThreadId = useCallback(
+    (newMode?: string, newLang?: string) => {
+      const newThreadId =
+        "thread_dvc_" + uuidv4().replace(/-/g, "").substring(0, 16);
 
-    setThreadId(newThreadId);
+      setThreadId(newThreadId);
 
-    // Update URL with the new thread ID without page reload
-    const url = new URL(window.location.href);
+      // Update URL with the new thread ID, mode, and language
+      const url = new URL(window.location.href);
+      const basePath = "/chat";
 
-    // Ensure the URL is properly formed with the base path
-    const basePath = "/chat";
-
-    if (basePath && !url.pathname.startsWith(basePath)) {
-      url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
-    }
-
-    url.searchParams.set("thread_id", newThreadId);
-    window.history.pushState({ threadId: newThreadId }, "", url.toString());
-
-    // Optionally clear messages to start a fresh conversation
-    setMessages([]);
-
-    // Close any open markdown canvas
-    if (isMarkdownCanvasOpen) {
-      handleCloseMarkdownCanvas();
-    }
-  }, [isMarkdownCanvasOpen]);
+      if (basePath && !url.pathname.startsWith(basePath)) {
+        url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
+      }
+      url.searchParams.set("thread_id", newThreadId);
+      if (newMode) url.searchParams.set("mode", newMode);
+      if (newLang) url.searchParams.set("lang", newLang);
+      window.history.pushState({ threadId: newThreadId }, "", url.toString());
+      setMessages([]);
+      if (isMarkdownCanvasOpen) {
+        handleCloseMarkdownCanvas();
+      }
+      if (newMode) setMode(newMode);
+      if (newLang) setUserLanguage(newLang);
+    },
+    [isMarkdownCanvasOpen],
+  );
 
   useEffect(() => {
     // Check if URL already has a thread ID
     const url = new URL(window.location.href);
     const existingThreadId = url.searchParams.get("thread_id");
+    const urlMode = url.searchParams.get("mode");
+    const urlLang = url.searchParams.get("lang");
 
     // Verify the URL contains the correct base path
     const basePath = "/chat";
@@ -244,6 +258,8 @@ export default function ChatPage() {
     if (existingThreadId) {
       // Use the existing thread ID from URL
       setThreadId(existingThreadId);
+      if (urlMode) setMode(urlMode);
+      if (urlLang) setUserLanguage(urlLang);
 
       // Update path if needed but keep the thread ID
       if (needsPathUpdate) {
@@ -262,8 +278,10 @@ export default function ChatPage() {
     }
   }, [generateNewThreadId]);
 
-  // Add button/functionality to start a new thread
+  // Update startNewThread to clear mode/language
   const startNewThread = () => {
+    setMode("");
+    setUserLanguage("");
     generateNewThreadId();
   };
 
@@ -295,46 +313,71 @@ export default function ChatPage() {
     setError(null);
 
     try {
-      // First determine the task type if content is a string
+      let currentMode = mode;
+      let currentLang = userLanguage;
+
       const messageText =
         typeof content === "string"
           ? content
           : content.find((item) => item.type === "text")?.text || "";
 
-      // Only detect task type if we have text content
-      let taskType: "canvas" | "image" | "chat" = "chat"; // Default to chat
+      // Only detect mode/language if not set yet
+      if (!currentMode || !currentLang) {
+        // Detect mode
+        let detectedMode: "canvas" | "image" | "chat" = "chat";
 
-      if (messageText) {
-        try {
-          taskType = await detectTaskType(messageText, settings);
-          console.log(`Detected task type: ${taskType}`);
-        } catch (err) {
-          console.error("Error in task detection:", err);
-          // Continue with default chat mode if detection fails
+        if (messageText) {
+          try {
+            detectedMode = await detectTaskType(messageText, settings);
+          } catch (err) {
+            detectedMode = "chat";
+            console.error("Error detecting task type:", err);
+          }
         }
+
+        // Use LLM to detect language from messageText
+        let detectedLang = "en-US";
+
+        if (messageText) {
+          try {
+            detectedLang = await detectUserLang(messageText, settings);
+          } catch (err) {
+            detectedLang = "en-US";
+            console.error("Error detecting user language:", err);
+          }
+        }
+
+        currentMode = detectedMode;
+        currentLang = detectedLang;
+
+        // Update URL and state
+        generateNewThreadId(detectedMode, detectedLang);
+        setMode(detectedMode);
+        setUserLanguage(detectedLang);
       }
 
       const assistantMessageId = uuidv4();
       const assistantMessage: Message = {
         id: assistantMessageId,
         role: "assistant",
-        content: taskType === "image" ? "Creating your Image..." : "",
+        content: currentMode === "image" ? "Creating your Image..." : "",
         timestamp: new Date(),
-        isGeneratingImage: taskType === "image", // Mark as generating image if detected as image task
+        isGeneratingImage: currentMode === "image", // Mark as generating image if detected as image task
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
       setStreamingMessageId(assistantMessageId);
 
-      if (taskType === "image") {
+      if (currentMode === "image") {
         // Handle image generation - 使用新模組
         await handleImageGeneration(
           messageText,
           assistantMessageId,
           settings,
           setMessages,
+          currentLang,
         );
-      } else if (taskType === "canvas") {
+      } else if (currentMode === "canvas") {
         // Enhanced canvas mode with two-step generation - 使用新模組
         await handleCanvasMode(
           userMessage,
@@ -344,6 +387,7 @@ export default function ChatPage() {
           setMarkdownContent,
           setEditingMessageId,
           setIsMarkdownCanvasOpen,
+          currentLang,
         );
       } else {
         // Handle normal chat or code tasks - 使用新模組
@@ -353,6 +397,7 @@ export default function ChatPage() {
           assistantMessageId,
           settings,
           setMessages,
+          currentLang,
         );
       }
     } catch (err: any) {

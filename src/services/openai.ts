@@ -66,6 +66,7 @@ export const fetchModels = async (
 export const chatCompletion = async (
   messages: Message[],
   settings: ModelSetting,
+  userLanguage?: string,
   onToken?: (token: string) => void,
 ): Promise<string> => {
   try {
@@ -77,7 +78,9 @@ export const chatCompletion = async (
       if (typeof m.content === "string") {
         return {
           role: m.role as "user" | "assistant" | "system",
-          content: m.content,
+          content:
+            m.content +
+            `You MUST respond in ${userLanguage || "en-US"} language.`,
         };
       } else {
         // For array content with text and images, format according to OpenAI API
@@ -85,7 +88,12 @@ export const chatCompletion = async (
           role: m.role as "user" | "assistant" | "system",
           content: m.content.map((item) => {
             if (item.type === "text") {
-              return { type: "text", text: item.text };
+              return {
+                type: "text",
+                text:
+                  item.text +
+                  `You MUST respond in ${userLanguage || "en-US"} language.`,
+              };
             } else if (item.type === "image_url" && item.image_url) {
               return { type: "image_url", image_url: item.image_url };
             }
@@ -215,6 +223,43 @@ export const detectTaskType = async (
 };
 
 /**
+ * Detect the user's language from the first message
+ * @param message User's first message
+ * @param settings Model settings
+ * @returns Language code, e.g., zh-TW, en-US, ja-JP
+ */
+export const detectUserLang = async (
+  message: string,
+  settings: ModelSetting,
+): Promise<string> => {
+  try {
+    const client = createClient(settings);
+    const systemMessage: ChatCompletionMessageParam = {
+      role: "system",
+      content:
+        "Detect the language of the following user message. Respond ONLY with the language code (e.g., zh-TW, en-US, ja-JP, ko-KR, fr-FR, etc). No explanation, no extra text.",
+    };
+    const userMessage: ChatCompletionMessageParam = {
+      role: "user",
+      content: message,
+    };
+    const response = await client.chat.completions.create({
+      model: settings.model,
+      messages: [systemMessage, userMessage],
+      temperature: 0.1,
+      max_tokens: 10,
+    });
+    const lang = response.choices[0].message.content?.trim();
+
+    return lang || "en-US";
+  } catch (error) {
+    console.error("Error detecting user language:", error);
+
+    return "en-US";
+  }
+};
+
+/**
  * Refine a user prompt for better image generation
  * @param originalPrompt The original prompt from the user
  * @param settings Model settings
@@ -278,6 +323,7 @@ export const refineImagePrompt = async (
 export const generateImageAndText = async (
   prompt: string,
   settings: ModelSetting,
+  userLanguage?: string,
   onToken?: (token: string) => void,
 ): Promise<{ imageUrl: string; textResponse: string }> => {
   try {
@@ -350,6 +396,7 @@ export const generateImageAndText = async (
         },
       ],
       settings,
+      userLanguage,
       onToken,
     );
 

@@ -435,6 +435,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
       messageContent.trim().startsWith("> ") ||
       messageContent.trim().startsWith(">\n") ||
       /^>/.test(messageContent.trim());
+
     if (isQuoteBlock) {
       return (
         <div className="italic text-default-500 flex items-center gap-1">

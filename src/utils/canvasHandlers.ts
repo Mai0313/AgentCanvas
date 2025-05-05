@@ -78,6 +78,7 @@ export const handleCanvasMode = async (
   setMarkdownContent: React.Dispatch<React.SetStateAction<string>>,
   setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>,
   setIsMarkdownCanvasOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  userLanguage?: string, // 新增參數
 ): Promise<void> => {
   // 步驟 1: 僅生成代碼塊 - 這將直接輸出到 MarkdownCanvas
   let codeBlock = "";
@@ -85,7 +86,7 @@ export const handleCanvasMode = async (
     id: "system-code-msg",
     role: "system",
     content:
-      "You are a canvas assistant. Provide only a single code block solution with language formatting (e.g., ```javascript). Start directly with the code block and do not include any explanations or comments outside the code block. Make the solution concise and complete. Make sure all descriptions are in user language.",
+      "You are a canvas assistant. Provide only a single code block solution with language formatting (e.g., ```javascript). Start directly with the code block and do not include any explanations or comments outside the code block. Make the solution concise and complete.",
     timestamp: new Date(),
   };
 
@@ -121,6 +122,7 @@ export const handleCanvasMode = async (
     await chatCompletion(
       [codeSystemMessage, userMessage],
       settings,
+      userLanguage,
       (token) => {
         codeBlock += token;
 
@@ -136,7 +138,7 @@ export const handleCanvasMode = async (
       id: "system-explain-msg",
       role: "system",
       content:
-        "Now explain the code block you provided in user language. Give context on how it works and any important implementation details. Don't repeat the code itself, just provide the explanation. Make sure you use user language.",
+        "Now explain the code block you provided. Give context on how it works and any important implementation details. Don't repeat the code itself, just provide the explanation.",
       timestamp: new Date(),
     };
 
@@ -173,6 +175,7 @@ export const handleCanvasMode = async (
     await chatCompletion(
       [explanationSystemMessage, userMessage, codeContextMessage],
       settings,
+      userLanguage,
       (token) => {
         // 累積解釋文本
         explanationContent += token;

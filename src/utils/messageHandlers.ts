@@ -67,11 +67,13 @@ export const handleImageGeneration = async (
   assistantMessageId: string,
   settings: ModelSetting,
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+  userLanguage?: string, // 新增參數
 ): Promise<void> => {
   // 處理圖片生成
   const { imageUrl, textResponse } = await generateImageAndText(
     messageText,
     settings,
+    userLanguage,
   );
 
   // 更新消息，包含圖片和描述
@@ -103,24 +105,30 @@ export const handleStandardChatMode = async (
   assistantMessageId: string,
   settings: ModelSetting,
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+  userLanguage?: string, // 新增參數
 ): Promise<void> => {
-  await chatCompletion([...messages, userMessage], settings, (token) => {
-    setMessages((prev) => {
-      const updatedMessages = [...prev];
-      const messageIndex = updatedMessages.findIndex(
-        (m) => m.id === assistantMessageId,
-      );
+  await chatCompletion(
+    [...messages, userMessage],
+    settings,
+    userLanguage,
+    (token) => {
+      setMessages((prev) => {
+        const updatedMessages = [...prev];
+        const messageIndex = updatedMessages.findIndex(
+          (m) => m.id === assistantMessageId,
+        );
 
-      if (messageIndex !== -1) {
-        updatedMessages[messageIndex] = {
-          ...updatedMessages[messageIndex],
-          content: updatedMessages[messageIndex].content + token,
-        };
-      }
+        if (messageIndex !== -1) {
+          updatedMessages[messageIndex] = {
+            ...updatedMessages[messageIndex],
+            content: updatedMessages[messageIndex].content + token,
+          };
+        }
 
-      return updatedMessages;
-    });
-  });
+        return updatedMessages;
+      });
+    },
+  );
 };
 
 /**
@@ -135,6 +143,7 @@ export const regenerateMessage = async (
   setStreamingMessageId: React.Dispatch<React.SetStateAction<string | null>>,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setError: React.Dispatch<React.SetStateAction<string | null>>,
+  userLanguage?: string, // 新增參數
 ): Promise<void> => {
   // 找到當前消息及其索引
   const messageIndex = messages.findIndex((m) => m.id === messageId);
@@ -184,23 +193,28 @@ export const regenerateMessage = async (
       ? { ...settings, model: modelName }
       : settings;
 
-    await chatCompletion(contextMessages, settingsToUse, (token) => {
-      setMessages((prev) => {
-        const updatedMsgs = [...prev];
-        const msgIndex = updatedMsgs.findIndex(
-          (m) => m.id === assistantMessageId,
-        );
+    await chatCompletion(
+      contextMessages,
+      settingsToUse,
+      userLanguage,
+      (token) => {
+        setMessages((prev) => {
+          const updatedMsgs = [...prev];
+          const msgIndex = updatedMsgs.findIndex(
+            (m) => m.id === assistantMessageId,
+          );
 
-        if (msgIndex !== -1) {
-          updatedMsgs[msgIndex] = {
-            ...updatedMsgs[msgIndex],
-            content: updatedMsgs[msgIndex].content + token,
-          };
-        }
+          if (msgIndex !== -1) {
+            updatedMsgs[msgIndex] = {
+              ...updatedMsgs[msgIndex],
+              content: updatedMsgs[msgIndex].content + token,
+            };
+          }
 
-        return updatedMsgs;
-      });
-    });
+          return updatedMsgs;
+        });
+      },
+    );
   } catch (err: any) {
     setError(err.message || "重新生成回應時出錯。請檢查您的設置並重試。");
     console.error("重新生成回應錯誤:", err);
