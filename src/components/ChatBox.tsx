@@ -607,7 +607,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   return (
-    <div ref={dropZoneRef} className="chat-box w-full h-full flex flex-col bg-background text-foreground dark:bg-background">
+    <div
+      ref={dropZoneRef}
+      className="chat-box w-full h-full flex flex-col bg-background text-foreground dark:bg-background"
+    >
       <div
         ref={messagesContainerRef}
         className={`messages-container flex-grow rounded-lg p-4 overflow-auto relative ${

@@ -793,14 +793,38 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
                   formattingToolbar={() => (
                     <FormattingToolbar>
                       <BlockTypeSelect key={"blockTypeSelect"} />
-                      <BasicTextStyleButton key={"boldStyleButton"} basicTextStyle={"bold"} />
-                      <BasicTextStyleButton key={"italicStyleButton"} basicTextStyle={"italic"} />
-                      <BasicTextStyleButton key={"underlineStyleButton"} basicTextStyle={"underline"} />
-                      <BasicTextStyleButton key={"strikeStyleButton"} basicTextStyle={"strike"} />
-                      <BasicTextStyleButton key={"codeStyleButton"} basicTextStyle={"code"} />
-                      <TextAlignButton key={"textAlignLeftButton"} textAlignment={"left"} />
-                      <TextAlignButton key={"textAlignCenterButton"} textAlignment={"center"} />
-                      <TextAlignButton key={"textAlignRightButton"} textAlignment={"right"} />
+                      <BasicTextStyleButton
+                        key={"boldStyleButton"}
+                        basicTextStyle={"bold"}
+                      />
+                      <BasicTextStyleButton
+                        key={"italicStyleButton"}
+                        basicTextStyle={"italic"}
+                      />
+                      <BasicTextStyleButton
+                        key={"underlineStyleButton"}
+                        basicTextStyle={"underline"}
+                      />
+                      <BasicTextStyleButton
+                        key={"strikeStyleButton"}
+                        basicTextStyle={"strike"}
+                      />
+                      <BasicTextStyleButton
+                        key={"codeStyleButton"}
+                        basicTextStyle={"code"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignLeftButton"}
+                        textAlignment={"left"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignCenterButton"}
+                        textAlignment={"center"}
+                      />
+                      <TextAlignButton
+                        key={"textAlignRightButton"}
+                        textAlignment={"right"}
+                      />
                       <ColorStyleButton key={"colorStyleButton"} />
                       <NestBlockButton key={"nestBlockButton"} />
                       <UnnestBlockButton key={"unnestBlockButton"} />
