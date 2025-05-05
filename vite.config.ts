@@ -5,6 +5,10 @@ import tsconfigPaths from "vite-tsconfig-paths";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
+  preview: {
+    // 允許所有主機
+    allowedHosts: true,
+  },
   build: {
     chunkSizeWarningLimit: 800, // Increase the warning limit to 800KB
     rollupOptions: {
