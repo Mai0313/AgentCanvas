@@ -73,7 +73,6 @@ export default function IndexPage() {
           <ChatBox
             editingMessageId={editingMessageId}
             isLoading={isLoading}
-            longestCodeBlockPosition={null}
             messages={messages}
             settings={settings}
             streamingMessageId={streamingMessageId}

@@ -175,7 +175,6 @@ interface MessageItemProps {
   message: Message;
   isStreaming?: boolean;
   isEditing?: boolean;
-  longestCodeBlockPosition?: { start: number; end: number } | null;
   toggleMarkdownCanvas: () => void;
   onAskGpt?: (selectedText: string) => void;
   onCopy?: (content: string) => void;
