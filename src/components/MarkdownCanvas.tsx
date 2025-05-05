@@ -467,7 +467,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
 
       let generatedTitle = "";
 
-      await chatCompletion(messages, settings, (token) => {
+      await chatCompletion(messages, settings, "en-US", (token) => {
         generatedTitle += token;
       });
 
