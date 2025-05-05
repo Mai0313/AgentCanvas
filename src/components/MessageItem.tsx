@@ -429,12 +429,39 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
     const messageContent = getMessageContentAsString();
 
+    // 檢查是否為引用內容（以 > 開頭，允許多行）
+    const isQuoteBlock =
+      messageContent.trim().startsWith(">") ||
+      messageContent.trim().startsWith("> ") ||
+      messageContent.trim().startsWith(">\n") ||
+      /^>/.test(messageContent.trim());
+    if (isQuoteBlock) {
+      return (
+        <div className="italic text-default-500 flex items-center gap-1">
+          <svg
+            className="w-4 h-4 text-primary"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M7 17h8M7 13h8M9 9h6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          引用內容已隱藏
+        </div>
+      );
+    }
+
     return (
       <SplitText
         animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
         animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
         className="text-foreground text-base whitespace-pre-line"
-        delay={isStreaming ? 10 : 20}
+        delay={isStreaming ? 10 : 20} // 更快的動畫速度
         easing="easeOutCubic"
         rootMargin="-50px"
         text={messageContent}
