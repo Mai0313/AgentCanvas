@@ -184,8 +184,6 @@ interface MessageItemProps {
   fetchModels?: () => Promise<string[]>;
   currentModel?: string;
   isLoadingModels?: boolean;
-  isMarkdownMinimized?: boolean;
-  onRestoreMarkdownCanvas?: () => void;
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({
@@ -199,8 +197,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
   fetchModels,
   currentModel = "",
   isLoadingModels = false,
-  isMarkdownMinimized = false,
-  onRestoreMarkdownCanvas,
 }) => {
   const [showSelectionPopup, setShowSelectionPopup] = useState(false);
   const [selectedText, setSelectedText] = useState("");
@@ -503,50 +499,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
       className={`message mb-4 ${isStreaming ? "border-primary" : ""} ${isEditMode ? "border-warning" : ""}`}
       onMouseUp={handleMouseUp}
     >
-      {/* 當為縮小狀態且是AI訊息時，顯示展開Canvas按鈕（移到最上方） */}
-      {isMarkdownMinimized && message.role === "assistant" && (
-        <div className="flex justify-center my-2">
-          <button
-            className="markdown-mini-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors shadow"
-            title="展開 Canvas 編輯器"
-            onClick={onRestoreMarkdownCanvas}
-          >
-            <span className="inline-block align-middle">
-              <svg
-                fill="none"
-                height="24"
-                viewBox="0 0 48 48"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 13L4 25.4322L16 37"
-                  stroke="#333"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="4"
-                />
-                <path
-                  d="M32 13L44 25.4322L32 37"
-                  stroke="#333"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="4"
-                />
-                <path
-                  d="M28 4L21 44"
-                  stroke="#333"
-                  strokeLinecap="round"
-                  strokeWidth="4"
-                />
-              </svg>
-            </span>
-            <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">
-              展開 Canvas 編輯器
-            </span>
-          </button>
-        </div>
-      )}
       <div
         className={`message-header flex justify-between items-center p-2 px-4 ${roleBgClass} rounded-t-lg`}
       >
@@ -564,7 +516,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
           )}
         </span>
       </div>
-
       <div className="message-content p-4">
         {processMessageContent()}
         {renderConditional(
@@ -593,7 +544,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
           </div>,
         )}
       </div>
-
       {/* 消息操作按鈕 - 對於所有非流式傳輸的消息都顯示 */}
       {renderConditional(
         !isEditMode && !isStreaming,

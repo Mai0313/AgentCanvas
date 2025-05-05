@@ -783,10 +783,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   fetchModels={fetchModels}
                   isEditing={editingMessageId === message.id}
                   isLoadingModels={isLoadingModels}
-                  isMarkdownMinimized={
-                    isMarkdownMinimized &&
-                    minimizedMarkdownMessageId === message.id
-                  }
                   isStreaming={streamingMessageId === message.id}
                   message={message}
                   toggleMarkdownCanvas={() => {
@@ -799,7 +795,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   onDelete={onDelete}
                   onEdit={onEdit}
                   onRegenerate={onRegenerate}
-                  onRestoreMarkdownCanvas={onRestoreMarkdownCanvas}
                 />
               </React.Fragment>
             ))}
