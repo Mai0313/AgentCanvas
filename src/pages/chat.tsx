@@ -54,6 +54,9 @@ export default function ChatPage() {
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
     null,
   );
+  // 新增：縮小狀態與對應訊息ID
+  const [isMarkdownMinimized, setIsMarkdownMinimized] = useState(false);
+  const [minimizedMarkdownMessageId, setMinimizedMarkdownMessageId] = useState<string | null>(null);
 
   // Resizable layout states
   const [markdownWidth, setMarkdownWidth] = useState(40); // Default 40% width for markdown
@@ -468,7 +471,17 @@ export default function ChatPage() {
   };
 
   const handleCloseMarkdownCanvas = () => {
-    closeMarkdownCanvas(setIsMarkdownCanvasOpen, setEditingMessageId);
+    // 不是直接關閉，而是縮小到AI訊息
+    setIsMarkdownCanvasOpen(false);
+    setIsMarkdownMinimized(true);
+    setMinimizedMarkdownMessageId(editingMessageId);
+  };
+
+  // 恢復全螢幕MarkdownCanvas
+  const handleRestoreMarkdownCanvas = () => {
+    setIsMarkdownCanvasOpen(true);
+    setIsMarkdownMinimized(false);
+    // 保持editingMessageId/minimizedMarkdownMessageId不變
   };
 
   return (
@@ -691,7 +704,7 @@ export default function ChatPage() {
               </PopoverTrigger>
               <PopoverContent>
                 <div className="px-1 py-2 w-80">
-                  <div className="text-small font-bold">Model Info</div>
+                  <div className="text-small font-bold">Model Information</div>
                   <div className="text-tiny mt-2">
                     <div className="grid grid-cols-2 gap-2">
                       <div className="font-medium">Model:</div>
@@ -746,6 +759,9 @@ export default function ChatPage() {
                 settings={settings}
                 streamingMessageId={streamingMessageId}
                 toggleMarkdownCanvas={toggleMarkdownCanvas}
+                isMarkdownMinimized={isMarkdownMinimized}
+                minimizedMarkdownMessageId={minimizedMarkdownMessageId}
+                onRestoreMarkdownCanvas={handleRestoreMarkdownCanvas}
                 onCopy={handleCopyMessage}
                 onDelete={handleDeleteMessage}
                 onEdit={handleEditMessage}

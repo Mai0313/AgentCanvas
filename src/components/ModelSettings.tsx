@@ -17,7 +17,7 @@ const ModelSettings: React.FC<ModelSettingsProps> = ({
       {/* 只保留最小必要的信息，移除 API settings 和 advanced Settings */}
       <div className="model-info mt-4">
         <div className="flex items-center gap-2 my-4">
-          <span className="text-xs text-default-500">Model Info</span>
+          <span className="text-xs text-default-500">Model Information</span>
           <Divider className="flex-grow" />
         </div>
 

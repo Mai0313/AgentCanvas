@@ -30,35 +30,6 @@ const SendIcon = (props: any) => {
   );
 };
 
-// Image icon for image paste indicator
-const ImageIcon = (props: any) => {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      focusable="false"
-      height="1em"
-      role="presentation"
-      viewBox="0 0 24 24"
-      width="1em"
-      {...props}
-    >
-      <path
-        d="M21.68 16.96L18.22 9.06C17.94 8.42 17.49 7.86 16.9 7.45C16.31 7.03 15.61 6.79 14.9 6.75H9.10001C8.39001 6.79 7.69001 7.03 7.10001 7.45C6.51001 7.86 6.06001 8.42 5.78001 9.06L2.32001 16.96C2.00001 17.67 1.91001 18.48 2.07001 19.25C2.23001 20.03 2.63001 20.72 3.20001 21.21C3.68001 21.63 4.28001 21.89 4.90001 21.95C5.52001 22 6.15001 21.86 6.70001 21.55L7.62001 20.97C8.20001 20.65 8.87001 20.5 9.54001 20.5H14.46C15.13 20.5 15.8 20.65 16.38 20.97L17.3 21.55C17.85 21.86 18.48 22 19.1 21.95C19.72 21.89 20.32 21.63 20.8 21.21C21.37 20.72 21.77 20.03 21.93 19.25C22.09 18.48 22 17.67 21.68 16.96ZM19.8 20.1C19.4 20.44 18.81 20.49 18.35 20.21L17.43 19.64C16.61 19.15 15.66 18.89 14.69 18.9H9.31001C8.34001 18.89 7.39001 19.15 6.57001 19.64L5.65001 20.21C5.19001 20.49 4.60001 20.44 4.20001 20.1C3.88001 19.81 3.66001 19.41 3.60001 18.97C3.54001 18.53 3.64001 18.08 3.87001 17.71L7.33001 9.81C7.47001 9.49 7.70001 9.21 7.98001 9.02C8.26001 8.83 8.60001 8.72 8.94001 8.71H15.06C15.4 8.72 15.74 8.83 16.02 9.02C16.3 9.21 16.53 9.49 16.67 9.81L20.13 17.71C20.36 18.08 20.46 18.53 20.4 18.97C20.34 19.41 20.12 19.81 19.8 20.1Z"
-        fill="currentColor"
-      />
-      <path
-        d="M12 11.3C11.28 11.3 10.65 11.74 10.35 12.4C10.26 12.63 10.06 12.81 9.81995 12.88C9.57995 12.95 9.32995 12.91 9.12995 12.77C8.92995 12.62 8.80995 12.39 8.79995 12.13C8.78995 11.88 8.88995 11.64 9.06995 11.47C9.64995 10.91 10.41 10.59 11.21 10.59C11.62 10.59 12.01 10.7 12.35 10.91C12.7 11.12 12.97 11.42 13.15 11.78C13.33 12.14 13.41 12.53 13.37 12.93C13.33 13.33 13.18 13.7 12.94 14.02C12.89 14.09 12.79 14.12 12.71 14.09C12.64 14.06 12.59 13.99 12.6 13.91C12.68 13.37 12.57 12.82 12.3 12.35C12.02 11.83 11.54 11.47 10.97 11.35C10.79 11.31 10.6 11.3 10.41 11.3H12Z"
-        fill="currentColor"
-      />
-      <path
-        d="M12 14.7C12.83 14.7 13.5 14.03 13.5 13.2C13.5 12.37 12.83 11.7 12 11.7C11.17 11.7 10.5 12.37 10.5 13.2C10.5 14.03 11.17 14.7 12 14.7Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-};
-
 // File icon for document files
 const FileIcon = (props: any) => {
   return (
@@ -158,6 +129,9 @@ interface ChatBoxProps {
   fetchModels?: () => Promise<string[]>; // 動態獲取可用模型的函數
   currentModel?: string; // 當前使用的模型
   isLoadingModels?: boolean; // 是否正在載入模型
+  isMarkdownMinimized?: boolean;
+  minimizedMarkdownMessageId?: string | null;
+  onRestoreMarkdownCanvas?: () => void;
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({
@@ -175,6 +149,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   fetchModels,
   currentModel,
   isLoadingModels,
+  isMarkdownMinimized = false,
+  minimizedMarkdownMessageId = null,
+  onRestoreMarkdownCanvas,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [quotedText, setQuotedText] = useState<string | null>(null);
@@ -337,32 +314,22 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     };
   }, []);
 
-  // Handle paste events directly in the input element
+  // Handle paste events for the whole chat box,不只input
   useEffect(() => {
-    const handlePasteInInput = (e: ClipboardEvent) => {
+    const handlePasteInChatBox = (e: ClipboardEvent) => {
       if (e.clipboardData && e.clipboardData.items) {
         const items = e.clipboardData.items;
-        let hasImageOrFile = false;
-
         for (let i = 0; i < items.length; i++) {
-          // Check if this is an image or other file
           if (items[i].kind === "file") {
             const file = items[i].getAsFile();
-
             if (!file) continue;
-
-            hasImageOrFile = true;
-            e.preventDefault(); // Prevent default paste behavior for image files
-
+            e.preventDefault();
             try {
-              // Read the file as base64
               const reader = new FileReader();
               const fileType = items[i].type;
-
               reader.onload = (event) => {
                 if (event.target && event.target.result) {
                   const dataUrl = event.target.result as string;
-
                   setPastedImages((prev) => [
                     ...prev,
                     {
@@ -371,43 +338,25 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                       type: fileType,
                     },
                   ]);
-
-                  // Show visual feedback that image was pasted successfully
                   setShowImageFeedback(true);
                   setTimeout(() => setShowImageFeedback(false), 1500);
                 }
               };
-
               reader.readAsDataURL(file);
             } catch (error) {
               console.error("Error processing pasted file:", error);
             }
           }
         }
-
-        // If no image was found, let default behavior handle text paste
-        if (!hasImageOrFile) {
-          // Default behavior will handle text paste
-        }
       }
     };
-
-    // 只在输入框本身添加监听器，避免重复处理粘贴事件
-    const inputElement = inputRef.current;
-
-    if (inputElement) {
-      inputElement.addEventListener(
-        "paste",
-        handlePasteInInput as EventListener,
-      );
+    const chatBoxEl = dropZoneRef.current;
+    if (chatBoxEl) {
+      chatBoxEl.addEventListener("paste", handlePasteInChatBox as EventListener);
     }
-
     return () => {
-      if (inputElement) {
-        inputElement.removeEventListener(
-          "paste",
-          handlePasteInInput as EventListener,
-        );
+      if (chatBoxEl) {
+        chatBoxEl.removeEventListener("paste", handlePasteInChatBox as EventListener);
       }
     };
   }, []);
@@ -617,15 +566,26 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           isDragging ? "border-2 border-dashed border-primary" : ""
         } transition-all duration-500`}
       >
-        {isDragging && (
-          <div className="absolute inset-0 bg-primary/10 flex items-center justify-center backdrop-blur-sm z-10">
-            <div className="text-center p-6 bg-background/80 rounded-lg shadow-lg">
-              <ImageIcon className="text-primary text-4xl mx-auto mb-2" />
-              <p className="text-xl font-bold">Drop images or files here</p>
-            </div>
+        {/* 縮小的 MarkdownCanvas 按鈕，插入到 AI 最後一則訊息下方 */}
+        {isMarkdownMinimized && minimizedMarkdownMessageId && (
+          <div className="flex justify-center my-2">
+            <button
+              className="markdown-mini-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors shadow"
+              onClick={onRestoreMarkdownCanvas}
+              title="展開 Canvas 編輯器"
+            >
+              <span className="inline-block align-middle">
+                {/* 雙箭頭SVG */}
+                <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 13L4 25.4322L16 37" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M32 13L44 25.4322L32 37" stroke="#333" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M28 4L21 44" stroke="#333" strokeWidth="4" strokeLinecap="round"/>
+                </svg>
+              </span>
+              <span className="ml-2 font-medium text-primary-700 dark:text-primary-200">展開 Canvas 編輯器</span>
+            </button>
           </div>
         )}
-
         {messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <Card
@@ -779,25 +739,31 @@ const ChatBox: React.FC<ChatBoxProps> = ({
             }`}
           >
             {messages.map((message) => (
-              <MessageItem
-                key={message.id}
-                currentModel={currentModel}
-                fetchModels={fetchModels}
-                isEditing={editingMessageId === message.id}
-                isLoadingModels={isLoadingModels}
-                isStreaming={streamingMessageId === message.id}
-                message={message}
-                toggleMarkdownCanvas={() => {
-                  if (typeof message.content === "string") {
-                    toggleMarkdownCanvas(message.id, message.content);
+              <React.Fragment key={message.id}>
+                <MessageItem
+                  key={message.id}
+                  currentModel={currentModel}
+                  fetchModels={fetchModels}
+                  isEditing={editingMessageId === message.id}
+                  isLoadingModels={isLoadingModels}
+                  isStreaming={streamingMessageId === message.id}
+                  message={message}
+                  toggleMarkdownCanvas={() => {
+                    if (typeof message.content === "string") {
+                      toggleMarkdownCanvas(message.id, message.content);
+                    }
+                  }}
+                  onAskGpt={handleAskGpt}
+                  onCopy={onCopy}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                  onRegenerate={onRegenerate}
+                  isMarkdownMinimized={
+                    isMarkdownMinimized && minimizedMarkdownMessageId === message.id
                   }
-                }}
-                onAskGpt={handleAskGpt}
-                onCopy={onCopy}
-                onDelete={onDelete}
-                onEdit={onEdit}
-                onRegenerate={onRegenerate}
-              />
+                  onRestoreMarkdownCanvas={onRestoreMarkdownCanvas}
+                />
+              </React.Fragment>
             ))}
           </div>
         )}
