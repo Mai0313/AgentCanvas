@@ -84,7 +84,7 @@ export const handleCanvasMode = async (
   // 步驟 1: 僅生成代碼塊 - 這將直接輸出到 MarkdownCanvas
   let codeBlock = "";
   const codeAssistantMessage: Message = {
-    id: "assistant-code-msg",
+    id: "code-assistant",
     role: "assistant",
     content: `You are a canvas assistant.
       Provide only a single code block solution with language formatting (e.g., \`\`\`javascript).
@@ -137,8 +137,8 @@ export const handleCanvasMode = async (
     );
 
     // 創建一個代表生成代碼的消息（用於上下文）
-    const explanationMessage: Message = {
-      id: "assistant-code-explanation",
+    const explainAssistantMessage: Message = {
+      id: "code-explain-assistant",
       role: "assistant",
       content: `You will receive the original question from the user and a generated code block.
         Generated Code Block:
@@ -170,7 +170,7 @@ export const handleCanvasMode = async (
 
     // 步驟3：生成解釋文本
     await chatCompletion(
-      [explanationMessage, userMessage],
+      [explainAssistantMessage, userMessage],
       settings,
       userLanguage,
       (token) => {
@@ -236,13 +236,13 @@ export const handleCanvasModeNext = async (
 ): Promise<void> => {
   // 步驟1：先回答用戶問題
   const answerAssistantMessage: Message = {
-    id: "system-answer-msg",
+    id: "answer-assistant",
     role: "assistant",
     content: `You will receive a pair of code block and user question.
       Please answer the user's question based on this code block.`,
   };
-  const codeContextMessage: Message = {
-    id: "assistant-code-context",
+  const codeAssistantMessage: Message = {
+    id: "code-assistant",
     role: "assistant",
     content: `Current Code Block:
       ${existingCode}
@@ -274,7 +274,7 @@ export const handleCanvasModeNext = async (
   try {
     // 1. 先生成回答
     await chatCompletion(
-      [answerAssistantMessage, codeContextMessage],
+      [answerAssistantMessage, codeAssistantMessage],
       settings,
       userLanguage,
       (token) => {
@@ -297,9 +297,9 @@ export const handleCanvasModeNext = async (
 
     // 2. 生成新代碼塊
     let newCodeBlock = "";
-    const codeUpdateMessage: Message = {
-      id: "assistant-code-update",
-      role: "assistant",
+    const updateCodeMessage: Message = {
+      id: "update-code",
+      role: "user",
       content: `Current Code Block:
         ${existingCode}
         Update Suggestion:
@@ -315,7 +315,7 @@ export const handleCanvasModeNext = async (
     setEditingMessageId(codeMessageId);
     setIsMarkdownCanvasOpen(true);
     await chatCompletion(
-      [codeUpdateMessage],
+      [updateCodeMessage],
       settings,
       userLanguage,
       (token) => {
