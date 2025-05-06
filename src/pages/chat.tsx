@@ -31,6 +31,7 @@ import {
   saveMarkdownContent,
   handleCanvasMode,
   handleCanvasModeNext,
+  updateCanvasTitle,
 } from "@/utils/canvasHandlers";
 import {
   setupResizeEventHandlers,
@@ -216,6 +217,37 @@ export default function ChatPage() {
     }
   }, [isLoading]);
 
+  // 处理 Canvas 标题生成的新函数
+  const handleGenerateTitle = (
+    codeContent: string,
+    callback: (title: string) => void,
+  ) => {
+    // 使用现有的 updateCanvasTitle 工具函数实现标题生成
+    if (codeContent.trim()) {
+      // 创建一个适配器函数，将 callback 转换为符合 React.Dispatch<React.SetStateAction<string>> 类型
+      const setTitleAdapter: React.Dispatch<React.SetStateAction<string>> = (
+        value,
+      ) => {
+        // 处理函数形式的 SetStateAction
+        const newTitle = typeof value === "function" ? value("") : value;
+
+        callback(newTitle);
+      };
+
+      // 创建一个空的状态设置函数，因为这个状态由 MarkdownCanvas 内部管理
+      const setIsGeneratingAdapter: React.Dispatch<
+        React.SetStateAction<boolean>
+      > = () => {};
+
+      updateCanvasTitle(
+        codeContent,
+        settings,
+        setTitleAdapter,
+        setIsGeneratingAdapter,
+      );
+    }
+  };
+
   // Update generateNewThreadId to only set thread ID
   const generateNewThreadId = useCallback(
     (keepMessages = false) => {
@@ -229,7 +261,9 @@ export default function ChatPage() {
       const basePath = "/chat";
 
       if (basePath && !url.pathname.startsWith(basePath)) {
-        url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
+        url.pathname = `${basePath}${
+          url.pathname.startsWith("/") ? "" : "/"
+        }${url.pathname}`;
       }
       url.searchParams.set("thread_id", newThreadId);
       window.history.pushState({ threadId: newThreadId }, "", url.toString());
@@ -261,7 +295,9 @@ export default function ChatPage() {
 
       // Update path if needed but keep the thread ID
       if (needsPathUpdate) {
-        const newPath = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname.replace(/^\//, "")}`;
+        const newPath = `${basePath}${
+          url.pathname.startsWith("/") ? "" : "/"
+        }${url.pathname.replace(/^\//, "")}`;
 
         url.pathname = newPath;
         window.history.replaceState(
@@ -777,9 +813,9 @@ export default function ChatPage() {
                   <MarkdownCanvas
                     content={markdownContent}
                     isOpen={isMarkdownCanvasOpen}
-                    modelSettings={settings}
                     onAskGpt={handleAskGpt}
                     onClose={handleCloseMarkdownCanvas}
+                    onGenerateTitle={handleGenerateTitle}
                     onSave={handleSaveMarkdown}
                   />
                 </div>

@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Message, ModelSetting } from "../types";
 
-import { chatCompletion } from "./openai";
+import { chatCompletion, generateCodeBlockTitle } from "./openai";
 
 /**
  * 開啟 Markdown 畫布
@@ -338,5 +338,34 @@ export const handleCanvasModeNext = async (
 
       return updated;
     });
+  }
+};
+
+/**
+ * 更新 Canvas 標題
+ * 使用 generateCodeBlockTitle 為代碼塊生成標題
+ */
+export const updateCanvasTitle = async (
+  codeContent: string,
+  settings: ModelSetting,
+  setTitle: React.Dispatch<React.SetStateAction<string>>,
+  setIsGeneratingTitle: React.Dispatch<React.SetStateAction<boolean>>,
+): Promise<void> => {
+  if (!codeContent.trim()) return;
+
+  setIsGeneratingTitle(true);
+
+  try {
+    // 使用已存在的 generateCodeBlockTitle 函數生成標題
+    const title = await generateCodeBlockTitle(codeContent, settings);
+
+    // 更新標題
+    if (title) {
+      setTitle(title);
+    }
+  } catch (error) {
+    console.error("Error updating canvas title:", error);
+  } finally {
+    setIsGeneratingTitle(false);
   }
 };

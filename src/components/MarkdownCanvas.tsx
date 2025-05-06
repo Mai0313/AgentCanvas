@@ -30,10 +30,6 @@ import {
 // Import codeBlock functionality
 import { codeBlock } from "@blocknote/code-block";
 
-import { Message, ModelSetting } from "../types";
-import { getDefaultModelSettings } from "../utils/modelUtils";
-import { chatCompletion } from "../utils/openai.ts";
-
 import SelectionPopup from "./SelectionPopup";
 
 // 自訂 BlockNote theme，顏色參考 tailwind 的 bg-background/text-foreground
@@ -118,7 +114,10 @@ interface MarkdownCanvasProps {
   onClose: () => void;
   onAskGpt?: (selectedText: string) => void;
   onSave?: (editedContent: string) => void;
-  modelSettings?: ModelSetting;
+  onGenerateTitle?: (
+    codeContent: string,
+    callback: (title: string) => void,
+  ) => void; // 新增 onGenerateTitle prop
 }
 
 const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
@@ -127,7 +126,7 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
   onClose,
   onAskGpt,
   onSave,
-  modelSettings,
+  onGenerateTitle,
 }) => {
   // Create the editor instance with proper configuration
   const editor = useCreateBlockNote({
@@ -514,57 +513,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
     }
   };
 
-  // Generate title for the code snippet
-  const generateTitle = useCallback(async () => {
-    // 只有當編輯器載入完成且代碼塊完整時才生成標題
-    if (loadingEditor || !hasClosingBackticks) return;
-
-    const cleanContent = await getCleanCodeContent();
-
-    if (!cleanContent.trim()) return;
-
-    setIsGeneratingTitle(true);
-    console.log("Generating title via Chat Completion API");
-
-    try {
-      // Use the user's current model settings or fall back to default if not provided
-      const settings = modelSettings || getDefaultModelSettings();
-
-      const messages: Message[] = [
-        {
-          id: "system-msg",
-          role: "system",
-          content: `You are an assistant that helps name code snippets concisely.`,
-        },
-        {
-          id: "user-msg",
-          role: "user",
-          content: `Given this code snippet, provide a short, descriptive title (3-5 words) that describes what the code does.
-            Don't include words like "code", "function", "class", etc.
-            Just give the title directly:\n${cleanContent}
-            `,
-        },
-      ];
-
-      let generatedTitle = "";
-
-      await chatCompletion(messages, settings, "en-US", (token) => {
-        generatedTitle += token;
-      });
-
-      // Clean up the title (remove quotes if present)
-      generatedTitle = generatedTitle.replace(/^["']|["']$/g, "").trim();
-      if (generatedTitle) {
-        setTitle(generatedTitle);
-      }
-    } catch (error) {
-      console.error("Error generating title:", error);
-    } finally {
-      setIsGeneratingTitle(false);
-      setShouldGenerateTitle(false);
-    }
-  }, [getCleanCodeContent, loadingEditor, hasClosingBackticks, modelSettings]);
-
   // Effect for title generation based on shouldGenerateTitle flag
   useEffect(() => {
     if (
@@ -573,30 +521,43 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
       isOpen &&
       !isGeneratingTitle &&
       !loadingEditor &&
-      hasClosingBackticks // 只有當有結束標記時才生成標題
+      hasClosingBackticks && // 只有当有結束標記時才生成標題
+      onGenerateTitle // 确保有 onGenerateTitle 回调
     ) {
-      const titleTimer = setTimeout(() => {
-        generateTitle();
-      }, 100);
+      setShouldGenerateTitle(false);
+      setIsGeneratingTitle(true);
 
-      return () => clearTimeout(titleTimer);
+      // 直接调用 onGenerateTitle prop，并传递当前代码内容和一个回调函数
+      onGenerateTitle(rawMarkdown, (generatedTitle) => {
+        setTitle(generatedTitle);
+        setIsGeneratingTitle(false);
+      });
     }
   }, [
     shouldGenerateTitle,
     contentFullyLoaded,
     isOpen,
     isGeneratingTitle,
-    generateTitle,
     loadingEditor,
     hasClosingBackticks,
+    rawMarkdown,
+    onGenerateTitle,
   ]);
 
-  // Manual title generation function
+  // Manual title generation function - update to use the prop directly
   const handleManualGenerateTitle = () => {
-    if (hasClosingBackticks) {
-      setShouldGenerateTitle(true);
+    if (hasClosingBackticks && onGenerateTitle) {
+      setIsGeneratingTitle(true);
+
+      // 直接调用 onGenerateTitle prop
+      onGenerateTitle(rawMarkdown, (generatedTitle) => {
+        setTitle(generatedTitle);
+        setIsGeneratingTitle(false);
+      });
     } else {
-      console.log("無法生成標題：代碼塊不完整（缺少結束標記```）");
+      console.log(
+        "無法生成標題：代碼塊不完整（缺少結束標記```）或没有提供 onGenerateTitle 方法",
+      );
       // 可以選擇顯示通知給用戶，告知需要完整的代碼塊
     }
   };
