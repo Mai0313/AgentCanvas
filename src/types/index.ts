@@ -9,8 +9,6 @@ export interface Message {
   role: "user" | "assistant" | "system";
   content: string | MessageContent[];
   imageUrl?: string; // Add support for images
-  // Removed: isGeneratingImage and isGeneratingCode flags
-  // These are now managed via GenerationStatusContext
 }
 
 export interface MessageContent {
