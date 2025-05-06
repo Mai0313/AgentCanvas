@@ -8,7 +8,6 @@ export interface Message {
   id: string;
   role: "user" | "assistant" | "system";
   content: string | MessageContent[];
-  timestamp: Date;
   imageUrl?: string; // Add support for images
   isGeneratingImage?: boolean; // 添加標記，表示正在生成圖片
   isGeneratingCode?: boolean; // 添加標記，表示正在生成代碼到 MarkdownCanvas

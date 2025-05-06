@@ -398,13 +398,11 @@ export const generateImageAndText = async (
           id: "system",
           role: "system",
           content: systemMessage.content,
-          timestamp: new Date(),
         },
         {
           id: "user",
           role: "user",
           content: messageContent,
-          timestamp: new Date(),
         },
       ],
       settings,

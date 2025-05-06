@@ -180,7 +180,6 @@ export const regenerateMessage = async (
       id: assistantMessageId,
       role: "assistant",
       content: "",
-      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, assistantMessage]);

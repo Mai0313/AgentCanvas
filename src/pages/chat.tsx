@@ -290,7 +290,6 @@ export default function ChatPage() {
       id: uuidv4(),
       role: "user",
       content: content,
-      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -346,7 +345,6 @@ export default function ChatPage() {
         id: assistantMessageId,
         role: "assistant",
         content: currentMode === "image" ? "Creating your Image..." : "",
-        timestamp: new Date(),
         isGeneratingImage: currentMode === "image", // Mark as generating image if detected as image task
       };
 

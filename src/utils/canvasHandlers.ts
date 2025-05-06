@@ -91,7 +91,6 @@ export const handleCanvasMode = async (
       Start directly with the code block and do not include any explanations or comments outside the code block.
       Make the solution concise and complete.
       `,
-    timestamp: new Date(),
   };
 
   // 為 MarkdownCanvas 內容創建單獨的消息 ID
@@ -149,7 +148,6 @@ export const handleCanvasMode = async (
         Give context on how it works and any important implementation details related to the user's question.
         Don't repeat the code itself, just provide the explanation.
         `,
-      timestamp: new Date(),
     };
 
     // 代碼生成完成，重置ChatBox消息狀態，準備接收解釋文本
@@ -246,7 +244,6 @@ export const handleCanvasModeNext = async (
     role: "system",
     content: `You will receive a pair of code block and user question.
       Please answer the user's question based on this code block.`,
-    timestamp: new Date(),
   };
   const codeContextMessage: Message = {
     id: "assistant-code-context",
@@ -260,7 +257,6 @@ export const handleCanvasModeNext = async (
       - Just provide the answer in plain text.
       For example, if you think the code should be updated, you can make a update suggestion in bullet points; then another agent will handle the code update.
       `,
-    timestamp: new Date(),
   };
 
   let answerContent = "";
@@ -317,7 +313,6 @@ export const handleCanvasModeNext = async (
         Use language formatting (e.g., \`\`\`js).
         Do not include any explanation or comments outside the code block.
         `,
-      timestamp: new Date(),
     };
     const codeMessageId = uuidv4();
 

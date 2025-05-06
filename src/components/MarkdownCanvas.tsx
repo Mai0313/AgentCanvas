@@ -535,7 +535,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
           id: "system-msg",
           role: "system",
           content: `You are an assistant that helps name code snippets concisely.`,
-          timestamp: new Date(),
         },
         {
           id: "user-msg",
@@ -544,7 +543,6 @@ const MarkdownCanvas: React.FC<MarkdownCanvasProps> = ({
             Don't include words like "code", "function", "class", etc.
             Just give the title directly:\n${cleanContent}
             `,
-          timestamp: new Date(),
         },
       ];
 
