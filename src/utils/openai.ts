@@ -185,7 +185,36 @@ export const detectTaskType = async (
     const systemMessage: ChatCompletionMessageParam = {
       role: "system",
       content:
-        "Analyze the user's message and determine if they are requesting: 1) canvas writing, 2) image generation, or 3) general chat. Respond with ONLY one of these exact words: 'canvas', 'image', or 'chat'.",
+        `
+        Please divide the user's message into three task types: 'canvas', 'image', or 'chat'.
+        1. Determine if the user is asking for generating an image
+          YES -> response with 'image'
+          NO -> continue
+        2. Will the answer be answered within a few lines?
+          YES -> response with 'chat'
+          NO -> continue
+        3. Will the answer contain any code blocks or markdown?
+          YES -> response with 'canvas'
+          NO -> continue
+        4. Otherwise, response with 'chat'
+
+        Notice:
+          - Canvas is a popout window that allows users to write code or markdown.
+          - Respond with ONLY one of these exact words: 'canvas', 'image', or 'chat'.
+
+        Here are some examples:
+        Q: Tell me what this image is about?
+        A: chat
+
+        Q: Generate a picture of a cat.
+        A: image
+
+        Q: Write a function to calculate the sum of two numbers.
+        A: canvas
+
+        Q: Write me a plan for a trip to Japan.
+        A: canvas
+        `,
     };
 
     // User message to analyze
