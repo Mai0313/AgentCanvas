@@ -6,7 +6,7 @@ import type {
 import { AzureOpenAI, OpenAI } from "openai";
 import { Stream } from "openai/streaming";
 
-import { Message, ModelSetting, MessageContent } from "../types";
+import { Message, ModelSetting } from "../types";
 
 // Initialize the appropriate client based on api_type
 const createClient = (settings: ModelSetting) => {
@@ -79,7 +79,7 @@ export const chatCompletion = async (
       // For string contents, return simple object
       if (typeof m.content === "string") {
         return {
-          role: m.role as "user" | "assistant" | "system",
+          role: m.role as "user" | "assistant",
           content: `Here is the User's Question
             ${m.content}
             You MUST respond in ${userLanguage || "en-US"} language.
@@ -88,7 +88,7 @@ export const chatCompletion = async (
       } else {
         // For array content with text and images, format according to OpenAI API
         return {
-          role: m.role as "user" | "assistant" | "system",
+          role: m.role as "user" | "assistant",
           content: m.content.map((item) => {
             if (item.type === "text") {
               return {
@@ -169,8 +169,8 @@ export const detectTaskType = async (
     const client = createClient(settings);
 
     // System message to instruct the AI
-    const systemMessage: ChatCompletionMessageParam = {
-      role: "system",
+    const assistantMessage: ChatCompletionMessageParam = {
+      role: "assistant",
       content: `
         Please divide the user's message into three task types: 'canvas', 'image', or 'chat'.
         1. Determine if the user is asking for generating an image
@@ -212,7 +212,7 @@ export const detectTaskType = async (
     // Create the request with low temperature for more deterministic results
     const response = await client.chat.completions.create({
       model: settings.model,
-      messages: [systemMessage, userMessage],
+      messages: [assistantMessage, userMessage],
       temperature: 0.1, // Low temperature for more deterministic response
       max_tokens: 10, // We only need a short response
     });
@@ -246,8 +246,8 @@ export const detectUserLang = async (
 ): Promise<string> => {
   try {
     const client = createClient(settings);
-    const systemMessage: ChatCompletionMessageParam = {
-      role: "system",
+    const assistantMessage: ChatCompletionMessageParam = {
+      role: "assistant",
       content:
         "Detect the language of the following user message. Respond ONLY with the language code (e.g., zh-TW, en-US, ja-JP, ko-KR, fr-FR, etc). No explanation, no extra text.",
     };
@@ -257,7 +257,7 @@ export const detectUserLang = async (
     };
     const response = await client.chat.completions.create({
       model: settings.model,
-      messages: [systemMessage, userMessage],
+      messages: [assistantMessage, userMessage],
       temperature: 0.1,
       max_tokens: 10,
     });
@@ -285,8 +285,8 @@ export const refineImagePrompt = async (
     const client = createClient(settings);
 
     // System message to instruct the AI how to refine the prompt
-    const systemMessage: ChatCompletionMessageParam = {
-      role: "system",
+    const assistantMessage: ChatCompletionMessageParam = {
+      role: "assistant",
       content:
         "You are a prompt engineering expert specializing in optimizing image generation prompts. " +
         "Your task is to refine the user's input into a detailed, clear prompt that will produce high-quality images. " +
@@ -304,7 +304,7 @@ export const refineImagePrompt = async (
     // Request the refined prompt with focused temperature
     const response = await client.chat.completions.create({
       model: settings.model,
-      messages: [systemMessage, userMessage],
+      messages: [assistantMessage, userMessage],
       temperature: 0.7, // Balanced between creativity and consistency
       max_tokens: 500, // Allow for a detailed prompt
     });
@@ -312,9 +312,6 @@ export const refineImagePrompt = async (
     // Extract the refined prompt
     const refinedPrompt =
       response.choices[0].message.content?.trim() || originalPrompt;
-
-    console.log("Original prompt:", originalPrompt);
-    console.log("Refined prompt:", refinedPrompt);
 
     return refinedPrompt;
   } catch (error) {
@@ -342,10 +339,7 @@ export const generateImageAndText = async (
     const client = createClient(settings);
 
     // Step 1: Refine the user's prompt for better image generation
-    console.log("Refining prompt for image generation");
     const refinedPrompt = await refineImagePrompt(prompt, settings);
-
-    console.log("Generating image for refined prompt:", refinedPrompt);
 
     // Step 2: Generate the image using the refined prompt
     const imageResponse = await client.images.generate({
@@ -371,40 +365,33 @@ export const generateImageAndText = async (
     console.log("Image generated successfully, now getting description");
 
     // Step 3: Use the image in chat completion to generate a description
-    const systemMessage = {
-      role: "system",
-      content:
-        "The image has been generated by you. Please describe the image in detail what it generates.",
+    const assistantMessage: Message = {
+      id: "assistant-image-msg",
+      role: "assistant",
+      content: `The image has been generated by you. Please describe the image in detail what it generates.`,
     };
 
     // Create message content with both text and image URL reference
-    const messageContent: MessageContent[] = [
-      {
-        type: "text",
-        text: `Please describe this image that was generated based on the prompt: "${prompt}" in users language.`,
-      },
-      {
-        type: "image_url",
-        image_url: {
-          url: imageUrl,
+    const userMessage: Message = {
+      id: "user-image-msg",
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: `Please describe this image that was generated based on the prompt: "${prompt}" in users language.`,
         },
-      },
-    ];
+        {
+          type: "image_url",
+          image_url: {
+            url: imageUrl,
+          },
+        },
+      ],
+    };
 
     // Send the message with the image to chat completion
     const textResponse = await chatCompletion(
-      [
-        {
-          id: "system",
-          role: "system",
-          content: systemMessage.content,
-        },
-        {
-          id: "user",
-          role: "user",
-          content: messageContent,
-        },
-      ],
+      [assistantMessage, userMessage],
       settings,
       userLanguage,
       onToken,
@@ -451,6 +438,7 @@ export const generateCodeBlockTitle = async (
       max_tokens: 10,
     });
     const title = response.choices[0].message.content?.trim();
+
     console.log("Generated title:", title);
 
     return title || "Unknown Code Snippet";

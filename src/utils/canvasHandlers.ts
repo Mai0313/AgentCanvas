@@ -83,9 +83,9 @@ export const handleCanvasMode = async (
 ): Promise<void> => {
   // 步驟 1: 僅生成代碼塊 - 這將直接輸出到 MarkdownCanvas
   let codeBlock = "";
-  const codeSystemMessage: Message = {
-    id: "system-code-msg",
-    role: "system",
+  const codeAssistantMessage: Message = {
+    id: "assistant-code-msg",
+    role: "assistant",
     content: `You are a canvas assistant.
       Provide only a single code block solution with language formatting (e.g., \`\`\`javascript).
       Start directly with the code block and do not include any explanations or comments outside the code block.
@@ -125,7 +125,7 @@ export const handleCanvasMode = async (
     console.log("用戶語言:", userLanguage);
     console.log("用戶消息ID:", userMessage.id);
     await chatCompletion(
-      [codeSystemMessage, userMessage],
+      [codeAssistantMessage, userMessage],
       settings,
       "en-US",
       (token) => {
@@ -235,9 +235,9 @@ export const handleCanvasModeNext = async (
   userLanguage?: string,
 ): Promise<void> => {
   // 步驟1：先回答用戶問題
-  const answerSystemMessage: Message = {
+  const answerAssistantMessage: Message = {
     id: "system-answer-msg",
-    role: "system",
+    role: "assistant",
     content: `You will receive a pair of code block and user question.
       Please answer the user's question based on this code block.`,
   };
@@ -274,7 +274,7 @@ export const handleCanvasModeNext = async (
   try {
     // 1. 先生成回答
     await chatCompletion(
-      [answerSystemMessage, codeContextMessage],
+      [answerAssistantMessage, codeContextMessage],
       settings,
       userLanguage,
       (token) => {
