@@ -22,14 +22,14 @@ const ModeLanguageContext = createContext<ModeLanguageContextType | undefined>(
   undefined,
 );
 
-export function useModeLanguage() {
+export const useModeLanguage = () => {
   const ctx = useContext(ModeLanguageContext);
 
   if (!ctx)
     throw new Error("useModeLanguage must be used within ModeLanguageProvider");
 
   return ctx;
-}
+};
 
 // Generation Status Context
 export interface GenerationStatusContextType {
@@ -45,13 +45,14 @@ const GenerationStatusContext = createContext<
   GenerationStatusContextType | undefined
 >(undefined);
 
-export function useGenerationStatus() {
+// 修改導出方式，從 function 聲明改為箭頭函數表達式
+export const useGenerationStatus = () => {
   const ctx = useContext(GenerationStatusContext);
 
   if (!ctx) throw new Error("useGenerationStatus must be used within Provider");
 
   return ctx;
-}
+};
 
 export function Provider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
