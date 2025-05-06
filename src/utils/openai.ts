@@ -1,8 +1,7 @@
-import type { ChatCompletionMessageParam } from "openai/resources";
+import type { ChatCompletionMessageParam, ChatCompletionChunk } from "openai/resources";
 
 import { AzureOpenAI, OpenAI } from "openai";
 import { Stream } from "openai/streaming";
-// Fix the import path for ChatCompletionMessageParam
 
 import { Message, ModelSetting, MessageContent } from "../types";
 
@@ -79,8 +78,10 @@ export const chatCompletion = async (
         return {
           role: m.role as "user" | "assistant" | "system",
           content:
-            m.content +
-            `You MUST respond in ${userLanguage || "en-US"} language.`,
+            `Here is the User's Question
+            ${m.content}
+            You MUST respond in ${userLanguage || "en-US"} language.
+            `,
         };
       } else {
         // For array content with text and images, format according to OpenAI API
@@ -91,8 +92,9 @@ export const chatCompletion = async (
               return {
                 type: "text",
                 text:
-                  item.text +
-                  `You MUST respond in ${userLanguage || "en-US"} language.`,
+                  `Here is the User's Question
+                  ${item.text}
+                  You MUST respond in ${userLanguage || "en-US"} language.`,
               };
             } else if (item.type === "image_url" && item.image_url) {
               return { type: "image_url", image_url: item.image_url };
@@ -115,22 +117,6 @@ export const chatCompletion = async (
 
     // 檢查是否需要串流模式
     if (onToken) {
-
-      // Properly type the streaming response
-      type ChatCompletionChunk = {
-        id: string;
-        object: string;
-        created: number;
-        model: string;
-        choices: Array<{
-          index: number;
-          delta: {
-            content?: string;
-            role?: string;
-          };
-          finish_reason: string | null;
-        }>;
-      };
 
       // Create streaming request with proper typing
       const streamingOptions = {
