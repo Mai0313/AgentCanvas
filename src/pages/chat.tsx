@@ -354,6 +354,8 @@ export default function ChatPage() {
       setStreamingMessageId(assistantMessageId);
       console.log("Detected mode:", currentMode);
       console.log("All Messages", messages);
+      console.log("Current Message", userMessage);
+      console.log("Current CodeBlock", markdownContent);
 
       if (currentMode === "image") {
         // Handle image generation - 使用新模組
@@ -365,12 +367,7 @@ export default function ChatPage() {
           currentLang,
         );
       } else if (currentMode === "canvas") {
-        // 判斷這是 user 第幾次詢問（即 user 訊息數量）
-        const userMessageCount = messages.filter(
-          (msg) => msg.role === "user",
-        ).length;
-
-        if (userMessageCount === 0) {
+        if (messages.length === 0) {
           // 第一個 canvas 問題，走原本流程
           await handleCanvasMode(
             userMessage,
@@ -383,7 +380,6 @@ export default function ChatPage() {
             currentLang,
           );
         } else {
-          // 不是第一句，走追問流程
           await handleCanvasModeNext(
             userMessage,
             markdownContent,
@@ -464,14 +460,6 @@ export default function ChatPage() {
       setMessages,
       setMarkdownContent,
     );
-    // 觸發 Ask GPT 流程，將內容引用到 ChatBox
-    if (editedContent) {
-      const event = new CustomEvent("setQuotedText", {
-        detail: { quotedText: editedContent },
-      });
-
-      document.dispatchEvent(event);
-    }
   };
 
   const handleCloseMarkdownCanvas = () => {
