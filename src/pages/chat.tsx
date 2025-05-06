@@ -217,7 +217,7 @@ export default function ChatPage() {
   }, [isLoading]);
 
   // Update generateNewThreadId to only set thread ID
-  const generateNewThreadId = useCallback(() => {
+  const generateNewThreadId = useCallback((keepMessages = false) => {
     const newThreadId = "thread_" + uuidv4().replace(/-/g, "").substring(0, 16);
 
     setThreadId(newThreadId);
@@ -231,7 +231,12 @@ export default function ChatPage() {
     }
     url.searchParams.set("thread_id", newThreadId);
     window.history.pushState({ threadId: newThreadId }, "", url.toString());
-    setMessages([]);
+    
+    // 只有當 keepMessages 為 false 時才清空訊息
+    if (!keepMessages) {
+      setMessages([]);
+    }
+    
     if (isMarkdownCanvasOpen) {
       handleCloseMarkdownCanvas();
     }
@@ -341,7 +346,7 @@ export default function ChatPage() {
         // Update state
         setMode(detectedMode);
         setUserLanguage(detectedLang);
-        generateNewThreadId();
+        generateNewThreadId(true); // 傳入 true 來保留已添加的用戶訊息
       }
 
       const assistantMessageId = uuidv4();
