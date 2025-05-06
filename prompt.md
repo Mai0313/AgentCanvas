@@ -48,7 +48,11 @@
 - 可以從首頁直接開始對話 並會透過一個流暢的動畫轉移過去
 
 ## TODO Features
-- 為何我現在不能透過首頁直接開始對話了？ 好像我從首頁直接發訊息以後 他只有轉移到Chat那一區 但並沒有開始對話
+- 當進入 `canvas` 模式後 會透過兩個 `chatCompletion` 來判斷狀態 但有一個情況比較特別
+  - 如果模型已經提供對應代碼 而 User 只是編輯了 `MarkdownCanvas` 進行後續提問 `canvas` 模式的行為要反過來
+    - 先透過第一個 `chatCompletion` 來回答使用者的問題
+    - 透過第二個 `chatCompletion` 來生成修改後的代碼並輸出到 `MarkdownCanvas`
+能不能幫我在 `openai.ts`
 - 在 Canvas 模式下 會透過兩個 chatCompletion 來做兩件事情
   - 第一個 chatCompletion 會將使用者的問題放進去 並讓 LLM 只能透過一個代碼框來回答問題
   - 第二個 chatCompletion 會將第一個 chatCompletion 的結果放進去 並且將這段用 streaming 的方式寫入 MarkdownCanvas
@@ -57,12 +61,6 @@
 - `handleAskGpt` 能不能把引用的部分藏入 `@heroui/modal` 讓使用者可以點擊以後查看？
   - 有一點需要注意 `handleAskGpt` 那邊好像是透過 `>` 來判斷哪裡是引用來的訊息 所以可能要在每一行 (包括空行) 前面加上 `>` 來讓後續的訊息能被正確的判斷
 
-- 請幫我將 `MarkdownCanvas` 隱藏到 `@heroui/drawer` 的 `Drawer` 裡面 讓使用者可以點開 然後再隱藏起來 他可以放在LLM回答的開頭 記得換行
-
-- 當進入 `canvas` 模式後 會透過兩個 `chatCompletion` 來判斷狀態 但有一個情況比較特別
-  - 如果模型已經提供對應代碼 而 User 只是編輯了 `MarkdownCanvas` 進行後續提問 `canvas` 模式的行為要反過來
-    - 先透過第一個 `chatCompletion` 來回答使用者的問題
-    - 透過第二個 `chatCompletion` 來生成修改後的代碼並輸出到 `MarkdownCanvas`
 如果把 `MarkdownCanvas` 改成一個function call的話會不會比較好處理？
 
 

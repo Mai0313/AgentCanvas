@@ -35,6 +35,7 @@ import {
   setupResizeEventHandlers,
   setupMarkdownResizer,
 } from "@/utils/layoutHandlers";
+import { useModeLanguage } from "@/provider";
 
 // Import HeroUI components
 
@@ -79,18 +80,8 @@ export default function ChatPage() {
   // fullscreen 狀態 class
   const fullscreenClass = isMarkdownCanvasOpen ? "main-content-fullscreen" : "";
 
-  // Add state for mode and language, initialized from URL if present
-  const getUrlParam = (param: string) => {
-    if (typeof window === "undefined") return null;
-    const url = new URL(window.location.href);
-
-    return url.searchParams.get(param);
-  };
-
-  const [mode, setMode] = useState<string>(() => getUrlParam("mode") || "");
-  const [userLanguage, setUserLanguage] = useState<string>(
-    () => getUrlParam("lang") || "",
-  );
+  // Add state for mode and language
+  const { mode, setMode, userLanguage, setUserLanguage } = useModeLanguage();
 
   // Handle text selection from both chat and markdown canvas
   const handleAskGpt = (selectedText: string) => {
@@ -220,41 +211,34 @@ export default function ChatPage() {
     }
   }, [isLoading]);
 
-  // Update generateNewThreadId to also set mode and language in URL
-  const generateNewThreadId = useCallback(
-    (newMode?: string, newLang?: string) => {
-      const newThreadId =
-        "thread_dvc_" + uuidv4().replace(/-/g, "").substring(0, 16);
+  // Update generateNewThreadId to only set thread ID
+  const generateNewThreadId = useCallback(() => {
+    const newThreadId =
+      "thread_" + uuidv4().replace(/-/g, "").substring(0, 16);
 
-      setThreadId(newThreadId);
+    setThreadId(newThreadId);
 
-      // Update URL with the new thread ID, mode, and language
-      const url = new URL(window.location.href);
-      const basePath = "/chat";
+    // Update URL with the new thread ID only
+    const url = new URL(window.location.href);
+    const basePath = "/chat";
 
-      if (basePath && !url.pathname.startsWith(basePath)) {
-        url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
-      }
-      url.searchParams.set("thread_id", newThreadId);
-      if (newMode) url.searchParams.set("mode", newMode);
-      if (newLang) url.searchParams.set("lang", newLang);
-      window.history.pushState({ threadId: newThreadId }, "", url.toString());
-      setMessages([]);
-      if (isMarkdownCanvasOpen) {
-        handleCloseMarkdownCanvas();
-      }
-      if (newMode) setMode(newMode);
-      if (newLang) setUserLanguage(newLang);
-    },
-    [isMarkdownCanvasOpen],
-  );
+    if (basePath && !url.pathname.startsWith(basePath)) {
+      url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
+    }
+    url.searchParams.set("thread_id", newThreadId);
+    window.history.pushState({ threadId: newThreadId }, "", url.toString());
+    setMessages([]);
+    if (isMarkdownCanvasOpen) {
+      handleCloseMarkdownCanvas();
+    }
+    setMode("");
+    setUserLanguage("");
+  }, [isMarkdownCanvasOpen, setMode, setUserLanguage]);
 
   useEffect(() => {
     // Check if URL already has a thread ID
     const url = new URL(window.location.href);
     const existingThreadId = url.searchParams.get("thread_id");
-    const urlMode = url.searchParams.get("mode");
-    const urlLang = url.searchParams.get("lang");
 
     // Verify the URL contains the correct base path
     const basePath = "/chat";
@@ -263,8 +247,6 @@ export default function ChatPage() {
     if (existingThreadId) {
       // Use the existing thread ID from URL
       setThreadId(existingThreadId);
-      if (urlMode) setMode(urlMode);
-      if (urlLang) setUserLanguage(urlLang);
 
       // Update path if needed but keep the thread ID
       if (needsPathUpdate) {
@@ -355,10 +337,10 @@ export default function ChatPage() {
         currentMode = detectedMode;
         currentLang = detectedLang;
 
-        // Update URL and state
-        generateNewThreadId(detectedMode, detectedLang);
+        // Update state
         setMode(detectedMode);
         setUserLanguage(detectedLang);
+        generateNewThreadId();
       }
 
       const assistantMessageId = uuidv4();
