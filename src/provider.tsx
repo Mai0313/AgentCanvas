@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
 import type { NavigateOptions } from "react-router-dom";
 
+import React, { createContext, useContext, useState } from "react";
 import { HeroUIProvider } from "@heroui/system";
 import { useHref, useNavigate } from "react-router-dom";
 
@@ -18,11 +18,16 @@ export interface ModeLanguageContextType {
   setUserLanguage: (lang: string) => void;
 }
 
-const ModeLanguageContext = createContext<ModeLanguageContextType | undefined>(undefined);
+const ModeLanguageContext = createContext<ModeLanguageContextType | undefined>(
+  undefined,
+);
 
 export function useModeLanguage() {
   const ctx = useContext(ModeLanguageContext);
-  if (!ctx) throw new Error("useModeLanguage must be used within ModeLanguageProvider");
+
+  if (!ctx)
+    throw new Error("useModeLanguage must be used within ModeLanguageProvider");
+
   return ctx;
 }
 
@@ -34,7 +39,9 @@ export function Provider({ children }: { children: React.ReactNode }) {
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref}>
-      <ModeLanguageContext.Provider value={{ mode, setMode, userLanguage, setUserLanguage }}>
+      <ModeLanguageContext.Provider
+        value={{ mode, setMode, userLanguage, setUserLanguage }}
+      >
         {children}
       </ModeLanguageContext.Provider>
     </HeroUIProvider>

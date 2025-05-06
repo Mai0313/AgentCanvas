@@ -52,6 +52,9 @@
   - 如果模型已經提供對應代碼 而 User 只是編輯了 `MarkdownCanvas` 進行後續提問 `canvas` 模式的行為要反過來
     - 先透過第一個 `chatCompletion` 來回答使用者的問題
     - 透過第二個 `chatCompletion` 來生成修改後的代碼並輸出到 `MarkdownCanvas`
+
+
+
 能不能幫我在 `openai.ts`
 - 在 Canvas 模式下 會透過兩個 chatCompletion 來做兩件事情
   - 第一個 chatCompletion 會將使用者的問題放進去 並讓 LLM 只能透過一個代碼框來回答問題

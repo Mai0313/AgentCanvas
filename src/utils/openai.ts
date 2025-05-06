@@ -104,8 +104,6 @@ export const chatCompletion = async (
       }
     });
 
-    console.log("Sending request to:", settings.baseUrl);
-
     // 基本請求配置
     const requestOptions = {
       model: settings.model,
@@ -113,10 +111,10 @@ export const chatCompletion = async (
       temperature: settings.temperature,
       max_tokens: settings.maxTokens,
     };
+    console.log("Sending request to:", settings.baseUrl);
 
     // 檢查是否需要串流模式
     if (onToken) {
-      console.log("Sending streaming request to:", settings.baseUrl);
 
       // Properly type the streaming response
       type ChatCompletionChunk = {
@@ -158,7 +156,6 @@ export const chatCompletion = async (
 
       return fullResponse;
     } else {
-      console.log("Sending request to:", settings.baseUrl);
       const responses = await client.chat.completions.create(
         requestOptions as any,
       );

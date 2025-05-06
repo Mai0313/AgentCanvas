@@ -20,7 +20,6 @@ import { Textarea } from "@heroui/react";
 import { Message } from "../types";
 
 import SelectionPopup from "./SelectionPopup";
-import SplitText from "./SplitText";
 
 // Icons for the action buttons
 const CopyIcon = (props: any) => (
@@ -457,17 +456,11 @@ const MessageItem: React.FC<MessageItemProps> = ({
       );
     }
 
+    // 直接渲染普通文字，不用SplitText
     return (
-      <SplitText
-        animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
-        animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
-        className="text-foreground text-base whitespace-pre-line"
-        delay={isStreaming ? 10 : 20} // 更快的動畫速度
-        easing="easeOutCubic"
-        rootMargin="-50px"
-        text={messageContent}
-        threshold={0.2}
-      />
+      <div className="text-foreground text-base whitespace-pre-line">
+        {messageContent}
+      </div>
     );
   };
 

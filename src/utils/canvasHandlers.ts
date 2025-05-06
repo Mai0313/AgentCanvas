@@ -122,7 +122,6 @@ export const handleCanvasMode = async (
     // 第一步：生成代碼並在過程中累積結果
     console.log("用戶語言:", userLanguage);
     console.log("用戶消息ID:", userMessage.id);
-    console.log("用戶消息內容:", userMessage.content);
     await chatCompletion(
       [codeSystemMessage, userMessage],
       settings,
@@ -221,6 +220,130 @@ export const handleCanvasMode = async (
       }
 
       return updatedMessages;
+    });
+  }
+};
+
+/**
+ * Canvas模式：用於後續提問（已存在代碼，user追問）
+ * 1. 先回答用戶問題（用現有代碼+用戶問題作為上下文）
+ * 2. 再判斷是否需要生成新的代碼塊（可選）
+ * 3. 若有新代碼則stream到MarkdownCanvas
+ */
+export const handleCanvasModeNext = async (
+  userMessage: Message, // 用戶追問
+  existingCode: string, // 當前MarkdownCanvas中的代碼
+  settings: ModelSetting,
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+  assistantMessageId: string,
+  setMarkdownContent: React.Dispatch<React.SetStateAction<string>>,
+  setEditingMessageId: React.Dispatch<React.SetStateAction<string | null>>,
+  setIsMarkdownCanvasOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  userLanguage?: string,
+): Promise<void> => {
+  // 步驟1：先回答用戶問題
+  const answerSystemMessage: Message = {
+    id: "system-answer-msg",
+    role: "system",
+    content:
+      "You are a canvas assistant. Given the user's follow-up question and the current code block, answer the question concisely. If the question requires code changes, mention that an updated code will be provided.",
+    timestamp: new Date(),
+  };
+  const codeContextMessage: Message = {
+    id: "assistant-code-context",
+    role: "assistant",
+    content: existingCode,
+    timestamp: new Date(),
+  };
+
+  let answerContent = "";
+
+  setMessages((prev) => {
+    const updated = [...prev];
+    const idx = updated.findIndex((m) => m.id === assistantMessageId);
+
+    if (idx !== -1) {
+      updated[idx] = {
+        ...updated[idx],
+        content: "Generating...",
+        isGeneratingCode: false,
+      };
+    }
+
+    return updated;
+  });
+
+  try {
+    // 1. 先生成回答
+    await chatCompletion(
+      [answerSystemMessage, codeContextMessage, userMessage],
+      settings,
+      userLanguage,
+      (token) => {
+        answerContent += token;
+        setMessages((prev) => {
+          const updated = [...prev];
+          const idx = updated.findIndex((m) => m.id === assistantMessageId);
+
+          if (idx !== -1) {
+            updated[idx] = {
+              ...updated[idx],
+              content: answerContent,
+            };
+          }
+
+          return updated;
+        });
+      },
+    );
+
+    // 2. 判斷是否需要生成新代碼（可選）
+    // 這裡可以根據answerContent判斷是否有需要（例如包含"updated code"等關鍵字），這裡直接假設都生成
+    // 實際可根據需求優化
+    let shouldUpdateCode = /updated code|new code|modify|change|update/i.test(
+      answerContent,
+    );
+
+    if (shouldUpdateCode) {
+      // 3. 生成新代碼塊
+      let newCodeBlock = "";
+      const updateCodeSystemMessage: Message = {
+        id: "system-update-code-msg",
+        role: "system",
+        content:
+          "Given the user's follow-up question and the previous code, provide only the updated code block as a complete replacement. Use language formatting (e.g., ```js). Do not include any explanation or comments outside the code block.",
+        timestamp: new Date(),
+      };
+      const codeMessageId = uuidv4();
+
+      setMarkdownContent("");
+      setEditingMessageId(codeMessageId);
+      setIsMarkdownCanvasOpen(true);
+      await chatCompletion(
+        [updateCodeSystemMessage, codeContextMessage, userMessage],
+        settings,
+        userLanguage,
+        (token) => {
+          newCodeBlock += token;
+          setMarkdownContent(newCodeBlock);
+        },
+      );
+    }
+  } catch (error) {
+    console.error("Canvas模式(追問)處理錯誤:", error);
+    setMessages((prev) => {
+      const updated = [...prev];
+      const idx = updated.findIndex((m) => m.id === assistantMessageId);
+
+      if (idx !== -1) {
+        updated[idx] = {
+          ...updated[idx],
+          content: "生成回答或代碼時發生錯誤，請重試。",
+          isGeneratingCode: false,
+        };
+      }
+
+      return updated;
     });
   }
 };
