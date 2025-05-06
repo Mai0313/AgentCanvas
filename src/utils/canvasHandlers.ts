@@ -87,7 +87,11 @@ export const handleCanvasMode = async (
     id: "system-code-msg",
     role: "system",
     content:
-      "You are a canvas assistant. Provide only a single code block solution with language formatting (e.g., ```javascript). Start directly with the code block and do not include any explanations or comments outside the code block. Make the solution concise and complete.",
+      `You are a canvas assistant.
+      Provide only a single code block solution with language formatting (e.g., \`\`\`javascript).
+      Start directly with the code block and do not include any explanations or comments outside the code block.
+      Make the solution concise and complete.
+      `,
     timestamp: new Date(),
   };
 
@@ -136,20 +140,17 @@ export const handleCanvasMode = async (
       },
     );
 
-    // 步驟2：準備解釋部分
-    const explanationSystemMessage: Message = {
-      id: "system-explain-msg",
-      role: "system",
-      content:
-        "Now explain the code block you provided. Give context on how it works and any important implementation details. Don't repeat the code itself, just provide the explanation.",
-      timestamp: new Date(),
-    };
-
     // 創建一個代表生成代碼的消息（用於上下文）
-    const codeContextMessage: Message = {
-      id: "assistant-code-context",
+    const explanationMessage: Message = {
+      id: "assistant-code-explanation",
       role: "assistant",
-      content: codeBlock,
+      content:
+        `You will receive the original question from the user and a generated code block.
+        Generated Code Block:
+        ${codeBlock}
+        Give context on how it works and any important implementation details related to the user's question.
+        Don't repeat the code itself, just provide the explanation.
+        `,
       timestamp: new Date(),
     };
 
@@ -176,7 +177,7 @@ export const handleCanvasMode = async (
 
     // 步驟3：生成解釋文本
     await chatCompletion(
-      [explanationSystemMessage, userMessage, codeContextMessage],
+      [explanationMessage, userMessage],
       settings,
       userLanguage,
       (token) => {
@@ -246,13 +247,23 @@ export const handleCanvasModeNext = async (
     id: "system-answer-msg",
     role: "system",
     content:
-      "You are a canvas assistant. Given the user's follow-up question and the current code block, answer the question concisely. If the question requires code changes, mention that an updated code will be provided.",
+      `You will receive a pair of code block and user question.
+      Please answer the user's question based on this code block.`,
     timestamp: new Date(),
   };
   const codeContextMessage: Message = {
     id: "assistant-code-context",
     role: "assistant",
-    content: existingCode,
+    content:
+      `Current Code Block:
+      ${existingCode}
+      User's Question:
+      ${userMessage.content}
+      Notice
+      - You are not allowed to respond with any code block, other agents will handle it.
+      - Just provide the answer in plain text.
+      For example, if you think the code should be updated, you can make a update suggestion in bullet points; then another agent will handle the code update.
+      `,
     timestamp: new Date(),
   };
 
@@ -276,7 +287,7 @@ export const handleCanvasModeNext = async (
   try {
     // 1. 先生成回答
     await chatCompletion(
-      [answerSystemMessage, codeContextMessage, userMessage],
+      [answerSystemMessage, codeContextMessage],
       settings,
       userLanguage,
       (token) => {
@@ -297,38 +308,37 @@ export const handleCanvasModeNext = async (
       },
     );
 
-    // 2. 判斷是否需要生成新代碼（可選）
-    // 這裡可以根據answerContent判斷是否有需要（例如包含"updated code"等關鍵字），這裡直接假設都生成
-    // 實際可根據需求優化
-    let shouldUpdateCode = /updated code|new code|modify|change|update/i.test(
-      answerContent,
+    // 2. 生成新代碼塊
+    let newCodeBlock = "";
+    const codeUpdateMessage: Message = {
+      id: "assistant-code-update",
+      role: "assistant",
+      content:
+        `Current Code Block:
+        ${existingCode}
+        Update Suggestion:
+        ${answerContent}
+        Please provide only the updated code block as a complete replacement.
+        Use language formatting (e.g., \`\`\`js).
+        Do not include any explanation or comments outside the code block.
+        `,
+      timestamp: new Date(),
+    };
+    const codeMessageId = uuidv4();
+
+    setMarkdownContent("");
+    setEditingMessageId(codeMessageId);
+    setIsMarkdownCanvasOpen(true);
+    await chatCompletion(
+      [codeUpdateMessage],
+      settings,
+      userLanguage,
+      (token) => {
+        newCodeBlock += token;
+        setMarkdownContent(newCodeBlock);
+      },
     );
 
-    if (shouldUpdateCode) {
-      // 3. 生成新代碼塊
-      let newCodeBlock = "";
-      const updateCodeSystemMessage: Message = {
-        id: "system-update-code-msg",
-        role: "system",
-        content:
-          "Given the user's follow-up question and the previous code, provide only the updated code block as a complete replacement. Use language formatting (e.g., ```js). Do not include any explanation or comments outside the code block.",
-        timestamp: new Date(),
-      };
-      const codeMessageId = uuidv4();
-
-      setMarkdownContent("");
-      setEditingMessageId(codeMessageId);
-      setIsMarkdownCanvasOpen(true);
-      await chatCompletion(
-        [updateCodeSystemMessage, codeContextMessage, userMessage],
-        settings,
-        userLanguage,
-        (token) => {
-          newCodeBlock += token;
-          setMarkdownContent(newCodeBlock);
-        },
-      );
-    }
   } catch (error) {
     console.error("Canvas模式(追問)處理錯誤:", error);
     setMessages((prev) => {
