@@ -419,3 +419,42 @@ export const generateImageAndText = async (
     throw error;
   }
 };
+
+/**
+ * Generate a title for a code block based on the user's message
+ * @param message User's first message
+ * @param settings Model settings
+ * @returns Title for the code block
+ */
+export const generateCodeBlockTitle = async (
+  message: string,
+  settings: ModelSetting,
+): Promise<string> => {
+  try {
+    const client = createClient(settings);
+    const assistantMessage: ChatCompletionMessageParam = {
+      role: "assistant",
+      content: `You are an assistant that helps name code snippets concisely.`,
+    };
+    const userMessage: ChatCompletionMessageParam = {
+      role: "user",
+      content: `Given this code snippet, provide a short, descriptive title (3-5 words) that describes what the code does.
+        Don't include words like "code", "function", "class", etc.
+        Just give the title directly:\n${message}
+        `,
+    };
+    const response = await client.chat.completions.create({
+      model: settings.model,
+      messages: [assistantMessage, userMessage],
+      temperature: 0.1,
+      max_tokens: 10,
+    });
+    const title = response.choices[0].message.content?.trim();
+
+    return title || "Unknown Code Snippet";
+  } catch (error) {
+    console.error("Error generating code block title:", error);
+
+    return "Unknown Code Snippet";
+  }
+};

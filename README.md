@@ -22,6 +22,8 @@ Agent Canvas is an interactive AI chat application built with modern web technol
 - Developed using `Vite` and `TypeScript` with `yarn` for package management
 - Features a flexible interface for text, code, and image generation
 - Supports multiple conversation modes and interactive editing capabilities
+- Preserves state in URL for seamless session continuity
+- Supports both Dark Mode and Light Mode
 
 ## Technologies Used
 
@@ -35,21 +37,21 @@ Agent Canvas is an interactive AI chat application built with modern web technol
 ## Supporting Features
 
 ### Multi-Modal Conversation
-- When receiving user messages, content is analyzed via `chatCompletion` to determine task type:
-  - **Canvas Mode** (`taskType === "canvas"`)
-    - Chat is split into two separate `chatCompletion` calls while maintaining unified output
+- **Canvas Mode** (`currentMode === "canvas"`)
+  - Expands `MarkdownCanvas` and `ChatBox` to fullscreen mode
+  - Users can return to normal view by clicking the `X` (Close) button
+  - Chat process splits into two separate `chatCompletion` calls:
     - First completion: Generates code response in a code block and streams it to `MarkdownCanvas`
     - Second completion: Uses both the user's question and generated code to create descriptive text
-    - Both responses are displayed simultaneously in the same `ChatBox`, preserving standard chat behavior
+    - Both responses render simultaneously in the `ChatBox`, preserving standard chat behavior
   
-  - **Image Mode** (`taskType === "image"`)
-    - Uses `generateImageAndText` to create both image and corresponding text
-    - Generated images and text are rendered together in the `ChatBox`
-    - Process: First generates the image, then uses the resulting `imageUrl` in a `chatCompletion` to generate descriptive text
-
-  - **Chat Mode** (standard)
-    - Detects code blocks to determine if `MarkdownCanvas` mode should be activated
-    - When a code block is detected, subsequent code is streamed to `MarkdownCanvas`
+- **Image Mode** (`currentMode === "image"`)
+  - Uses `generateImageAndText` to create both image and corresponding text
+  - Generated images and text are rendered together in the `ChatBox`
+  - Process: First generates the image, then uses the resulting `imageUrl` in a `chatCompletion` to generate descriptive text
+  
+- **Chat Mode** (standard)
+  - Conducts normal question-answer dialogue
 
 ### Interactive UI Elements
 - **Resizable Interface**: `ResizeBox` between `MarkdownCanvas` and `ChatBox` allows users to adjust panel sizes
@@ -63,8 +65,16 @@ Agent Canvas is an interactive AI chat application built with modern web technol
   - **Regenerate**: Deletes current response and generates a new one
 
 ### Advanced Input Methods
+
 - **Image Input**: Users can paste images using Ctrl+V, which are then incorporated into chat completions
 - **Message Manipulation**: Edit and copy functionality for message management
+- **Smooth Animations**: Fluid transition from homepage to conversation interface
+
+## TODO Features
+
+- [ ] Chat History: Implement a feature to view past conversations
+- [ ] User Authentication: Allow users to save their chat history and settings
+- [ ] RAG (Retrieval-Augmented Generation): Integrate a system to fetch relevant documents or data to enhance responses
 
 ## How to Use
 

@@ -217,30 +217,34 @@ export default function ChatPage() {
   }, [isLoading]);
 
   // Update generateNewThreadId to only set thread ID
-  const generateNewThreadId = useCallback((keepMessages = false) => {
-    const newThreadId = "thread_" + uuidv4().replace(/-/g, "").substring(0, 16);
+  const generateNewThreadId = useCallback(
+    (keepMessages = false) => {
+      const newThreadId =
+        "thread_" + uuidv4().replace(/-/g, "").substring(0, 16);
 
-    setThreadId(newThreadId);
+      setThreadId(newThreadId);
 
-    // Update URL with the new thread ID only
-    const url = new URL(window.location.href);
-    const basePath = "/chat";
+      // Update URL with the new thread ID only
+      const url = new URL(window.location.href);
+      const basePath = "/chat";
 
-    if (basePath && !url.pathname.startsWith(basePath)) {
-      url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
-    }
-    url.searchParams.set("thread_id", newThreadId);
-    window.history.pushState({ threadId: newThreadId }, "", url.toString());
-    
-    // 只有當 keepMessages 為 false 時才清空訊息
-    if (!keepMessages) {
-      setMessages([]);
-    }
-    
-    if (isMarkdownCanvasOpen) {
-      handleCloseMarkdownCanvas();
-    }
-  }, [isMarkdownCanvasOpen]);
+      if (basePath && !url.pathname.startsWith(basePath)) {
+        url.pathname = `${basePath}${url.pathname.startsWith("/") ? "" : "/"}${url.pathname}`;
+      }
+      url.searchParams.set("thread_id", newThreadId);
+      window.history.pushState({ threadId: newThreadId }, "", url.toString());
+
+      // 只有當 keepMessages 為 false 時才清空訊息
+      if (!keepMessages) {
+        setMessages([]);
+      }
+
+      if (isMarkdownCanvasOpen) {
+        handleCloseMarkdownCanvas();
+      }
+    },
+    [isMarkdownCanvasOpen],
+  );
 
   useEffect(() => {
     // Check if URL already has a thread ID

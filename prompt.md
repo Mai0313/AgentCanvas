@@ -48,23 +48,8 @@
 - 可以從首頁直接開始對話 並會透過一個流暢的動畫轉移過去
 
 ## TODO Features
-- 當進入 `canvas` 模式後 會透過兩個 `chatCompletion` 來判斷狀態 但有一個情況比較特別
-  - 如果模型已經提供對應代碼 而 User 只是編輯了 `MarkdownCanvas` 進行後續提問 `canvas` 模式的行為要反過來
-    - 先透過第一個 `chatCompletion` 來回答使用者的問題
-    - 透過第二個 `chatCompletion` 來生成修改後的代碼並輸出到 `MarkdownCanvas`
-
-
-
-能不能幫我在 `openai.ts`
-- 在 Canvas 模式下 會透過兩個 chatCompletion 來做兩件事情
-  - 第一個 chatCompletion 會將使用者的問題放進去 並讓 LLM 只能透過一個代碼框來回答問題
-  - 第二個 chatCompletion 會將第一個 chatCompletion 的結果放進去 並且將這段用 streaming 的方式寫入 MarkdownCanvas
-我希望你幫我將 `展開 Canvas 編輯器` 這個按鈕移動到最後一則AI回覆的上方
-
-- `handleAskGpt` 能不能把引用的部分藏入 `@heroui/modal` 讓使用者可以點擊以後查看？
-  - 有一點需要注意 `handleAskGpt` 那邊好像是透過 `>` 來判斷哪裡是引用來的訊息 所以可能要在每一行 (包括空行) 前面加上 `>` 來讓後續的訊息能被正確的判斷
-
-如果把 `MarkdownCanvas` 改成一個function call的話會不會比較好處理？
-
+- 目前 `MarkdownCanvas` 內部會透過 `chatCompletion` 自動生成一個 `Title` 我希望把這段整個照下面的方式改掉
+  - 當 `Streaming` 結束以後 透過 `updateCanvasTitle` 調用 `generateCodeBlockTitle` 去 update title
+  - 你可能需要注意 `AI Title` 這個按鈕會不會出問題
 
 `yarn run docusaurus generate-typedoc`
