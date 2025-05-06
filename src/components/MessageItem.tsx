@@ -499,7 +499,11 @@ const MessageItem: React.FC<MessageItemProps> = ({
           {message.role === "assistant" ? "AI" : "You"}
         </span>
         <span className="timestamp text-default-400 text-sm">
-          {message.timestamp.toLocaleTimeString()}
+          {new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+          {/* Show streaming indicator if applicable */}
           {renderConditional(
             isStreaming && !message.isGeneratingImage,
             <span className="streaming-indicator ml-2 text-primary">
