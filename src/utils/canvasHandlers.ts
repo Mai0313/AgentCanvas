@@ -86,8 +86,7 @@ export const handleCanvasMode = async (
   const codeSystemMessage: Message = {
     id: "system-code-msg",
     role: "system",
-    content:
-      `You are a canvas assistant.
+    content: `You are a canvas assistant.
       Provide only a single code block solution with language formatting (e.g., \`\`\`javascript).
       Start directly with the code block and do not include any explanations or comments outside the code block.
       Make the solution concise and complete.
@@ -144,8 +143,7 @@ export const handleCanvasMode = async (
     const explanationMessage: Message = {
       id: "assistant-code-explanation",
       role: "assistant",
-      content:
-        `You will receive the original question from the user and a generated code block.
+      content: `You will receive the original question from the user and a generated code block.
         Generated Code Block:
         ${codeBlock}
         Give context on how it works and any important implementation details related to the user's question.
@@ -246,16 +244,14 @@ export const handleCanvasModeNext = async (
   const answerSystemMessage: Message = {
     id: "system-answer-msg",
     role: "system",
-    content:
-      `You will receive a pair of code block and user question.
+    content: `You will receive a pair of code block and user question.
       Please answer the user's question based on this code block.`,
     timestamp: new Date(),
   };
   const codeContextMessage: Message = {
     id: "assistant-code-context",
     role: "assistant",
-    content:
-      `Current Code Block:
+    content: `Current Code Block:
       ${existingCode}
       User's Question:
       ${userMessage.content}
@@ -313,8 +309,7 @@ export const handleCanvasModeNext = async (
     const codeUpdateMessage: Message = {
       id: "assistant-code-update",
       role: "assistant",
-      content:
-        `Current Code Block:
+      content: `Current Code Block:
         ${existingCode}
         Update Suggestion:
         ${answerContent}
@@ -338,7 +333,6 @@ export const handleCanvasModeNext = async (
         setMarkdownContent(newCodeBlock);
       },
     );
-
   } catch (error) {
     console.error("Canvas模式(追問)處理錯誤:", error);
     setMessages((prev) => {

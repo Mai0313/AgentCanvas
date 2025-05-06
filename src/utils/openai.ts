@@ -1,4 +1,7 @@
-import type { ChatCompletionMessageParam, ChatCompletionChunk } from "openai/resources";
+import type {
+  ChatCompletionMessageParam,
+  ChatCompletionChunk,
+} from "openai/resources";
 
 import { AzureOpenAI, OpenAI } from "openai";
 import { Stream } from "openai/streaming";
@@ -77,8 +80,7 @@ export const chatCompletion = async (
       if (typeof m.content === "string") {
         return {
           role: m.role as "user" | "assistant" | "system",
-          content:
-            `Here is the User's Question
+          content: `Here is the User's Question
             ${m.content}
             You MUST respond in ${userLanguage || "en-US"} language.
             `,
@@ -91,8 +93,7 @@ export const chatCompletion = async (
             if (item.type === "text") {
               return {
                 type: "text",
-                text:
-                  `Here is the User's Question
+                text: `Here is the User's Question
                   ${item.text}
                   You MUST respond in ${userLanguage || "en-US"} language.`,
               };
@@ -113,11 +114,11 @@ export const chatCompletion = async (
       temperature: settings.temperature,
       max_tokens: settings.maxTokens,
     };
+
     console.log("Sending request to:", settings.baseUrl);
 
     // 檢查是否需要串流模式
     if (onToken) {
-
       // Create streaming request with proper typing
       const streamingOptions = {
         ...requestOptions,
@@ -170,8 +171,7 @@ export const detectTaskType = async (
     // System message to instruct the AI
     const systemMessage: ChatCompletionMessageParam = {
       role: "system",
-      content:
-        `
+      content: `
         Please divide the user's message into three task types: 'canvas', 'image', or 'chat'.
         1. Determine if the user is asking for generating an image
           YES -> response with 'image'
