@@ -5,14 +5,6 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
       target: prod
-    environment:
-      VITE_API_TYPE: openai
-      VITE_API_KEY: srv_dvc_tma001
-      VITE_BASE_URL: https://tma.mediatek.inc/tma/sdk/api
-      VITE_TEMPERATURE: 0.7
-      VITE_MAX_TOKENS: 2048
-      VITE_AZURE_DEPLOYMENT: ""
-      VITE_AZURE_API_VERSION: 2025-03-01-preview
     command:
       - yarn
       - preview

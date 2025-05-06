@@ -44,8 +44,11 @@
 - 使用者可以透過 Copy Edit 的按鈕來編輯訊息
   - Copy: 複製
   - Edit: 編輯 當編輯完成以後會重新送出訊息
+- 支援 `Dark Mode` 與 `Light Mode`
+- 可以從首頁直接開始對話 並會透過一個流暢的動畫轉移過去
 
 ## TODO Features
+- 為何我現在不能透過首頁直接開始對話了？ 好像我從首頁直接發訊息以後 他只有轉移到Chat那一區 但並沒有開始對話
 - 在 Canvas 模式下 會透過兩個 chatCompletion 來做兩件事情
   - 第一個 chatCompletion 會將使用者的問題放進去 並讓 LLM 只能透過一個代碼框來回答問題
   - 第二個 chatCompletion 會將第一個 chatCompletion 的結果放進去 並且將這段用 streaming 的方式寫入 MarkdownCanvas

@@ -8,12 +8,12 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
-import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
 import { Alert } from "@heroui/alert";
 
 import DefaultLayout from "@/layouts/default";
 import ChatBox from "@/components/ChatBox";
 import MarkdownCanvas from "@/components/MarkdownCanvas";
+import { ModelSettingsModal } from "@/components/ModelSettings";
 import { Message, ModelSetting, MessageContent } from "@/types";
 import { fetchModels, detectTaskType, detectUserLang } from "@/utils/openai";
 import { getDefaultModelSettings } from "@/utils/modelUtils";
@@ -486,6 +486,8 @@ export default function ChatPage() {
     // 保持editingMessageId/minimizedMarkdownMessageId不變
   };
 
+  const [showModelSettings, setShowModelSettings] = useState(false);
+
   return (
     <DefaultLayout>
       {/* Thinking Alert 右上角浮動顯示 */}
@@ -665,71 +667,44 @@ export default function ChatPage() {
 
           {/* 右側的Model Info顯示 */}
           <div className="flex items-center">
-            <Popover placement="bottom-end">
-              <PopoverTrigger>
-                <Button
-                  isIconOnly
-                  className="text-warning"
-                  size="sm"
-                  variant="light"
-                >
-                  <svg
-                    fill="none"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    width="20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M12 16V12"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M12 8H12.01"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent>
-                <div className="px-1 py-2 w-80">
-                  <div className="text-small font-bold">Model Information</div>
-                  <div className="text-tiny mt-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="font-medium">Model:</div>
-                      <div>{settings.model || "Not selected"}</div>
-
-                      <div className="font-medium">Temperature:</div>
-                      <div>{settings.temperature}</div>
-
-                      <div className="font-medium">Max Tokens:</div>
-                      <div>{settings.maxTokens || "Default"}</div>
-
-                      <div className="font-medium">Base URL:</div>
-                      <div className="truncate">
-                        {settings.baseUrl || "Default"}
-                      </div>
-
-                      <div className="font-medium">API Key:</div>
-                      <div>{settings.apiKey ? "***" : "Not set"}</div>
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <Button
+              isIconOnly
+              aria-label="Edit Model Settings"
+              className="text-warning"
+              size="sm"
+              variant="light"
+              onClick={() => setShowModelSettings(true)}
+            >
+              {/* Custom SVG icon with currentColor for dark mode support */}
+              <svg
+                fill="none"
+                height="24"
+                viewBox="0 0 48 48"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M36.686 15.171C37.9364 16.9643 38.8163 19.0352 39.2147 21.2727H44V26.7273H39.2147C38.8163 28.9648 37.9364 31.0357 36.686 32.829L40.0706 36.2137L36.2137 40.0706L32.829 36.686C31.0357 37.9364 28.9648 38.8163 26.7273 39.2147V44H21.2727V39.2147C19.0352 38.8163 16.9643 37.9364 15.171 36.686L11.7863 40.0706L7.92939 36.2137L11.314 32.829C10.0636 31.0357 9.18372 28.9648 8.78533 26.7273H4V21.2727H8.78533C9.18372 19.0352 10.0636 16.9643 11.314 15.171L7.92939 11.7863L11.7863 7.92939L15.171 11.314C16.9643 10.0636 19.0352 9.18372 21.2727 8.78533V4H26.7273V8.78533C28.9648 9.18372 31.0357 10.0636 32.829 11.314L36.2137 7.92939L40.0706 11.7863L36.686 15.171Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinejoin="round"
+                  strokeWidth="4"
+                />
+                <path
+                  d="M24 29C26.7614 29 29 26.7614 29 24C29 21.2386 26.7614 19 24 19C21.2386 19 19 21.2386 19 24C19 26.7614 21.2386 29 24 29Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinejoin="round"
+                  strokeWidth="4"
+                />
+              </svg>
+            </Button>
+            <ModelSettingsModal
+              open={showModelSettings}
+              settings={settings}
+              onClose={() => setShowModelSettings(false)}
+              onSettingsChange={setSettings}
+            />
           </div>
         </div>
 
