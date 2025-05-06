@@ -438,9 +438,10 @@ export const generateCodeBlockTitle = async (
     };
     const userMessage: ChatCompletionMessageParam = {
       role: "user",
-      content: `Given this code snippet, provide a short, descriptive title (3-5 words) that describes what the code does.
+      content: `Given this code snippet, provide a short, file name that describes what the code does.
         Don't include words like "code", "function", "class", etc.
-        Just give the title directly:\n${message}
+        For example: xxx.py
+        Here is the code block:\n${message}
         `,
     };
     const response = await client.chat.completions.create({
@@ -450,6 +451,7 @@ export const generateCodeBlockTitle = async (
       max_tokens: 10,
     });
     const title = response.choices[0].message.content?.trim();
+    console.log("Generated title:", title);
 
     return title || "Unknown Code Snippet";
   } catch (error) {
