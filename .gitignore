@@ -30,4 +30,4 @@ yarn.lock
 package-lock.json
 bun.lockb
 .env
-# prompt.md
+prompt.md
