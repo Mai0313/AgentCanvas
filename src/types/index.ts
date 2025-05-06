@@ -9,8 +9,8 @@ export interface Message {
   role: "user" | "assistant" | "system";
   content: string | MessageContent[];
   imageUrl?: string; // Add support for images
-  isGeneratingImage?: boolean; // 添加標記，表示正在生成圖片
-  isGeneratingCode?: boolean; // 添加標記，表示正在生成代碼到 MarkdownCanvas
+  // Removed: isGeneratingImage and isGeneratingCode flags
+  // These are now managed via GenerationStatusContext
 }
 
 export interface MessageContent {

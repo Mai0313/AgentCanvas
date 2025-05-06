@@ -101,7 +101,8 @@ export const handleCanvasMode = async (
   setEditingMessageId(codeMessageId);
   setIsMarkdownCanvasOpen(true);
 
-  // 使用靜態的占位文本，並標記為正在生成代碼，這樣ChatBox中就不會顯示"Loading content..."了
+  // 使用靜態的占位文本，不再使用 isGeneratingCode 標記
+  // 改為在 component 中通過 context 判斷
   setMessages((prev) => {
     const updatedMessages = [...prev];
     const messageIndex = updatedMessages.findIndex(
@@ -112,7 +113,6 @@ export const handleCanvasMode = async (
       updatedMessages[messageIndex] = {
         ...updatedMessages[messageIndex],
         content: "Generating...", // 使用靜態占位符，防止內容跳動
-        isGeneratingCode: true, // 標記此消息正在生成代碼到MarkdownCanvas，避免顯示"Loading content..."
       };
     }
 
@@ -133,8 +133,6 @@ export const handleCanvasMode = async (
 
         // 每收到一個token就更新MarkdownCanvas內容 - 實現真正的流式輸出
         setMarkdownContent(codeBlock);
-
-        // 不更新ChatBox中的消息內容，因為我們已經設置了靜態占位符
       },
     );
 
@@ -164,7 +162,6 @@ export const handleCanvasMode = async (
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
           content: "", // 清空內容，準備接收解釋文本
-          isGeneratingCode: false, // 代碼生成完成
         };
       }
 
@@ -212,7 +209,6 @@ export const handleCanvasMode = async (
         updatedMessages[messageIndex] = {
           ...updatedMessages[messageIndex],
           content: "生成代碼或解釋時發生錯誤，請重試。",
-          isGeneratingCode: false,
         };
       }
 
@@ -269,7 +265,6 @@ export const handleCanvasModeNext = async (
       updated[idx] = {
         ...updated[idx],
         content: "Generating...",
-        isGeneratingCode: false,
       };
     }
 
@@ -309,7 +304,7 @@ export const handleCanvasModeNext = async (
         ${existingCode}
         Update Suggestion:
         ${answerContent}
-        Please provide only the updated code block as a complete replacement.
+        Please provide only the updated code block in full as a complete replacement.
         Use language formatting (e.g., \`\`\`js).
         Do not include any explanation or comments outside the code block.
         `,
@@ -338,7 +333,6 @@ export const handleCanvasModeNext = async (
         updated[idx] = {
           ...updated[idx],
           content: "生成回答或代碼時發生錯誤，請重試。",
-          isGeneratingCode: false,
         };
       }
 

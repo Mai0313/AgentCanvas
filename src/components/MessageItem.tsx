@@ -21,6 +21,8 @@ import { Message } from "../types";
 
 import SelectionPopup from "./SelectionPopup";
 
+import { useGenerationStatus } from "@/provider";
+
 // Icons for the action buttons
 const CopyIcon = (props: any) => (
   <svg
@@ -209,6 +211,13 @@ const MessageItem: React.FC<MessageItemProps> = ({
   const messageRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Get the generation status from context
+  const { isGeneratingImage, isGeneratingCode } = useGenerationStatus();
+
+  // Check if this message is in a generating state
+  const messageIsGeneratingImage = isGeneratingImage(message.id);
+  const messageIsGeneratingCode = isGeneratingCode(message.id);
+
   // Helper function to convert message content to string, wrapped in useCallback
   const getMessageContentAsString = useCallback((): string => {
     if (typeof message.content === "string") {
@@ -393,7 +402,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
       );
     }
 
-    if (message.isGeneratingImage) {
+    if (messageIsGeneratingImage) {
       return (
         <Card
           key="generating-image"
@@ -411,7 +420,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
       );
     }
 
-    if (message.isGeneratingCode) {
+    if (messageIsGeneratingCode) {
       return (
         <Card key="generating-code" className="generating-code-container p-4">
           <div className="generating-code-text text-default-500">
@@ -505,7 +514,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
           })}
           {/* Show streaming indicator if applicable */}
           {renderConditional(
-            isStreaming && !message.isGeneratingImage,
+            isStreaming && !messageIsGeneratingImage,
             <span className="streaming-indicator ml-2 text-primary">
               <Spinner className="inline-block mr-1" size="sm" />
               typing...
@@ -518,8 +527,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
         {renderConditional(
           isStreaming &&
             message.content === "" &&
-            !message.isGeneratingImage &&
-            !message.isGeneratingCode,
+            !messageIsGeneratingImage &&
+            !messageIsGeneratingCode,
           <div className="typing-indicator flex justify-center">
             <Spinner color="primary" size="sm" />
           </div>,

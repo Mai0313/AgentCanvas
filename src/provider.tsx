@@ -10,7 +10,7 @@ declare module "@react-types/shared" {
   }
 }
 
-// 新增 ModeLanguageContext
+// ModeLanguage Context
 export interface ModeLanguageContextType {
   mode: string;
   setMode: (mode: string) => void;
@@ -31,18 +31,66 @@ export function useModeLanguage() {
   return ctx;
 }
 
+// Generation Status Context
+export interface GenerationStatusContextType {
+  generatingImageMessageId: string | null;
+  setGeneratingImageMessageId: (id: string | null) => void;
+  generatingCodeMessageId: string | null;
+  setGeneratingCodeMessageId: (id: string | null) => void;
+  isGeneratingImage: (messageId: string) => boolean;
+  isGeneratingCode: (messageId: string) => boolean;
+}
+
+const GenerationStatusContext = createContext<
+  GenerationStatusContextType | undefined
+>(undefined);
+
+export function useGenerationStatus() {
+  const ctx = useContext(GenerationStatusContext);
+
+  if (!ctx) throw new Error("useGenerationStatus must be used within Provider");
+
+  return ctx;
+}
+
 export function Provider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
-  // 新增全域 state
+  // Mode and language state
   const [mode, setMode] = useState("");
   const [userLanguage, setUserLanguage] = useState("");
+
+  // Generation status state
+  const [generatingImageMessageId, setGeneratingImageMessageId] = useState<
+    string | null
+  >(null);
+  const [generatingCodeMessageId, setGeneratingCodeMessageId] = useState<
+    string | null
+  >(null);
+
+  // Helper functions to check if a specific message is generating
+  const isGeneratingImage = (messageId: string): boolean =>
+    generatingImageMessageId === messageId;
+
+  const isGeneratingCode = (messageId: string): boolean =>
+    generatingCodeMessageId === messageId;
 
   return (
     <HeroUIProvider navigate={navigate} useHref={useHref}>
       <ModeLanguageContext.Provider
         value={{ mode, setMode, userLanguage, setUserLanguage }}
       >
-        {children}
+        <GenerationStatusContext.Provider
+          value={{
+            generatingImageMessageId,
+            setGeneratingImageMessageId,
+            generatingCodeMessageId,
+            setGeneratingCodeMessageId,
+            isGeneratingImage,
+            isGeneratingCode,
+          }}
+        >
+          {children}
+        </GenerationStatusContext.Provider>
       </ModeLanguageContext.Provider>
     </HeroUIProvider>
   );

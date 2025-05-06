@@ -749,6 +749,25 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                 ) {
                   return (
                     <React.Fragment key={message.id + "-with-canvas-btn"}>
+                      <MessageItem
+                        key={message.id}
+                        currentModel={currentModel}
+                        fetchModels={fetchModels}
+                        isEditing={editingMessageId === message.id}
+                        isLoadingModels={isLoadingModels}
+                        isStreaming={streamingMessageId === message.id}
+                        message={message}
+                        toggleMarkdownCanvas={() => {
+                          if (typeof message.content === "string") {
+                            toggleMarkdownCanvas(message.id, message.content);
+                          }
+                        }}
+                        onAskGpt={handleAskGpt}
+                        onCopy={onCopy}
+                        onDelete={onDelete}
+                        onEdit={onEdit}
+                        onRegenerate={onRegenerate}
+                      />
                       <div className="flex justify-center my-2">
                         <button
                           className="markdown-mini-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors shadow"
@@ -791,25 +810,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                           </span>
                         </button>
                       </div>
-                      <MessageItem
-                        key={message.id}
-                        currentModel={currentModel}
-                        fetchModels={fetchModels}
-                        isEditing={editingMessageId === message.id}
-                        isLoadingModels={isLoadingModels}
-                        isStreaming={streamingMessageId === message.id}
-                        message={message}
-                        toggleMarkdownCanvas={() => {
-                          if (typeof message.content === "string") {
-                            toggleMarkdownCanvas(message.id, message.content);
-                          }
-                        }}
-                        onAskGpt={handleAskGpt}
-                        onCopy={onCopy}
-                        onDelete={onDelete}
-                        onEdit={onEdit}
-                        onRegenerate={onRegenerate}
-                      />
                     </React.Fragment>
                   );
                 }

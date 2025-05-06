@@ -36,7 +36,7 @@ import {
   setupResizeEventHandlers,
   setupMarkdownResizer,
 } from "@/utils/layoutHandlers";
-import { useModeLanguage } from "@/provider";
+import { useModeLanguage, useGenerationStatus } from "@/provider";
 
 // Import HeroUI components
 
@@ -83,6 +83,10 @@ export default function ChatPage() {
 
   // Add state for mode and language
   const { mode, setMode, userLanguage, setUserLanguage } = useModeLanguage();
+
+  // Add generation status
+  const { setGeneratingImageMessageId, setGeneratingCodeMessageId } =
+    useGenerationStatus();
 
   // Handle text selection from both chat and markdown canvas
   const handleAskGpt = (selectedText: string) => {
@@ -345,7 +349,6 @@ export default function ChatPage() {
         id: assistantMessageId,
         role: "assistant",
         content: currentMode === "image" ? "Creating your Image..." : "",
-        isGeneratingImage: currentMode === "image", // Mark as generating image if detected as image task
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -357,6 +360,7 @@ export default function ChatPage() {
 
       if (currentMode === "image") {
         // Handle image generation - 使用新模組
+        setGeneratingImageMessageId(assistantMessageId);
         await handleImageGeneration(
           messageText,
           assistantMessageId,
@@ -364,6 +368,7 @@ export default function ChatPage() {
           setMessages,
           currentLang,
         );
+        setGeneratingImageMessageId(null);
       } else if (currentMode === "canvas") {
         if (messages.length === 0) {
           // 第一個 canvas 問題，走原本流程
@@ -392,6 +397,7 @@ export default function ChatPage() {
         }
       } else {
         // Handle normal chat or code tasks - 使用新模組
+        setGeneratingCodeMessageId(assistantMessageId);
         await handleStandardChatMode(
           messages,
           userMessage,
@@ -400,6 +406,7 @@ export default function ChatPage() {
           setMessages,
           currentLang,
         );
+        setGeneratingCodeMessageId(null);
       }
     } catch (err: any) {
       setError(

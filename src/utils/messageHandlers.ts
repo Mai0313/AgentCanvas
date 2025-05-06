@@ -89,7 +89,7 @@ export const handleImageGeneration = async (
         ...updatedMessages[messageIndex],
         content: textResponse,
         imageUrl: imageUrl,
-        isGeneratingImage: false, // 移除生成中狀態
+        // isGeneratingImage flag is now managed by context
       };
     }
 
