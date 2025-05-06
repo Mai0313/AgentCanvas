@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   preview: {
     // 允許所有主機
-    allowedHosts: ["mtktma.mediatek.inc", "mtktma"],
+    allowedHosts: true,
   },
   build: {
     chunkSizeWarningLimit: 800, // Increase the warning limit to 800KB
