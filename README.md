@@ -13,6 +13,9 @@
 
 An intelligent conversational interface supporting multiple modes of interaction with AI models.
 
+## Demo
+[![Watch on YouTube](https://img.youtube.com/vi/-7xr-apjWSY/hqdefault.jpg)](https://youtu.be/-7xr-apjWSY)
+
 ## Homepage
 ![Agent Canvas UI](/public/ui.png)
 
