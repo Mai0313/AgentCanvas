@@ -13,9 +13,15 @@
 
 An intelligent conversational interface supporting multiple modes of interaction with AI models.
 
+## Homepage
 ![Agent Canvas UI](/public/ui.png)
+
+## Canvas Mode
 ![Canvas Mode](/public/canvas.png)
-![Image Mode](/public/image.png)
+- This mode supports interactive editing of generated code and text.
+
+## Graph Mode
+![Image Mode](/public/graph.png)
 
 ## Project Description
 
