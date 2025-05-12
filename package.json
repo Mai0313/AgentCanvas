@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@azure/openai": "^2.0.0",
-    "@blocknote/code-block": "^0.29.1",
+    "@blocknote/code-block": "^0.30.0",
     "@blocknote/core": "^0.29.1",
     "@blocknote/mantine": "^0.29.1",
     "@blocknote/react": "^0.29.1",
