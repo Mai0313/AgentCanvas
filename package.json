@@ -41,7 +41,7 @@
     "clsx": "2.1.1",
     "framer-motion": "^12.9.7",
     "lodash": "^4.17.21",
-    "openai": "^4.97.0",
+    "openai": "^4.103.0",
     "prismjs": "^1.30.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
