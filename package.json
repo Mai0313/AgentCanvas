@@ -15,7 +15,7 @@
     "@blocknote/code-block": "^0.29.1",
     "@blocknote/core": "^0.29.1",
     "@blocknote/mantine": "^0.29.1",
-    "@blocknote/react": "^0.29.1",
+    "@blocknote/react": "^0.31.1",
     "@heroui/alert": "^2.2.19",
     "@heroui/button": "2.2.19",
     "@heroui/card": "^2.2.18",
