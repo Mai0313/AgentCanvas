@@ -39,7 +39,7 @@
     "@types/lodash-es": "^4.17.12",
     "@types/prismjs": "^1.26.5",
     "clsx": "2.1.1",
-    "framer-motion": "^12.9.7",
+    "framer-motion": "^12.16.0",
     "lodash": "^4.17.21",
     "openai": "^4.97.0",
     "prismjs": "^1.30.0",
